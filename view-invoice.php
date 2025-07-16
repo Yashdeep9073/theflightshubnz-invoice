@@ -193,10 +193,10 @@ try {
 
 
     // echo "<pre>";
-    // print_r($companySettings);
+    // print_r($invoice);
+    // print_r($currencySymbol);
     // exit;
 
-    // Step 1: Generate stylized Service Table using DomPDF
     ob_start();
     ?>
 
@@ -248,7 +248,9 @@ try {
     $pdf->SetFont('FuturaBT-Medium', '', 25); // Set font to normal Times
     $pdf->SetTextColor(0, 0, 0); // Set text color to black
     $pdf->SetXY(50, 45);
+    $pdf->SetTextColor(249, 82, 43); // Set text color to rgba(249, 82, 43, 1)
     $pdf->Cell(22, 10, 'THE FLIGHTSHUB PVT LTD.', 0, 0); // Render "Invoice No:" in black, normal font
+    $pdf->SetTextColor(0, 0, 0); // Reset text color to black
     $pdf->SetFont('FuturaBT-Medium', '', 8); // Set font to bold
     $pdf->SetXY(60, 50);
     $pdf->Cell(22, 10, $companySettings['address'] . " " . $companySettings['state'] . "," . $companySettings['country'], 0, 0); // Render "Invoice No:" in black, normal font
@@ -270,31 +272,153 @@ try {
     $pdf->SetFont('FuturaBT-Medium', '', 12); // Reset font to normal
 
 
+    // Invoice Info (top-right, adjust based on template)
+    $pdf->SetFont('FuturaBT-Medium', '', 25); // Set font to normal Times
+    $pdf->SetTextColor(0, 0, 0); // Set text color to black
+    $pdf->SetXY(65, 70);
+    $pdf->SetTextColor(249, 82, 43); // Set text color to rgba(249, 82, 43, 1)
+    $pdf->Cell(22, 10, 'PAYMENT INVOICE', 0, 0); // Render "Invoice No:" in black, normal font
+    $pdf->SetTextColor(0, 0, 0); // Reset text color to black
 
     // Invoice Info (top-right, adjust based on template)
     $pdf->SetFont('FuturaBT-Medium', '', 12); // Set font to normal Times
     $pdf->SetTextColor(0, 0, 0); // Set text color to black
-    $pdf->SetXY(20, 65);
+    $pdf->SetXY(20, 85);
     $pdf->Cell(22, 10, 'Invoice No: ', 0, 0); // Render "Invoice No:" in black, normal font
     $pdf->SetFont('FuturaBT-Medium', '', 12); // Set font to bold
+    $pdf->SetTextColor(249, 82, 43); // Set text color to rgba(249, 82, 43, 1)
     $pdf->Cell(0, 10, $invoice['invoice_number'], 0, 0); // Render invoice number in bold blue
     $pdf->SetTextColor(0, 0, 0); // Reset text color to black
     $pdf->SetFont('FuturaBT-Medium', '', 12); // Reset font to normal
-    $pdf->SetXY(140, 65);
+    $pdf->SetXY(140, 85);
     $labelWidth = $pdf->GetStringWidth('Invoice Due: ') + 1; // Calculate width of "Date:" with small padding
     $pdf->Cell($labelWidth, 10, 'Invoice Due: ', 0, 0); // Render "Date:" in black, normal font with exact width
     $pdf->SetFont('FuturaBT-Medium', '', 12); // Set font to bold
-    $pdf->Cell(0, 10, date('d-M-Y', strtotime($invoice['due_date'])), 0, 1); // Render date in bold blue, no gap
+    $pdf->Cell(0, 10, date('d M Y', strtotime($invoice['due_date'])), 0, 1); // Render date in bold blue, no gap
     $pdf->SetTextColor(0, 0, 0); // Reset text color to black
     $pdf->SetFont('FuturaBT-Medium', '', 12); // Reset font to normal
 
-    $pdf->SetXY(20, 75);
+    $pdf->SetXY(20, 95);
     $pdf->Cell(22, 10, 'Bill To:', 0, 0); // Render "Invoice No:" in black, normal font
-    $pdf->SetXY(140, 75);
-    $pdf->Cell(22, 10, 'Travel Date:', 0, 0); // Render "Invoice No:" in black, normal font
+    $pdf->SetXY(140, 95);
+    $labelWidth = $pdf->GetStringWidth('Travel Date: ') + 1; // Calculate width of "Date:" with small padding
+    $pdf->Cell($labelWidth, 10, 'Travel Date: ', 0, 0); // Render "Date:" in black, normal font with exact width
+    $pdf->SetFont('FuturaBT-Medium', '', 12); // Set font to bold
+    $pdf->Cell(0, 10, date('d M Y', strtotime($invoice['travel_date'])), 0, 1); // Render date in bold blue, no gap
+    $pdf->SetTextColor(0, 0, 0); // Reset text color to black
+    $pdf->SetFont('FuturaBT-Medium', '', 12); // Reset font to normal
+
+    $pdf->SetFont('FuturaBT-Medium', '', 14); // Reset font to norma
+    $pdf->SetXY(20, 101);
+    $pdf->MultiCell(90, 8, $invoice['customer_name'] . "," ?? 'N/A', 0, 'L');
+    $pdf->SetXY(140, 106);
+
+    $address = $invoice['customer_address'] ?? 'N/A';
+
+    // Split the address into words
+    $words = explode(' ', $address);
+    $word_count = count($words);
+
+    // Create the first line (first 4 words) and the rest
+    $first_line = implode(' ', array_slice($words, 0, 4));
+    $second_line = implode(' ', array_slice($words, 4));
+    $formatted_address = $first_line . ($second_line ? "\n" . $second_line : '');
+
+    // Set font and calculate width
+    $pdf->SetFont('FuturaBT-Medium', '', 14);
+    $width = max($pdf->GetStringWidth($first_line), $pdf->GetStringWidth($second_line)) + 5; // Use widest line for width
+    $width = max($width, 90); // Minimum width of 90
+
+    // Render the address with reduced line height
+    $pdf->SetXY(20, 107);
+    $pdf->MultiCell($width, 6, $formatted_address, 0, 'L'); // Reduced line height from 8 to 6 rgba(158, 158, 158, 1)
+
+    // Table headers (just labels, not a formal table)
+    $pdf->SetFont('FuturaBT-Medium', '', 10);
+    $pdf->SetXY(20, 125);
+    $pdf->Cell(0, 5, 'Description', 0, 0);
+
+    $pdf->SetXY(80, 125);
+    $pdf->Cell(0, 5, 'Quantity', 0, 0);
+
+    $pdf->SetXY(120, 125);
+    $pdf->Cell(0, 5, 'Rate', 0, 0);
+
+    $pdf->SetXY(160, 125);
+    $pdf->Cell(0, 5, 'Amount', 0, 0);
+
+    // Line under headers
+    $pdf->SetLineWidth(0.1);
+    $pdf->SetDrawColor(158, 158, 158); // Set line color to rgba(158, 158, 158, 1)
+    $pdf->Line(20, 130, 190, 130);
+    $pdf->SetTextColor(0, 0, 0); // Reset text color to black
+
+
+    $y = 135;
+    $lineHeight = 7;
+
+    foreach ($services as $item) {
+        $pdf->SetFont('FuturaBT-Medium', '', 12);
+        $pdf->SetXY(20, $y);
+        $pdf->Cell(0, $lineHeight, $item['name'], 0, 0);
+
+        $pdf->SetXY(80, $y);
+        $pdf->Cell(0, $lineHeight, $invoice['quantity'], 0, 0);
+
+        $pdf->SetXY(120, $y);
+        $pdf->Cell(0, $lineHeight, $invoice['amount'], 0, 0);
+
+        $pdf->SetXY(160, $y);
+        $pdf->Cell(0, $lineHeight, $currencySymbol . "." . $invoice['total_amount'], 0, 0);
+
+        $y += $lineHeight;
+    }
+
+    // Line after items
+    $pdf->SetLineWidth(0.1);
+    $pdf->SetDrawColor(158, 158, 158); // Set line color to rgba(158, 158, 158, 1)
+    $pdf->Line(20, $y + 2, 190, $y + 2);
+    $pdf->SetTextColor(0, 0, 0); // Reset text color to black
+
+
+    // Totals section
+    $pdf->SetFont('FuturaBT-Medium', '', 10);
+    $y += 10;
+
+    $pdf->SetXY(140, $y);
+    $pdf->Cell(0, 5, 'Sub Total:', 0, 0);
+    $pdf->SetXY(160, $y);
+    $pdf->SetTextColor(249, 82, 43);
+    $pdf->Cell(0, 5, $currencySymbol . "." . $invoice['amount'], 0, 0);
+    $pdf->SetTextColor(0, 0, 0);
+
+    $y += 7;
+    $pdf->SetXY(140, $y);
+    $pdf->Cell(0, 5, 'Total:', 0, 0);
+    $pdf->SetXY(160, $y);
+    $pdf->SetTextColor(249, 82, 43);
+    $pdf->Cell(0, 5, $currencySymbol . "." . $invoice['total_amount'], 0, 0);
+    $pdf->SetTextColor(0, 0, 0);
+
+    $status = $invoice['status'] == "PAID" ? date('d M Y', strtotime($invoice['created_at'])) : "";
+    $y += 7;
+    $pdf->SetXY(140, $y);
+    $pdf->Cell(0, 5, 'Paid to Date:', 0, 0);
+    $pdf->SetXY(165, $y); // Increased X-coordinate from 160 to 165 for a larger gap
+    $pdf->SetTextColor(249, 82, 43);
+    $pdf->Cell(0, 5, $status, 0, 0);
+    $pdf->SetTextColor(0, 0, 0);
+
+    // Line under totals
+    $pdf->SetLineWidth(0.1);
+    $pdf->Line(140, $y + 5, 190, $y + 5);
+
 
     // Output final PDF
     $pdf->Output("I", "Final_Invoice_{$invoiceId}.pdf");
+
+
+
 
 
 } catch (Exception $e) {
