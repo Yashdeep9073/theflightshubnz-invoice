@@ -248,9 +248,9 @@ try {
     $pdf->SetFont('FuturaBT-Medium', '', 25); // Set font to normal Times
     $pdf->SetTextColor(0, 0, 0); // Set text color to black
     $pdf->SetXY(50, 45);
-    // $pdf->SetTextColor(249, 82, 43); // Set text color to rgba(249, 82, 43, 1)
+    $pdf->SetTextColor(14, 139, 206); // Set text color to rgba(14, 139, 206, 1)
     $pdf->Cell(22, 10, 'THE FLIGHTSHUB PVT LTD.', 0, 0); // Render "Invoice No:" in black, normal font
-    // $pdf->SetTextColor(0, 0, 0); // Reset text color to black
+    $pdf->SetTextColor(0, 0, 0); // Reset text color to black
     $pdf->SetFont('FuturaBT-Medium', '', 8); // Set font to bold
     $pdf->SetXY(60, 50);
     $pdf->Cell(22, 10, $companySettings['address'] . " " . $companySettings['state'] . "," . $companySettings['country'], 0, 0); // Render "Invoice No:" in black, normal font
@@ -271,6 +271,11 @@ try {
     $pdf->SetTextColor(0, 0, 0); // Reset text color to black
     $pdf->SetFont('FuturaBT-Medium', '', 12); // Reset font to normal
 
+    // Line under headers
+    $pdf->SetLineWidth(0.1);
+    $pdf->SetDrawColor(158, 158, 158); // Set line color to rgba(158, 158, 158, 1)
+    $pdf->Line(20, 63, 190, 63);
+    $pdf->SetTextColor(0, 0, 0); // Reset text color to black
 
     // Invoice Info (top-right, adjust based on template)
     $pdf->SetFont('FuturaBT-Medium', '', 25); // Set font to normal Times
@@ -368,8 +373,10 @@ try {
         $pdf->SetXY(120, $y);
         $pdf->Cell(0, $lineHeight, $invoice['amount'], 0, 0);
 
+        $pdf->SetTextColor(14, 139, 206); // Set text color to rgba(14, 139, 206, 1)
         $pdf->SetXY(160, $y);
         $pdf->Cell(0, $lineHeight, $currencySymbol . "." . $invoice['total_amount'], 0, 0);
+        $pdf->SetTextColor(0, 0, 0);
 
         $y += $lineHeight;
     }
@@ -441,6 +448,7 @@ try {
     $pdf->Cell(0, 10, 'ACCOUNT NAME: THE FLIGHTSHUB PVT LTD', 0, 1);
     $yPos += 5;
 
+    $pdf->SetTextColor(14, 139, 206);
     $pdf->SetXY(25, $yPos);
     $pdf->Cell(0, 10, 'ANZ :: 01-1842-0636659-00', 0, 1);
     $yPos += 5;
@@ -453,6 +461,7 @@ try {
     $pdf->Cell(0, 10, 'BNZ :: 02-0528-0567582-000', 0, 1);
     $pdf->SetFont('FuturaBT-Medium', '', 12); // Reset font to normal
     $pdf->SetXY(70, 245);
+    $pdf->SetTextColor(0, 0, 0);
     $pdf->Cell(22, 10, 'THANK YOU FOR THE BUSINESS', 0, 0); // Render "Invoice No:" in black, normal font
     $pdf->SetXY(55, 250);
     $pdf->Cell(22, 10, 'WE WISH YOU A SAFE AND PLEASANT JOURNEY', 0, 0); // Render "Invoice No:" in black, normal font
