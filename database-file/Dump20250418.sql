@@ -1,6 +1,6 @@
 -- MySQL dump 10.13  Distrib 8.0.42, for Win64 (x86_64)
 --
--- Host: 127.0.0.1    Database: smart_sheet
+-- Host: 127.0.0.1    Database: theflightshub_invoice
 -- ------------------------------------------------------
 -- Server version	8.0.42
 
@@ -61,7 +61,7 @@ CREATE TABLE `cities` (
   `state_code` varchar(45) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`city_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4243 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4243 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_520_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -94,10 +94,12 @@ CREATE TABLE `company_settings` (
   `state` varchar(100) DEFAULT NULL,
   `city` varchar(100) DEFAULT NULL,
   `postal_code` varchar(20) DEFAULT NULL,
+  `gst_number` varchar(255) DEFAULT NULL,
+  `bz_number` varchar(255) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`company_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_520_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -106,7 +108,7 @@ CREATE TABLE `company_settings` (
 
 LOCK TABLES `company_settings` WRITE;
 /*!40000 ALTER TABLE `company_settings` DISABLE KEYS */;
-INSERT INTO `company_settings` VALUES (1,'Vibrantick Infotech Solutions Pvt Ltd.','info@vibrantick.in','123456789','https://vibrantick.in/','public/upload/company/images/img_686cb58fb6c0f7.51754919.png','public/upload/company/images/img_684fd449336be5.53385055.png','D-185 Mohali Phase 8','India','Punjab','Mohali','160062','2025-06-16 06:49:16','2025-07-08 06:07:11');
+INSERT INTO `company_settings` VALUES (1,'The FlightsHub New Zealand LTD.','info@theflightshub.co.nz','+64 22 422 6675','https://www.theflightshub.co.nz/','public/upload/company/images/img_68774d6155fb40.33862285.png','public/upload/company/images/img_68774d6c7052d8.41196456.png','195 Stokes Valley Road, Lower Hutt 5019,',' New Zealand','Wellington','Stokes Valley','160062','135-522-619','9429050261475','2025-06-16 06:49:16','2025-07-16 07:23:14');
 /*!40000 ALTER TABLE `company_settings` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -127,7 +129,7 @@ CREATE TABLE `currency` (
   `updated_at` timestamp NULL DEFAULT NULL,
   `is_active` int DEFAULT '1',
   PRIMARY KEY (`currency_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_520_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -136,7 +138,7 @@ CREATE TABLE `currency` (
 
 LOCK TABLES `currency` WRITE;
 /*!40000 ALTER TABLE `currency` DISABLE KEYS */;
-INSERT INTO `currency` VALUES (1,'India Rupee','INR','₹',NULL,'2025-07-10 10:37:37',NULL,1),(3,'Euro','EUR','€',NULL,'2025-07-10 11:28:26',NULL,1),(4,'US Dollar','USD','$',NULL,'2025-07-10 11:28:36',NULL,1);
+INSERT INTO `currency` VALUES (1,'India Rupee','INR','₹',NULL,'2025-07-10 10:37:37',NULL,1),(3,'Euro','EUR','€',NULL,'2025-07-10 11:28:26',NULL,1),(4,'US Dollar','USD','$',NULL,'2025-07-10 11:28:36',NULL,1),(5,'New Zealand Doller','NZD','$',NULL,'2025-07-16 12:45:07',NULL,1);
 /*!40000 ALTER TABLE `currency` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -149,20 +151,20 @@ DROP TABLE IF EXISTS `customer`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `customer` (
   `customer_id` int NOT NULL AUTO_INCREMENT,
-  `customer_name` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
-  `customer_phone` varchar(15) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `customer_email` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `customer_address` text COLLATE utf8mb4_general_ci,
-  `ship_name` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `ship_phone` varchar(15) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `ship_email` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `ship_address` text COLLATE utf8mb4_general_ci,
+  `customer_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `customer_phone` varchar(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `customer_email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `customer_address` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `ship_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `ship_phone` varchar(15) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `ship_email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `ship_address` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `isActive` int DEFAULT '1',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
-  `customer_state` varchar(45) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `customer_state` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `customer_city` int DEFAULT NULL,
-  `gst_number` varchar(45) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `gst_number` varchar(45) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`customer_id`),
   UNIQUE KEY `customer_phone_UNIQUE` (`customer_phone`),
   UNIQUE KEY `customer_email_UNIQUE` (`customer_email`),
@@ -199,7 +201,7 @@ CREATE TABLE `email_settings` (
   `update_at` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`email_settings_id`),
   UNIQUE KEY `email_address_UNIQUE` (`email_address`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_520_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -221,36 +223,35 @@ DROP TABLE IF EXISTS `invoice`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `invoice` (
   `invoice_id` int NOT NULL AUTO_INCREMENT,
-  `invoice_number` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
-  `payment_method` enum('CREDIT_CARD','DEBIT_CARD','CASH','NET_BANKING','PAYPAL','OTHER') COLLATE utf8mb4_general_ci NOT NULL,
-  `transaction_id` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `status` enum('PAID','PENDING','CANCELLED','REFUNDED') COLLATE utf8mb4_general_ci NOT NULL,
+  `invoice_number` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `payment_method` enum('CREDIT_CARD','DEBIT_CARD','CASH','NET_BANKING','PAYPAL','OTHER') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `transaction_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `status` enum('PAID','PENDING','CANCELLED','REFUNDED') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `amount` decimal(10,2) NOT NULL,
   `quantity` int NOT NULL,
   `tax` int NOT NULL,
   `discount` decimal(10,2) NOT NULL,
   `total_amount` decimal(10,2) NOT NULL,
-  `due_date` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `due_date` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `customer_id` int DEFAULT NULL,
   `service_id` json DEFAULT NULL,
-  `description` longtext COLLATE utf8mb4_general_ci,
+  `description` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `is_active` int NOT NULL DEFAULT '1',
   `reminder_enabled` int NOT NULL DEFAULT '0',
   `reminder_count` int NOT NULL DEFAULT '0',
   `created_by` int NOT NULL,
-  `from_date` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `to_date` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `invoice_type` enum('FIXED','RECURSIVE') COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `invoice_title` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `gst_status` enum('PAID','HOLD','CANCELLED') COLLATE utf8mb4_general_ci DEFAULT 'HOLD',
-  `repeat_cycle` enum('DAILY','WEEKLY','MONTHLY','QUARTERLY','SEMIQUARTERLY','ANNUALLY','BIENNIALLY') COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `create_before` int DEFAULT NULL,
+  `from_date` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `to_date` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `invoice_type` enum('FIXED','RECURSIVE') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_520_ci DEFAULT 'FIXED',
+  `invoice_title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `gst_status` enum('PAID','HOLD','CANCELLED') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'HOLD',
+  `travel_date` varchar(45) COLLATE utf8mb4_general_ci DEFAULT NULL,
   PRIMARY KEY (`invoice_id`),
   UNIQUE KEY `invoice_number_UNIQUE` (`invoice_number`),
   UNIQUE KEY `transaction_id_UNIQUE` (`transaction_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=209 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=211 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -259,7 +260,7 @@ CREATE TABLE `invoice` (
 
 LOCK TABLES `invoice` WRITE;
 /*!40000 ALTER TABLE `invoice` DISABLE KEYS */;
-INSERT INTO `invoice` VALUES (195,'VIS-20250624-00004','CASH','TX-20250624-19380-AG4P','PENDING',514.00,1,12,0.00,606.52,'2025-07-05',83,'[2, 3, 7, 8]','This shows you&amp;amp;amp;amp;amp;amp;#039;ve been operating since 2021 till now.\r\nLet me know if you want the PHP code to handle that automatically too.','2025-06-24 05:33:56','2025-07-11 10:17:55',1,0,0,1,'2025-06-10','2025-06-25','RECURSIVE','App Service','HOLD','MONTHLY',3),(196,'VIS-20250624-00005','CASH','TX-20250624-53815-NJAV','CANCELLED',5000.00,1,8,0.00,5750.00,'2025-07-11',78,'[2]','This is testing','2025-06-24 05:47:10','2025-07-11 11:19:17',1,0,0,1,'2025-06-01','2025-06-30','RECURSIVE',NULL,'HOLD','WEEKLY',3),(197,'VIS-20250624-00029','CASH','TX-20250624-89682-SE1A','PAID',120000.00,1,8,0.00,138000.00,'2025-06-25',77,'[2]','Description','2025-06-24 11:36:17','2025-07-04 14:31:22',1,0,0,1,'','','FIXED',NULL,'HOLD',NULL,NULL),(198,'VIS-20250630-00001','PAYPAL','TX-20250630-16563-23A8','PENDING',5000.00,1,8,0.00,5750.00,'2025-06-30',83,'[2, 3, 7]','This is testing invoice seo service ','2025-06-30 14:28:11','2025-07-04 14:08:56',1,0,0,1,'','','FIXED','Seo Service','HOLD',NULL,NULL),(199,'VIS-20250704-00002','DEBIT_CARD','TX-20250704-54667-6N7N','PENDING',10000.00,1,12,0.00,11800.00,'2025-07-09',80,'[8, 9, 10]','998365','2025-07-04 07:28:36','2025-07-11 11:19:17',1,0,0,1,'2025-06-01','2025-06-30','RECURSIVE','Digital Marketing','HOLD','DAILY',3),(200,'VIS-20250704-00003','DEBIT_CARD','TX-20250704-39295-5I7A','PENDING',10000.00,1,12,0.00,11800.00,'2025-07-17',80,'[8, 9, 10]','998365','2025-07-04 07:30:41','2025-07-04 14:08:56',1,0,0,1,'','','FIXED','Seo Service','HOLD',NULL,NULL),(202,'VIS-20250704-00004','DEBIT_CARD','TX-20250704-51851-EZN2','PENDING',10000.00,2,12,0.00,23600.00,'2025-07-18',80,'[8, 9, 10]','998365','2025-07-04 07:31:18','2025-07-04 14:08:56',1,0,0,1,'','','FIXED','Web Service','HOLD',NULL,NULL),(203,'VIS-20250704-00005','DEBIT_CARD','TX-20250704-62119-1HP3','PENDING',10000.00,2,12,0.00,23600.00,'2025-09-16',85,'[0, 3, 9, 10]','998365','2025-07-04 07:32:06','2025-07-11 11:19:17',1,0,0,1,'2025-07-01','2025-08-04','RECURSIVE','App Service','HOLD','WEEKLY',3),(204,'VIS-20250704-00006','DEBIT_CARD','TX-20250704-99874-7NGO','PENDING',10000.00,3,12,0.00,35400.00,'2025-07-24',86,'[0, 2, 3]','998365','2025-07-04 07:32:49','2025-07-04 14:08:56',1,0,0,1,'','','FIXED','Website Service','HOLD',NULL,NULL),(205,'VIS-20250704-00007','DEBIT_CARD','TX-20250704-93768-SBIL','PENDING',10001.00,2,12,0.00,23602.36,'2025-07-17',86,'[0, 2, 3]','998365','2025-07-04 07:33:22','2025-07-04 14:08:56',1,0,0,1,'','','FIXED','Website Service','HOLD',NULL,NULL),(206,'VIS-20250704-00008','CREDIT_CARD','TX-20250704-46379-4Y5I','PENDING',350000.00,1,12,0.00,413000.00,'2025-08-02',78,'[3]','998365','2025-07-04 07:33:59','2025-07-04 14:08:56',1,0,0,1,'','','FIXED','App Service','HOLD',NULL,NULL),(207,'VIS-20250711-00001','CASH','TX-20250711-50705-FBXZ','PENDING',10000.00,1,11,0.00,10300.00,'2025-07-11',78,'[3, 7]','This is testing','2025-07-11 08:45:18','2025-07-11 11:51:24',1,0,0,1,'2025-07-11','2025-08-09','RECURSIVE','Seo Service  ','HOLD','DAILY',3),(208,'VIS-20250711-00080','CASH','TX-20250711-75570-60DE','PENDING',10000.00,1,11,0.00,10300.00,'2025',78,'\"[3, 7]\"','This is testing','2025-07-11 12:52:29','2025-07-11 12:52:29',1,0,0,1,'2025','2025-08-09','RECURSIVE','Seo Service  ','HOLD','DAILY',3);
+INSERT INTO `invoice` VALUES (195,'VIS-20250624-00004','CASH','TX-20250624-19380-AG4P','PENDING',514.00,1,12,0.00,606.52,'2025-07-05',83,'[2, 3, 7, 8]','This shows you&amp;amp;amp;amp;amp;amp;#039;ve been operating since 2021 till now.\r\nLet me know if you want the PHP code to handle that automatically too.','2025-06-24 05:33:56','2025-07-16 10:00:05',1,0,0,1,'2025-06-10','2025-06-25','RECURSIVE','App Service','HOLD','2025-07-31'),(196,'VIS-20250624-00005','CASH','TX-20250624-53815-NJAV','CANCELLED',5000.00,1,8,0.00,5750.00,'2025-07-11',78,'[2]','This is testing','2025-06-24 05:47:10','2025-07-16 10:00:05',1,0,0,1,'2025-06-01','2025-06-30','RECURSIVE',NULL,'HOLD','2025-07-31'),(197,'VIS-20250624-00029','CASH','TX-20250624-89682-SE1A','PAID',120000.00,1,8,0.00,138000.00,'2025-06-25',77,'[2]','Description','2025-06-24 11:36:17','2025-07-16 12:43:28',1,0,0,1,'','','FIXED','Newzeland Flight','HOLD','2025-07-31'),(198,'VIS-20250630-00001','PAYPAL','TX-20250630-16563-23A8','PENDING',5000.00,1,8,0.00,5750.00,'2025-06-30',83,'[2, 3, 7]','This is testing invoice seo service ','2025-06-30 14:28:11','2025-07-16 10:00:05',1,0,0,1,'','','FIXED','Seo Service','HOLD','2025-07-31'),(199,'VIS-20250704-00002','DEBIT_CARD','TX-20250704-54667-6N7N','PENDING',10000.00,1,12,0.00,11800.00,'2025-07-09',80,'[8, 9, 10]','998365','2025-07-04 07:28:36','2025-07-16 10:00:05',1,0,0,1,'2025-06-01','2025-06-30','RECURSIVE','Digital Marketing','HOLD','2025-07-31'),(200,'VIS-20250704-00003','DEBIT_CARD','TX-20250704-39295-5I7A','PENDING',10000.00,1,12,0.00,11800.00,'2025-07-17',80,'[8, 9, 10]','998365','2025-07-04 07:30:41','2025-07-16 10:00:05',1,0,0,1,'','','FIXED','Seo Service','HOLD','2025-07-31'),(202,'VIS-20250704-00004','DEBIT_CARD','TX-20250704-51851-EZN2','PENDING',10000.00,2,12,0.00,23600.00,'2025-07-18',80,'[8, 9, 10]','998365','2025-07-04 07:31:18','2025-07-16 10:00:05',1,0,0,1,'','','FIXED','Web Service','HOLD','2025-07-31'),(203,'VIS-20250704-00005','DEBIT_CARD','TX-20250704-62119-1HP3','PENDING',10000.00,2,12,0.00,23600.00,'2025-09-16',85,'[0, 3, 9, 10]','998365','2025-07-04 07:32:06','2025-07-16 10:00:05',1,0,0,1,'2025-07-01','2025-08-04','RECURSIVE','App Service','HOLD','2025-07-31'),(204,'VIS-20250704-00006','DEBIT_CARD','TX-20250704-99874-7NGO','PENDING',10000.00,3,12,0.00,35400.00,'2025-07-24',86,'[0, 2, 3]','998365','2025-07-04 07:32:49','2025-07-16 10:00:05',1,0,0,1,'','','FIXED','Website Service','HOLD','2025-07-31'),(205,'VIS-20250704-00007','DEBIT_CARD','TX-20250704-93768-SBIL','PENDING',10001.00,2,12,0.00,23602.36,'2025-07-17',86,'[0, 2, 3]','998365','2025-07-04 07:33:22','2025-07-16 10:00:05',1,0,0,1,'','','FIXED','Website Service','HOLD','2025-07-31'),(206,'VIS-20250704-00008','CREDIT_CARD','TX-20250704-46379-4Y5I','PENDING',350000.00,1,12,0.00,413000.00,'2025-08-02',78,'[3]','998365','2025-07-04 07:33:59','2025-07-16 10:00:05',1,0,0,1,'','','FIXED','App Service','HOLD','2025-07-31'),(207,'VIS-20250711-00001','CASH','TX-20250711-50705-FBXZ','PENDING',10000.00,1,11,0.00,10300.00,'2025-07-11',78,'[3, 7]','This is testing','2025-07-11 08:45:18','2025-07-16 10:00:05',1,0,0,1,'2025-07-11','2025-08-09','RECURSIVE','Seo Service  ','HOLD','2025-07-31'),(208,'VIS-20250711-00080','CASH','TX-20250711-75570-60DE','PENDING',10000.00,1,11,0.00,10300.00,'2025',78,'\"[3, 7]\"','This is testing','2025-07-11 12:52:29','2025-07-16 10:00:05',1,0,0,1,'2025','2025-08-09','RECURSIVE','Seo Service  ','HOLD','2025-07-31'),(209,'INV-20250716-00004','CREDIT_CARD','TX-20250716-20145-HV6F','PENDING',213.00,1,14,0.00,215.66,'2025-07-26',80,'[3, 7]','travel_date','2025-07-16 09:39:24','2025-07-16 10:00:05',1,0,0,1,'','','FIXED','Seo Service  ','HOLD','2025-07-31'),(210,'INV-20250716-00005','CREDIT_CARD','TX-20250716-30350-JH3I','PENDING',69.00,1,12,0.00,81.42,'2025-08-01',80,'[8]','$travelDate','2025-07-16 09:46:47','2025-07-16 09:59:47',1,0,0,1,'','','FIXED','Seo Service  ','HOLD','2025-07-31');
 /*!40000 ALTER TABLE `invoice` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -278,7 +279,7 @@ CREATE TABLE `invoice_sequence` (
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `date` (`date`)
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_520_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -287,7 +288,7 @@ CREATE TABLE `invoice_sequence` (
 
 LOCK TABLES `invoice_sequence` WRITE;
 /*!40000 ALTER TABLE `invoice_sequence` DISABLE KEYS */;
-INSERT INTO `invoice_sequence` VALUES (3,'20250606',19,'2025-06-06 07:17:17','2025-06-06 08:47:30'),(4,'20250613',1,'2025-06-13 09:47:44','2025-06-13 09:47:44'),(5,'20250617',1,'2025-06-17 06:49:58','2025-06-17 06:49:58'),(6,'20250623',1,'2025-06-23 05:39:12','2025-06-23 05:39:12'),(7,'20250624',29,'2025-06-24 05:10:24','2025-06-24 11:30:58'),(8,'20250630',1,'2025-06-30 14:26:46','2025-06-30 14:26:46'),(9,'20250704',9,'2025-07-04 07:26:25','2025-07-04 13:46:40'),(10,'20250711',80,'2025-07-11 08:34:06','2025-07-11 12:52:29');
+INSERT INTO `invoice_sequence` VALUES (3,'20250606',19,'2025-06-06 07:17:17','2025-06-06 08:47:30'),(4,'20250613',1,'2025-06-13 09:47:44','2025-06-13 09:47:44'),(5,'20250617',1,'2025-06-17 06:49:58','2025-06-17 06:49:58'),(6,'20250623',1,'2025-06-23 05:39:12','2025-06-23 05:39:12'),(7,'20250624',29,'2025-06-24 05:10:24','2025-06-24 11:30:58'),(8,'20250630',1,'2025-06-30 14:26:46','2025-06-30 14:26:46'),(9,'20250704',9,'2025-07-04 07:26:25','2025-07-04 13:46:40'),(10,'20250711',80,'2025-07-11 08:34:06','2025-07-11 12:52:29'),(11,'20250716',5,'2025-07-16 08:46:49','2025-07-16 09:46:10');
 /*!40000 ALTER TABLE `invoice_sequence` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -310,7 +311,7 @@ CREATE TABLE `invoice_settings` (
   `is_show_hsn` int DEFAULT '0',
   `is_show_bill_date` int DEFAULT '0',
   PRIMARY KEY (`invoice_settings_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_520_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -319,7 +320,7 @@ CREATE TABLE `invoice_settings` (
 
 LOCK TABLES `invoice_settings` WRITE;
 /*!40000 ALTER TABLE `invoice_settings` DISABLE KEYS */;
-INSERT INTO `invoice_settings` VALUES (1,'VIS','public/upload/invoice/images/img_684fc980c2c6f3.96229369.png','It checks if a file was uploaded using $_FILES[\"...\"][\"error\"] === 0.\r\n\r\nUpdates logo/favicon only if new ones are uploaded.\r\n\r\nSafely binds dynamic number of parameters based on what’s uploaded.\r\n\r\nUse id as primary key for update logic.','It checks if a file was uploaded using $_FILES[\"...\"][\"error\"] === 0.\r\n\r\nUpdates logo/favicon only if new ones are uploaded.\r\n\r\nSafely binds dynamic number of parameters based on what’s uploaded.\r\n\r\nUse id as primary key for update logic.','public/upload/invoice/images/img_684fe475a6b0f8.35010741.pdf','2025-06-16 07:36:32','2025-06-24 06:45:42',1,1);
+INSERT INTO `invoice_settings` VALUES (1,'INV','public/upload/invoice/images/img_687753ba8d88d4.95365622.svg','INVOICE NOTE:\r\n•	ALL THE PAYMENTS MUST BE PAID IN NZD BY THE DUE DATE UNLESS MENTIONED OR CREDIT LIMIT OFFERED.\r\n•	ANY PAYMENTS MADE BY BANK CREDIT CARD WILL ATTRACT 2.5% CC FEE.\r\nALL ACCOUNT TRANSFERS SHALL BE MADE INTO BELOW ACCOUNT DETAILS\r\nACCOUNT NAME: THE FLIGHTSHUB PVT LTD\r\nANZ :: 01-1842-0636659-00\r\nASB :: 12-3142-0494687-00\r\nBNZ :: 02-0528-0567582-000\r\n','INVOICE NOTE:\r\n•	ALL THE PAYMENTS MUST BE PAID IN NZD BY THE DUE DATE UNLESS MENTIONED OR CREDIT LIMIT OFFERED.\r\n•	ANY PAYMENTS MADE BY BANK CREDIT CARD WILL ATTRACT 2.5% CC FEE.\r\nALL ACCOUNT TRANSFERS SHALL BE MADE INTO BELOW ACCOUNT DETAILS\r\nACCOUNT NAME: THE FLIGHTSHUB PVT LTD\r\nANZ :: 01-1842-0636659-00\r\nASB :: 12-3142-0494687-00\r\nBNZ :: 02-0528-0567582-000\r\n','public/upload/invoice/images/img_68778aad9dd7d1.70850019.pdf','2025-06-16 07:36:32','2025-07-16 11:19:09',1,1);
 /*!40000 ALTER TABLE `invoice_settings` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -332,10 +333,10 @@ DROP TABLE IF EXISTS `localization_settings`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `localization_settings` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `language` varchar(50) COLLATE utf8mb4_general_ci DEFAULT 'English',
-  `timezone` varchar(100) COLLATE utf8mb4_general_ci DEFAULT 'UTC',
-  `date_format` varchar(20) COLLATE utf8mb4_general_ci DEFAULT 'd M Y',
-  `time_format` varchar(10) COLLATE utf8mb4_general_ci DEFAULT '12',
+  `language` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'English',
+  `timezone` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'UTC',
+  `date_format` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'd M Y',
+  `time_format` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT '12',
   `currency_id` int DEFAULT NULL,
   `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
   `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -349,7 +350,7 @@ CREATE TABLE `localization_settings` (
 
 LOCK TABLES `localization_settings` WRITE;
 /*!40000 ALTER TABLE `localization_settings` DISABLE KEYS */;
-INSERT INTO `localization_settings` VALUES (1,'ja','Asia/Kolkata','Y年m月d日','24',1,'2025-07-10 18:13:31','2025-07-11 16:16:53');
+INSERT INTO `localization_settings` VALUES (1,NULL,'Asia/Kolkata','Y年m月d日','24',5,'2025-07-10 18:13:31','2025-07-16 18:15:17');
 /*!40000 ALTER TABLE `localization_settings` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -451,7 +452,7 @@ CREATE TABLE `services` (
   `update_at` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   `isActive` int DEFAULT '1',
   PRIMARY KEY (`service_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_520_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -477,7 +478,7 @@ CREATE TABLE `state` (
   `state_code` varchar(45) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`state_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=38 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=38 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_520_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -504,7 +505,7 @@ CREATE TABLE `system_settings` (
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_520_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -526,8 +527,8 @@ DROP TABLE IF EXISTS `tax`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `tax` (
   `tax_id` int NOT NULL AUTO_INCREMENT,
-  `tax_name` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
-  `tax_rate` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `tax_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `tax_rate` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `status` int NOT NULL DEFAULT '1',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `udapted_at` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
@@ -554,4 +555,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-07-11 18:37:44
+-- Dump completed on 2025-07-16 18:27:03

@@ -248,9 +248,9 @@ try {
     $pdf->SetFont('FuturaBT-Medium', '', 25); // Set font to normal Times
     $pdf->SetTextColor(0, 0, 0); // Set text color to black
     $pdf->SetXY(50, 45);
-    $pdf->SetTextColor(249, 82, 43); // Set text color to rgba(249, 82, 43, 1)
+    // $pdf->SetTextColor(249, 82, 43); // Set text color to rgba(249, 82, 43, 1)
     $pdf->Cell(22, 10, 'THE FLIGHTSHUB PVT LTD.', 0, 0); // Render "Invoice No:" in black, normal font
-    $pdf->SetTextColor(0, 0, 0); // Reset text color to black
+    // $pdf->SetTextColor(0, 0, 0); // Reset text color to black
     $pdf->SetFont('FuturaBT-Medium', '', 8); // Set font to bold
     $pdf->SetXY(60, 50);
     $pdf->Cell(22, 10, $companySettings['address'] . " " . $companySettings['state'] . "," . $companySettings['country'], 0, 0); // Render "Invoice No:" in black, normal font
@@ -276,9 +276,9 @@ try {
     $pdf->SetFont('FuturaBT-Medium', '', 25); // Set font to normal Times
     $pdf->SetTextColor(0, 0, 0); // Set text color to black
     $pdf->SetXY(65, 70);
-    $pdf->SetTextColor(249, 82, 43); // Set text color to rgba(249, 82, 43, 1)
+    // $pdf->SetTextColor(249, 82, 43); // Set text color to rgba(249, 82, 43, 1)
     $pdf->Cell(22, 10, 'PAYMENT INVOICE', 0, 0); // Render "Invoice No:" in black, normal font
-    $pdf->SetTextColor(0, 0, 0); // Reset text color to black
+    // $pdf->SetTextColor(0, 0, 0); // Reset text color to black
 
     // Invoice Info (top-right, adjust based on template)
     $pdf->SetFont('FuturaBT-Medium', '', 12); // Set font to normal Times
@@ -286,7 +286,7 @@ try {
     $pdf->SetXY(20, 85);
     $pdf->Cell(22, 10, 'Invoice No: ', 0, 0); // Render "Invoice No:" in black, normal font
     $pdf->SetFont('FuturaBT-Medium', '', 12); // Set font to bold
-    $pdf->SetTextColor(249, 82, 43); // Set text color to rgba(249, 82, 43, 1)
+    $pdf->SetTextColor(14, 139, 206); // Set text color to rgba(14, 139, 206, 1)
     $pdf->Cell(0, 10, $invoice['invoice_number'], 0, 0); // Render invoice number in bold blue
     $pdf->SetTextColor(0, 0, 0); // Reset text color to black
     $pdf->SetFont('FuturaBT-Medium', '', 12); // Reset font to normal
@@ -388,7 +388,7 @@ try {
     $pdf->SetXY(140, $y);
     $pdf->Cell(0, 5, 'Sub Total:', 0, 0);
     $pdf->SetXY(160, $y);
-    $pdf->SetTextColor(249, 82, 43);
+    $pdf->SetTextColor(14, 139, 206); // Set text color to rgba(14, 139, 206, 1)
     $pdf->Cell(0, 5, $currencySymbol . "." . $invoice['amount'], 0, 0);
     $pdf->SetTextColor(0, 0, 0);
 
@@ -396,7 +396,7 @@ try {
     $pdf->SetXY(140, $y);
     $pdf->Cell(0, 5, 'Total:', 0, 0);
     $pdf->SetXY(160, $y);
-    $pdf->SetTextColor(249, 82, 43);
+    $pdf->SetTextColor(14, 139, 206); // Set text color to rgba(14, 139, 206, 1)
     $pdf->Cell(0, 5, $currencySymbol . "." . $invoice['total_amount'], 0, 0);
     $pdf->SetTextColor(0, 0, 0);
 
@@ -405,13 +405,58 @@ try {
     $pdf->SetXY(140, $y);
     $pdf->Cell(0, 5, 'Paid to Date:', 0, 0);
     $pdf->SetXY(165, $y); // Increased X-coordinate from 160 to 165 for a larger gap
-    $pdf->SetTextColor(249, 82, 43);
+    $pdf->SetTextColor(14, 139, 206); // Set text color to rgba(14, 139, 206, 1)
     $pdf->Cell(0, 5, $status, 0, 0);
     $pdf->SetTextColor(0, 0, 0);
 
     // Line under totals
     $pdf->SetLineWidth(0.1);
     $pdf->Line(140, $y + 5, 190, $y + 5);
+
+
+    // Invoice Note
+    $pdf->SetFont('FuturaBT-Medium', '', 12);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetXY(20, 185);
+    $pdf->Cell(0, 10, 'INVOICE NOTE:', 0, 1);
+
+    // Start bullet points
+    $yPos = 195;
+    $pdf->SetFont('FuturaBT-Medium', '', 8);
+
+    $pdf->SetXY(25, $yPos);
+    $pdf->Cell(0, 10, 'ALL THE PAYMENTS MUST BE PAID IN NZD BY THE DUE DATE UNLESS MENTIONED OR CREDIT LIMIT OFFERED.', 0, 1);
+    $yPos += 5;
+
+    $pdf->SetXY(25, $yPos);
+    $pdf->Cell(0, 10, 'ANY PAYMENTS MADE BY BANK CREDIT CARD WILL ATTRACT 2.5% CC FEE.', 0, 1);
+    $yPos += 10;
+
+    $pdf->SetFont('FuturaBT-Medium', '', 10);
+    $pdf->SetXY(25, $yPos);
+    $pdf->Cell(0, 10, 'ALL ACCOUNT TRANSFERS SHALL BE MADE INTO BELOW ACCOUNT DETAILS', 0, 1);
+    $yPos += 7;
+
+    $pdf->SetXY(25, $yPos);
+    $pdf->Cell(0, 10, 'ACCOUNT NAME: THE FLIGHTSHUB PVT LTD', 0, 1);
+    $yPos += 5;
+
+    $pdf->SetXY(25, $yPos);
+    $pdf->Cell(0, 10, 'ANZ :: 01-1842-0636659-00', 0, 1);
+    $yPos += 5;
+
+    $pdf->SetXY(25, $yPos);
+    $pdf->Cell(0, 10, 'ASB :: 12-3142-0494687-00', 0, 1);
+    $yPos += 5;
+
+    $pdf->SetXY(25, $yPos);
+    $pdf->Cell(0, 10, 'BNZ :: 02-0528-0567582-000', 0, 1);
+    $pdf->SetFont('FuturaBT-Medium', '', 12); // Reset font to normal
+    $pdf->SetXY(70, 245);
+    $pdf->Cell(22, 10, 'THANK YOU FOR THE BUSINESS', 0, 0); // Render "Invoice No:" in black, normal font
+    $pdf->SetXY(55, 250);
+    $pdf->Cell(22, 10, 'WE WISH YOU A SAFE AND PLEASANT JOURNEY', 0, 0); // Render "Invoice No:" in black, normal font
+
 
 
     // Output final PDF
