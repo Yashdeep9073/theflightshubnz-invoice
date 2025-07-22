@@ -460,16 +460,15 @@ try {
     $pdf->SetXY(25, $yPos);
     $pdf->Cell(0, 10, 'BNZ :: 02-0528-0567582-000', 0, 1);
     $pdf->SetFont('FuturaBT-Medium', '', 12); // Reset font to normal
-    $pdf->SetXY(70, 245);
+    $pdf->SetXY(70, 240);
     $pdf->SetTextColor(0, 0, 0);
     $pdf->Cell(22, 10, 'THANK YOU FOR THE BUSINESS', 0, 0); // Render "Invoice No:" in black, normal font
-    $pdf->SetXY(55, 250);
+    $pdf->SetXY(55, 245);
     $pdf->Cell(22, 10, 'WE WISH YOU A SAFE AND PLEASANT JOURNEY', 0, 0); // Render "Invoice No:" in black, normal font
 
 
-
     // Output final PDF
-    $pdf->Output("I", "Final_Invoice_{$invoiceId}.pdf");
+    $pdf->Output("I", "Final_Invoice_{$invoice['invoice_number']}.pdf");
 
 
 

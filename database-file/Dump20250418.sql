@@ -199,6 +199,13 @@ CREATE TABLE `email_settings` (
   `is_active` int DEFAULT '1',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `update_at` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `logo_url` varchar(255) DEFAULT NULL,
+  `support_email` varchar(255) DEFAULT NULL,
+  `phone` varchar(255) DEFAULT NULL,
+  `address_line1` longtext,
+  `ig_url` longtext,
+  `fb_url` longtext,
+  `linkedin_url` longtext,
   PRIMARY KEY (`email_settings_id`),
   UNIQUE KEY `email_address_UNIQUE` (`email_address`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_520_ci;
@@ -210,8 +217,39 @@ CREATE TABLE `email_settings` (
 
 LOCK TABLES `email_settings` WRITE;
 /*!40000 ALTER TABLE `email_settings` DISABLE KEYS */;
-INSERT INTO `email_settings` VALUES (3,'VIS Solution','mailerbot@vibrantick.in','7F2gaC>7jU','smtp.hostinger.com',465,1,'2025-06-13 08:27:04','2025-06-13 08:34:17');
+INSERT INTO `email_settings` VALUES (3,'The FlightsHub New Zealand LTD','admin@vcarenetwork.in','^2PrR:OQCsv','smtp.hostinger.com',465,1,'2025-06-13 08:27:04','2025-07-22 12:48:48','public/upload/emailSetting/images/img_687f86443eb377.83424494.svg','support@theflightshub.co.nz','+64 22 422 6077','Stokes Valley, Lower Hutt 5019,Wellington,New Zealand','https://www.instagram.com/theflightshub_nz/','https://www.facebook.com/TheflightsHub.nz','https://www.linkedin.com/company/the-flightshub-new-zealand/');
 /*!40000 ALTER TABLE `email_settings` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `email_template`
+--
+
+DROP TABLE IF EXISTS `email_template`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `email_template` (
+  `idemail_template` int NOT NULL AUTO_INCREMENT,
+  `email_template_title` varchar(255) DEFAULT NULL,
+  `email_template_subject` varchar(255) DEFAULT NULL,
+  `content_1` longtext,
+  `content_2` longtext,
+  `type` enum('REMINDER','ISSUED') DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `update_at` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+  `is_active` int DEFAULT '1',
+  PRIMARY KEY (`idemail_template`)
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_520_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `email_template`
+--
+
+LOCK TABLES `email_template` WRITE;
+/*!40000 ALTER TABLE `email_template` DISABLE KEYS */;
+INSERT INTO `email_template` VALUES (6,'Invoice Issued','Invoice from The FlightsHub New Zealand','<p>We are pleased to inform you that your invoice has been successfully generated. Please review the details below and make the payment before the due date to ensure uninterrupted service.</p>','<p>If you have already made this payment, thank you! Please disregard this email or contact us if you need a receipt. For any questions or assistance, contact our support team at <a href=\"mailto:support@theflightshub.co.nz\" rel=\"noopener noreferrer\" target=\"_blank\" style=\"background-color: rgb(255, 255, 255); color: rgb(0, 98, 167);\">support@theflightshub.co.nz</a> or call <a href=\"tel:+64 22 422 6675\" rel=\"noopener noreferrer\" target=\"_blank\" style=\"background-color: rgb(255, 255, 255); color: rgb(0, 98, 167);\">+64 22 422 6675</a>.</p><p>Thank you for your prompt attention to this matter.</p><p>Best regards,</p><p>The FlightsHub New Zealand LTD.</p>','ISSUED','2025-07-22 12:24:49','2025-07-22 12:28:34',1),(7,'Payment Reminder','Payment Reminder: Overdue Invoices','<p>We hope this message finds you well. The following invoice(s) are overdue. Kindly make the payment at your earliest convenience to avoid any service interruptions.</p>','<p>Please settle the outstanding amount at your earliest convenience. For any questions or assistance, contact our support team at <a href=\"mailto:support@theflightshub.co.nz\" rel=\"noopener noreferrer\" target=\"_blank\" style=\"color: rgb(0, 98, 167); background-color: rgb(255, 255, 255);\">support@theflightshub.co.nz</a> or call <a href=\"tel:+64 22 422 6675\" rel=\"noopener noreferrer\" target=\"_blank\" style=\"color: rgb(0, 98, 167); background-color: rgb(255, 255, 255);\">+64 22 422 6675</a>.</p><p>Thank you for your prompt attention to this matter.</p><p>Best regards,</p><p>The FlightsHub New Zealand LTD.</p>','REMINDER','2025-07-22 12:31:01',NULL,1);
+/*!40000 ALTER TABLE `email_template` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -260,7 +298,7 @@ CREATE TABLE `invoice` (
 
 LOCK TABLES `invoice` WRITE;
 /*!40000 ALTER TABLE `invoice` DISABLE KEYS */;
-INSERT INTO `invoice` VALUES (195,'VIS-20250624-00004','CASH','TX-20250624-19380-AG4P','PENDING',514.00,1,12,0.00,606.52,'2025-07-05',83,'[2, 3, 7, 8]','This shows you&amp;amp;amp;amp;amp;amp;#039;ve been operating since 2021 till now.\r\nLet me know if you want the PHP code to handle that automatically too.','2025-06-24 05:33:56','2025-07-16 10:00:05',1,0,0,1,'2025-06-10','2025-06-25','RECURSIVE','App Service','HOLD','2025-07-31'),(196,'VIS-20250624-00005','CASH','TX-20250624-53815-NJAV','CANCELLED',5000.00,1,8,0.00,5750.00,'2025-07-11',78,'[2]','This is testing','2025-06-24 05:47:10','2025-07-16 10:00:05',1,0,0,1,'2025-06-01','2025-06-30','RECURSIVE',NULL,'HOLD','2025-07-31'),(197,'VIS-20250624-00029','CASH','TX-20250624-89682-SE1A','PAID',120000.00,1,8,0.00,138000.00,'2025-06-25',77,'[2]','Description','2025-06-24 11:36:17','2025-07-16 12:43:28',1,0,0,1,'','','FIXED','Newzeland Flight','HOLD','2025-07-31'),(198,'VIS-20250630-00001','PAYPAL','TX-20250630-16563-23A8','PENDING',5000.00,1,8,0.00,5750.00,'2025-06-30',83,'[2, 3, 7]','This is testing invoice seo service ','2025-06-30 14:28:11','2025-07-16 10:00:05',1,0,0,1,'','','FIXED','Seo Service','HOLD','2025-07-31'),(199,'VIS-20250704-00002','DEBIT_CARD','TX-20250704-54667-6N7N','PENDING',10000.00,1,12,0.00,11800.00,'2025-07-09',80,'[8, 9, 10]','998365','2025-07-04 07:28:36','2025-07-16 10:00:05',1,0,0,1,'2025-06-01','2025-06-30','RECURSIVE','Digital Marketing','HOLD','2025-07-31'),(200,'VIS-20250704-00003','DEBIT_CARD','TX-20250704-39295-5I7A','PENDING',10000.00,1,12,0.00,11800.00,'2025-07-17',80,'[8, 9, 10]','998365','2025-07-04 07:30:41','2025-07-16 10:00:05',1,0,0,1,'','','FIXED','Seo Service','HOLD','2025-07-31'),(202,'VIS-20250704-00004','DEBIT_CARD','TX-20250704-51851-EZN2','PENDING',10000.00,2,12,0.00,23600.00,'2025-07-18',80,'[8, 9, 10]','998365','2025-07-04 07:31:18','2025-07-16 10:00:05',1,0,0,1,'','','FIXED','Web Service','HOLD','2025-07-31'),(203,'VIS-20250704-00005','DEBIT_CARD','TX-20250704-62119-1HP3','PENDING',10000.00,2,12,0.00,23600.00,'2025-09-16',85,'[0, 3, 9, 10]','998365','2025-07-04 07:32:06','2025-07-16 10:00:05',1,0,0,1,'2025-07-01','2025-08-04','RECURSIVE','App Service','HOLD','2025-07-31'),(204,'VIS-20250704-00006','DEBIT_CARD','TX-20250704-99874-7NGO','PENDING',10000.00,3,12,0.00,35400.00,'2025-07-24',86,'[0, 2, 3]','998365','2025-07-04 07:32:49','2025-07-16 10:00:05',1,0,0,1,'','','FIXED','Website Service','HOLD','2025-07-31'),(205,'VIS-20250704-00007','DEBIT_CARD','TX-20250704-93768-SBIL','PENDING',10001.00,2,12,0.00,23602.36,'2025-07-17',86,'[0, 2, 3]','998365','2025-07-04 07:33:22','2025-07-16 10:00:05',1,0,0,1,'','','FIXED','Website Service','HOLD','2025-07-31'),(206,'VIS-20250704-00008','CREDIT_CARD','TX-20250704-46379-4Y5I','PENDING',350000.00,1,12,0.00,413000.00,'2025-08-02',78,'[3]','998365','2025-07-04 07:33:59','2025-07-16 10:00:05',1,0,0,1,'','','FIXED','App Service','HOLD','2025-07-31'),(207,'VIS-20250711-00001','CASH','TX-20250711-50705-FBXZ','PENDING',10000.00,1,11,0.00,10300.00,'2025-07-11',78,'[3, 7]','This is testing','2025-07-11 08:45:18','2025-07-16 10:00:05',1,0,0,1,'2025-07-11','2025-08-09','RECURSIVE','Seo Service  ','HOLD','2025-07-31'),(208,'VIS-20250711-00080','CASH','TX-20250711-75570-60DE','PENDING',10000.00,1,11,0.00,10300.00,'2025',78,'\"[3, 7]\"','This is testing','2025-07-11 12:52:29','2025-07-16 10:00:05',1,0,0,1,'2025','2025-08-09','RECURSIVE','Seo Service  ','HOLD','2025-07-31'),(209,'INV-20250716-00004','CREDIT_CARD','TX-20250716-20145-HV6F','PENDING',213.00,1,14,0.00,215.66,'2025-07-26',80,'[3, 7]','travel_date','2025-07-16 09:39:24','2025-07-16 10:00:05',1,0,0,1,'','','FIXED','Seo Service  ','HOLD','2025-07-31'),(210,'INV-20250716-00005','CREDIT_CARD','TX-20250716-30350-JH3I','PENDING',69.00,1,12,0.00,81.42,'2025-08-01',80,'[8]','$travelDate','2025-07-16 09:46:47','2025-07-16 09:59:47',1,0,0,1,'','','FIXED','Seo Service  ','HOLD','2025-07-31');
+INSERT INTO `invoice` VALUES (195,'VIS-20250624-00004','CASH','TX-20250624-19380-AG4P','PENDING',514.00,1,12,0.00,606.52,'2025-07-05',83,'[2, 3, 7, 8]','This shows you&amp;amp;amp;amp;amp;amp;#039;ve been operating since 2021 till now.\r\nLet me know if you want the PHP code to handle that automatically too.','2025-06-24 05:33:56','2025-07-16 10:00:05',1,0,0,1,'2025-06-10','2025-06-25','RECURSIVE','App Service','HOLD','2025-07-31'),(196,'VIS-20250624-00005','CASH','TX-20250624-53815-NJAV','CANCELLED',5000.00,1,8,0.00,5750.00,'2025-07-11',78,'[2]','This is testing','2025-06-24 05:47:10','2025-07-16 10:00:05',1,0,0,1,'2025-06-01','2025-06-30','RECURSIVE',NULL,'HOLD','2025-07-31'),(197,'VIS-20250624-00029','CASH','TX-20250624-89682-SE1A','PAID',120000.00,1,8,0.00,138000.00,'2025-06-25',77,'[2]','Description','2025-06-24 11:36:17','2025-07-16 12:43:28',1,0,0,1,'','','FIXED','Newzeland Flight','HOLD','2025-07-31'),(198,'VIS-20250630-00001','PAYPAL','TX-20250630-16563-23A8','PENDING',5000.00,1,8,0.00,5750.00,'2025-06-30',83,'[2, 3, 7]','This is testing invoice seo service ','2025-06-30 14:28:11','2025-07-16 10:00:05',1,0,0,1,'','','FIXED','Seo Service','HOLD','2025-07-31'),(199,'VIS-20250704-00002','DEBIT_CARD','TX-20250704-54667-6N7N','PENDING',10000.00,1,12,0.00,11800.00,'2025-07-09',80,'[8, 9, 10]','998365','2025-07-04 07:28:36','2025-07-16 10:00:05',1,0,0,1,'2025-06-01','2025-06-30','RECURSIVE','Digital Marketing','HOLD','2025-07-31'),(200,'VIS-20250704-00003','DEBIT_CARD','TX-20250704-39295-5I7A','PENDING',10000.00,1,12,0.00,11800.00,'2025-07-17',80,'[8, 9, 10]','998365','2025-07-04 07:30:41','2025-07-16 10:00:05',1,0,0,1,'','','FIXED','Seo Service','HOLD','2025-07-31'),(202,'VIS-20250704-00004','DEBIT_CARD','TX-20250704-51851-EZN2','PENDING',10000.00,2,12,0.00,23600.00,'2025-07-18',80,'[8, 9, 10]','998365','2025-07-04 07:31:18','2025-07-16 10:00:05',1,0,0,1,'','','FIXED','Web Service','HOLD','2025-07-31'),(203,'VIS-20250704-00005','DEBIT_CARD','TX-20250704-62119-1HP3','PENDING',10000.00,2,12,0.00,23600.00,'2025-09-16',85,'[0, 3, 9, 10]','998365','2025-07-04 07:32:06','2025-07-16 10:00:05',1,0,0,1,'2025-07-01','2025-08-04','RECURSIVE','App Service','HOLD','2025-07-31'),(204,'VIS-20250704-00006','DEBIT_CARD','TX-20250704-99874-7NGO','PENDING',10000.00,3,12,0.00,35400.00,'2025-07-24',86,'[0, 2, 3]','998365','2025-07-04 07:32:49','2025-07-16 10:00:05',1,0,0,1,'','','FIXED','Website Service','HOLD','2025-07-31'),(205,'VIS-20250704-00007','DEBIT_CARD','TX-20250704-93768-SBIL','PENDING',10001.00,2,12,0.00,23602.36,'2025-07-17',86,'[0, 2, 3]','998365','2025-07-04 07:33:22','2025-07-16 10:00:05',1,0,0,1,'','','FIXED','Website Service','HOLD','2025-07-31'),(206,'VIS-20250704-00008','CREDIT_CARD','TX-20250704-46379-4Y5I','PENDING',350000.00,1,12,0.00,413000.00,'2025-08-02',78,'[3]','998365','2025-07-04 07:33:59','2025-07-22 12:53:55',1,0,4,1,'','','FIXED','App Service','HOLD','2025-07-31'),(207,'VIS-20250711-00001','CASH','TX-20250711-50705-FBXZ','PENDING',10000.00,1,11,0.00,10300.00,'2025-07-11',78,'[3, 7]','This is testing','2025-07-11 08:45:18','2025-07-16 10:00:05',1,0,0,1,'2025-07-11','2025-08-09','RECURSIVE','Seo Service  ','HOLD','2025-07-31'),(208,'VIS-20250711-00080','CASH','TX-20250711-75570-60DE','PENDING',10000.00,1,11,0.00,10300.00,'2025',78,'\"[3, 7]\"','This is testing','2025-07-11 12:52:29','2025-07-16 10:00:05',1,0,0,1,'2025','2025-08-09','RECURSIVE','Seo Service  ','HOLD','2025-07-31'),(209,'INV-20250716-00004','CREDIT_CARD','TX-20250716-20145-HV6F','PENDING',213.00,1,14,0.00,215.66,'2025-07-26',80,'[3, 7]','travel_date','2025-07-16 09:39:24','2025-07-16 10:00:05',1,0,0,1,'','','FIXED','Seo Service  ','HOLD','2025-07-31'),(210,'INV-20250716-00005','CREDIT_CARD','TX-20250716-30350-JH3I','PENDING',69.00,1,12,0.00,81.42,'2025-08-01',80,'[8]','$travelDate','2025-07-16 09:46:47','2025-07-16 09:59:47',1,0,0,1,'','','FIXED','Seo Service  ','HOLD','2025-07-31');
 /*!40000 ALTER TABLE `invoice` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -279,7 +317,7 @@ CREATE TABLE `invoice_sequence` (
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `date` (`date`)
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_520_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_520_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -288,7 +326,7 @@ CREATE TABLE `invoice_sequence` (
 
 LOCK TABLES `invoice_sequence` WRITE;
 /*!40000 ALTER TABLE `invoice_sequence` DISABLE KEYS */;
-INSERT INTO `invoice_sequence` VALUES (3,'20250606',19,'2025-06-06 07:17:17','2025-06-06 08:47:30'),(4,'20250613',1,'2025-06-13 09:47:44','2025-06-13 09:47:44'),(5,'20250617',1,'2025-06-17 06:49:58','2025-06-17 06:49:58'),(6,'20250623',1,'2025-06-23 05:39:12','2025-06-23 05:39:12'),(7,'20250624',29,'2025-06-24 05:10:24','2025-06-24 11:30:58'),(8,'20250630',1,'2025-06-30 14:26:46','2025-06-30 14:26:46'),(9,'20250704',9,'2025-07-04 07:26:25','2025-07-04 13:46:40'),(10,'20250711',80,'2025-07-11 08:34:06','2025-07-11 12:52:29'),(11,'20250716',5,'2025-07-16 08:46:49','2025-07-16 09:46:10');
+INSERT INTO `invoice_sequence` VALUES (3,'20250606',19,'2025-06-06 07:17:17','2025-06-06 08:47:30'),(4,'20250613',1,'2025-06-13 09:47:44','2025-06-13 09:47:44'),(5,'20250617',1,'2025-06-17 06:49:58','2025-06-17 06:49:58'),(6,'20250623',1,'2025-06-23 05:39:12','2025-06-23 05:39:12'),(7,'20250624',29,'2025-06-24 05:10:24','2025-06-24 11:30:58'),(8,'20250630',1,'2025-06-30 14:26:46','2025-06-30 14:26:46'),(9,'20250704',9,'2025-07-04 07:26:25','2025-07-04 13:46:40'),(10,'20250711',80,'2025-07-11 08:34:06','2025-07-11 12:52:29'),(11,'20250716',5,'2025-07-16 08:46:49','2025-07-16 09:46:10'),(12,'20250721',2,'2025-07-21 07:43:38','2025-07-21 07:43:38');
 /*!40000 ALTER TABLE `invoice_sequence` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -320,7 +358,7 @@ CREATE TABLE `invoice_settings` (
 
 LOCK TABLES `invoice_settings` WRITE;
 /*!40000 ALTER TABLE `invoice_settings` DISABLE KEYS */;
-INSERT INTO `invoice_settings` VALUES (1,'INV','public/upload/invoice/images/img_687753ba8d88d4.95365622.svg','INVOICE NOTE:\r\n•	ALL THE PAYMENTS MUST BE PAID IN NZD BY THE DUE DATE UNLESS MENTIONED OR CREDIT LIMIT OFFERED.\r\n•	ANY PAYMENTS MADE BY BANK CREDIT CARD WILL ATTRACT 2.5% CC FEE.\r\nALL ACCOUNT TRANSFERS SHALL BE MADE INTO BELOW ACCOUNT DETAILS\r\nACCOUNT NAME: THE FLIGHTSHUB PVT LTD\r\nANZ :: 01-1842-0636659-00\r\nASB :: 12-3142-0494687-00\r\nBNZ :: 02-0528-0567582-000\r\n','INVOICE NOTE:\r\n•	ALL THE PAYMENTS MUST BE PAID IN NZD BY THE DUE DATE UNLESS MENTIONED OR CREDIT LIMIT OFFERED.\r\n•	ANY PAYMENTS MADE BY BANK CREDIT CARD WILL ATTRACT 2.5% CC FEE.\r\nALL ACCOUNT TRANSFERS SHALL BE MADE INTO BELOW ACCOUNT DETAILS\r\nACCOUNT NAME: THE FLIGHTSHUB PVT LTD\r\nANZ :: 01-1842-0636659-00\r\nASB :: 12-3142-0494687-00\r\nBNZ :: 02-0528-0567582-000\r\n','public/upload/invoice/images/img_68778aad9dd7d1.70850019.pdf','2025-06-16 07:36:32','2025-07-16 11:19:09',1,1);
+INSERT INTO `invoice_settings` VALUES (1,'INV','public/upload/invoice/images/img_687753ba8d88d4.95365622.svg','INVOICE NOTE:\r\n•	ALL THE PAYMENTS MUST BE PAID IN NZD BY THE DUE DATE UNLESS MENTIONED OR CREDIT LIMIT OFFERED.\r\n•	ANY PAYMENTS MADE BY BANK CREDIT CARD WILL ATTRACT 2.5% CC FEE.\r\nALL ACCOUNT TRANSFERS SHALL BE MADE INTO BELOW ACCOUNT DETAILS\r\nACCOUNT NAME: THE FLIGHTSHUB PVT LTD\r\nANZ :: 01-1842-0636659-00\r\nASB :: 12-3142-0494687-00\r\nBNZ :: 02-0528-0567582-000\r\n','INVOICE NOTE:\r\n•	ALL THE PAYMENTS MUST BE PAID IN NZD BY THE DUE DATE UNLESS MENTIONED OR CREDIT LIMIT OFFERED.\r\n•	ANY PAYMENTS MADE BY BANK CREDIT CARD WILL ATTRACT 2.5% CC FEE.\r\nALL ACCOUNT TRANSFERS SHALL BE MADE INTO BELOW ACCOUNT DETAILS\r\nACCOUNT NAME: THE FLIGHTSHUB PVT LTD\r\nANZ :: 01-1842-0636659-00\r\nASB :: 12-3142-0494687-00\r\nBNZ :: 02-0528-0567582-000\r\n','public/upload/invoice/images/img_687dedebb0b473.80344067.pdf','2025-06-16 07:36:32','2025-07-21 07:36:11',1,1);
 /*!40000 ALTER TABLE `invoice_settings` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -350,7 +388,7 @@ CREATE TABLE `localization_settings` (
 
 LOCK TABLES `localization_settings` WRITE;
 /*!40000 ALTER TABLE `localization_settings` DISABLE KEYS */;
-INSERT INTO `localization_settings` VALUES (1,NULL,'Asia/Kolkata','Y年m月d日','24',5,'2025-07-10 18:13:31','2025-07-16 18:15:17');
+INSERT INTO `localization_settings` VALUES (1,NULL,'Asia/Kolkata','d M Y H:i','24',5,'2025-07-10 18:13:31','2025-07-18 13:30:49');
 /*!40000 ALTER TABLE `localization_settings` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -461,7 +499,7 @@ CREATE TABLE `services` (
 
 LOCK TABLES `services` WRITE;
 /*!40000 ALTER TABLE `services` DISABLE KEYS */;
-INSERT INTO `services` VALUES (2,'Website Development ',998314,'2025-04-16 11:53:29','2025-04-21 13:10:13',1),(3,'App Development ',998314,'2025-04-16 11:53:39','2025-04-21 13:10:13',1),(7,'Graphic Designing',998391,'2025-04-21 13:15:15','2025-04-21 13:23:20',1),(8,'Digital Marketing ',998365,'2025-06-30 14:58:57',NULL,1),(9,'Backlink Creation',998365,'2025-07-04 07:27:02',NULL,1),(10,'Google Ads',998365,'2025-07-04 07:27:19',NULL,1);
+INSERT INTO `services` VALUES (2,'Travel Insurance ',998314,'2025-04-16 11:53:29','2025-07-22 13:01:36',1),(3,'India - New Zealand Flight',998314,'2025-04-16 11:53:39','2025-07-22 13:01:36',1),(7,'UAE - New Zealand Flight',998391,'2025-04-21 13:15:15','2025-07-22 13:01:36',1),(8,'Japan - New Zealand Flight',998365,'2025-06-30 14:58:57','2025-07-22 13:01:36',1),(9,'China - New Zealand Flight',998365,'2025-07-04 07:27:02','2025-07-22 13:01:36',1),(10,'Australia - New Zealand Flight',998365,'2025-07-04 07:27:19','2025-07-22 13:01:36',1);
 /*!40000 ALTER TABLE `services` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -555,4 +593,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-07-16 18:27:03
+-- Dump completed on 2025-07-22 18:32:41

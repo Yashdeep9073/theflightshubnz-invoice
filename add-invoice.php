@@ -103,7 +103,6 @@ if (isset($_POST['invoiceNumber']) && $_SERVER['REQUEST_METHOD'] == "POST") {
 }
 
 
-
 if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['submit'])) {
     try {
         // echo "<pre>";
