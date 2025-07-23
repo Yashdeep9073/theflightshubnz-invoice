@@ -14,8 +14,6 @@ try {
     $customers = $stmtFetch->get_result();
 
     $stmtFetchInvoices = $db->prepare("SELECT * FROM invoice 
-    INNER JOIN customer
-    ON customer.customer_id = invoice.customer_id
     WHERE invoice.status = 'PENDING' AND invoice.is_active = 1
     ");
     if ($stmtFetchInvoices->execute()) {

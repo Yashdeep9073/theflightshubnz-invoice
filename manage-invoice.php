@@ -10,7 +10,7 @@ use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
 
 if (!isset($_SESSION["admin_id"])) {
-    header("Location: login.php");
+    header("Location: index.php");
     exit();
 }
 
@@ -79,12 +79,10 @@ try {
             invoice.status as invoiceStatus,
             customer.customer_id,
             customer.customer_name,
-            admin.admin_username,
-            tax.tax_rate
+            admin.admin_username
             FROM invoice 
             INNER JOIN customer ON customer.customer_id = invoice.customer_id
             LEFT JOIN admin ON admin.admin_id = invoice.created_by 
-             INNER JOIN tax ON tax.tax_id = invoice.tax
             WHERE invoice.is_active = 1";
 
             $conditions = [];
@@ -129,25 +127,14 @@ try {
                 $stmtFetchInvoices->close();
             }
 
-            // Also fetch customers for the filter UI
-            $stmtFetchCustomers = $db->prepare("SELECT * FROM customer WHERE isActive = 1");
-            $stmtFetchCustomers->execute();
-            $customers = $stmtFetchCustomers->get_result()->fetch_all(MYSQLI_ASSOC);
-            $stmtFetchCustomers->close();
         } else {
             $stmtFetchInvoices = $db->prepare("SELECT 
                 invoice.*,
                 invoice.status as invoiceStatus,
-                customer.customer_id,
-                customer.customer_name,
-                admin.admin_username,
-                tax.tax_rate
+                admin.admin_username
                 FROM invoice 
-                INNER JOIN customer
-                ON customer.customer_id = invoice.customer_id
                 LEFT JOIN admin
                 ON admin.admin_id = invoice.created_by 
-                  INNER JOIN tax ON tax.tax_id = invoice.tax
                 WHERE invoice.is_active = 1
                 ");
             if ($stmtFetchInvoices->execute()) {
@@ -1031,14 +1018,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['invoiceIds'])) {
                                     <div class="col-lg-3 col-sm-6 col-12">
                                         <div class="input-blocks">
                                             <i data-feather="user" class="info-img"></i>
-                                            <select class="select" name="customerId">
-                                                <option value="">Choose Name</option>
-                                                <?php foreach ($customers as $customer) { ?>
-                                                    <option value="<?php echo $customer['customer_id'] ?>">
-                                                        <?php echo $customer['customer_name'] ?>
-                                                    </option>
-                                                <?php } ?>
-                                            </select>
+                                            <input class="form-control" placeholder="Enter Customer Name" type="text"
+                                                name="customerId" required>
                                         </div>
                                     </div>
 
@@ -1084,7 +1065,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['invoiceIds'])) {
                                         <th>Created Date</th>
                                         <th>Due Date</th>
                                         <th>Amount</th>
-                                        <th>GST Amount</th>
                                         <th>Created By</th>
                                         <th>Status</th>
                                         <th class="no-sort text-center">Action</th>
@@ -1112,15 +1092,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['invoiceIds'])) {
                                             </td>
 
                                             <td><?php echo (isset($localizationSettings["currency_symbol"]) ? $localizationSettings["currency_symbol"] : "$") . " " . $invoice['total_amount'] ?>
-                                            </td>
-                                            <td><?php
-                                            $taxRateStr = $invoice['tax_rate'];
-                                            $taxRate = intval(str_replace('%', '', $taxRateStr));
-                                            $priceWithoutTax = $taxRate > 0 ? $invoice['total_amount'] / (1 + $taxRate / 100) : $invoice['total_amount'];
-                                            $taxAmount = $invoice['total_amount'] - $priceWithoutTax;
-                                            echo (isset($localizationSettings["currency_symbol"]) ? $localizationSettings["currency_symbol"] : "$") . " " . $taxAmount;
-                                            $totalTaxAmount += $taxAmount;
-                                            ?>
                                             </td>
                                             <td><?php echo $invoice['admin_username'] ?></td>
                                             <td>
@@ -1169,25 +1140,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['invoiceIds'])) {
                                                                 data-invoice-id="<?php echo $invoice['invoice_id'] ?>"
                                                                 class="dropdown-item deleteButton mb-0"><i
                                                                     data-feather="trash-2" class="info-img"></i>Delete </a>
-                                                        </li>
-                                                    <?php endif; ?>
-                                                    <?php if ($isAdmin || hasPermission('Send Reminder', $privileges, $roleData['0']['role_name'])): ?>
-
-                                                        <li>
-                                                            <a href="javascript:void(0);"
-                                                                data-invoice-id="<?php echo $invoice['invoice_id'] ?>"
-                                                                class="dropdown-item sendReminder mb-0"><i data-feather="bell"
-                                                                    class="info-img"></i>Send Reminder </a>
-                                                        </li>
-                                                    <?php endif; ?>
-
-                                                    <?php if ($isAdmin || hasPermission('Send Invoice', $privileges, $roleData['0']['role_name'])): ?>
-
-                                                        <li>
-                                                            <a href="javascript:void(0);"
-                                                                data-invoice-id="<?php echo $invoice['invoice_id'] ?>"
-                                                                class="dropdown-item sendInvoice mb-0"><i data-feather="send"
-                                                                    class="info-img"></i>Send Invoice </a>
                                                         </li>
                                                     <?php endif; ?>
                                                 </ul>

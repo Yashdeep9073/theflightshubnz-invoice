@@ -2,6 +2,7 @@
 session_start();
 
 require "./database/config.php";
+require "./utility/env.php";
 if (!isset($_SESSION["admin_id"])) {
     header("Location: login.php");
     exit();
@@ -37,6 +38,32 @@ try {
     $stmtFetchLocalizationSettings->execute();
     $localizationSettings = $stmtFetchLocalizationSettings->get_result()->fetch_array(MYSQLI_ASSOC);
     $timezone = $localizationSettings["timezone"] ?? "UTC";
+
+    $token = "TheFlighshubnz@123";
+    $secretKey = getenv("SECRET_KEY");
+    $timestamp = time();
+    $signature = hash_hmac('sha256', $token . $timestamp, $secretKey);
+    $apiUrl = "https://www.theflightshub.co.nz/airport-data-api.php?token=" . urlencode($token) . "&ts=" . $timestamp . "&sig=" . $signature;
+
+
+    // Initialize cURL
+    $ch = curl_init();
+
+    // Set cURL options
+    curl_setopt($ch, CURLOPT_URL, $apiUrl);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); // Return response instead of printing
+    curl_setopt($ch, CURLOPT_HTTPGET, true); // HTTP GET request
+
+    // Execute cURL request
+    $response = curl_exec($ch);
+
+    // Check for errors
+    if (curl_errno($ch)) {
+        echo "cURL Error: " . curl_error($ch);
+    } else {
+        // Convert JSON response to PHP array
+        $airports = json_decode($response, true);
+    }
 
 
 } catch (Exception $e) {
@@ -105,29 +132,25 @@ if (isset($_POST['invoiceNumber']) && $_SERVER['REQUEST_METHOD'] == "POST") {
 
 if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['submit'])) {
     try {
+
         // echo "<pre>";
         // print_r($_POST);
         // exit();
 
+        $invoiceTitle = htmlspecialchars($_POST["invoice_title"], ENT_QUOTES, 'UTF-8');
         $invoiceNumber = htmlspecialchars($_POST['invoice_number'] ?? '', ENT_QUOTES, 'UTF-8');
         $paymentMethod = htmlspecialchars($_POST['payment_method'] ?? '', ENT_QUOTES, 'UTF-8');
         $transactionId = htmlspecialchars($_POST['transaction_id'] ?? '', ENT_QUOTES, 'UTF-8');
         $status = htmlspecialchars($_POST['status'] ?? '', ENT_QUOTES, 'UTF-8');
         $dueDate = htmlspecialchars($_POST['due_date'] ?? '', ENT_QUOTES, 'UTF-8');
-        $fromDate = htmlspecialchars($_POST['from_date'] ?? '', ENT_QUOTES, 'UTF-8');
-        $toDate = htmlspecialchars($_POST['to_date'] ?? '', ENT_QUOTES, 'UTF-8');
-        $invoiceType = htmlspecialchars($_POST['invoice_type'] ?? '', ENT_QUOTES, 'UTF-8');
-        $description = htmlspecialchars($_POST['description'] ?? '', ENT_QUOTES, 'UTF-8');
-        $customerId = filter_input(INPUT_POST, 'customerName', FILTER_VALIDATE_INT);
-        $amount = filter_input(INPUT_POST, 'amount', FILTER_VALIDATE_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
-        $quantity = filter_input(INPUT_POST, 'quantity', FILTER_VALIDATE_INT);
-        $tax = filter_input(INPUT_POST, 'tax', FILTER_VALIDATE_INT);
-        $discount = filter_input(INPUT_POST, 'discount', FILTER_VALIDATE_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
-        $totalAmount = filter_input(INPUT_POST, 'total_amount', FILTER_VALIDATE_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
-        $invoiceTitle = htmlspecialchars($_POST["invoice_title"], ENT_QUOTES, 'UTF-8');
+        $customerName = htmlspecialchars($_POST['customerName'] ?? '', ENT_QUOTES, 'UTF-8');
+        $fromLocation = htmlspecialchars($_POST['fromLocation'] ?? '', ENT_QUOTES, 'UTF-8');
+        $toLocation = htmlspecialchars($_POST['toLocation'] ?? '', ENT_QUOTES, 'UTF-8');
+        $airlineName = htmlspecialchars($_POST['airlineName'] ?? '', ENT_QUOTES, 'UTF-8');
         $travelDate = htmlspecialchars($_POST["travel_date"], ENT_QUOTES, 'UTF-8');
-
-
+        $customerAddress = htmlspecialchars($_POST["customerAddress"], ENT_QUOTES, 'UTF-8');
+        $description = htmlspecialchars($_POST['description'] ?? '', ENT_QUOTES, 'UTF-8');
+        $totalAmount = filter_input(INPUT_POST, 'total_amount', FILTER_VALIDATE_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
         $createdBy = base64_decode($_SESSION['admin_id']);
 
         // Handle serviceName array
@@ -136,20 +159,10 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['submit'])) {
             : [];
         $serviceIdsJson = json_encode($serviceIds); // Convert to JSON string, e.g., "[2, 3, 5]"
 
-        // Validate required fields
-        if (
-            empty($invoiceNumber) || empty($paymentMethod) || empty($status) ||
-            empty($dueDate) || empty($customerId) || empty($amount) || empty($quantity) ||
-            empty($totalAmount) || empty($serviceIds)
-        ) {
-            throw new Exception('All required fields must be filled, and at least one service must be selected.');
-        }
 
         // Validate payment_method and status enums
         $validPaymentMethods = ['CREDIT_CARD', 'DEBIT_CARD', 'CASH', 'NET_BANKING', 'PAYPAL', 'OTHER'];
-
         $validStatuses = ['PAID', 'PENDING', 'CANCELLED', 'REFUNDED'];
-
         $validTypes = ['FIXED', 'RECURSIVE'];
 
         if (!in_array($paymentMethod, $validPaymentMethods)) {
@@ -159,38 +172,52 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['submit'])) {
             throw new Exception('Invalid status.');
         }
 
+        $passengerDetails = [];
+        foreach ($_POST['passenger_type'] as $index => $type) {
+            $passengerDetails[] = [
+                'type' => $type,
+                'quantity' => $_POST['quantity'][$index],
+                'amount' => $_POST['amount'][$index],
+            ];
+        }
+
+        // Convert to JSON for DB insertion
+        $passengerDetailsJson = json_encode($passengerDetails);
 
         // Prepare and execute the SQL query
-        $sql = "INSERT INTO `invoice` (
-            `invoice_number`, `payment_method`, `transaction_id`, `status`, 
-            `amount`, `quantity`, `tax`, `discount`, `total_amount`, 
-            `due_date`, `from_date`,`to_date` , `customer_id`, `service_id`, `description`,`created_by`,`invoice_title`,`travel_date`
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?,?,?,?,?,?)";
+        $sql = "INSERT INTO invoice (
+            invoice_number, invoice_title, payment_method, transaction_id, status, 
+            airline_name, travel_date, due_date, customer_name, service_id, 
+            from_location, to_location, description, total_amount, created_by, 
+            passenger_details,customer_address
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)";
 
         $stmt = $db->prepare($sql);
         if ($stmt === false) {
             throw new Exception('Prepare failed: ' . $db->error);
         }
+
+        // $toLocation = 1;
+        // Bind parameters
         $stmt->bind_param(
-            'ssssdiiddsssississ',
+            'sssssssssssssdiss',
             $invoiceNumber,
+            $invoiceTitle,
             $paymentMethod,
             $transactionId,
             $status,
-            $amount,
-            $quantity,
-            $tax,
-            $discount,
-            $totalAmount,
+            $airlineName,
+            $travelDate,
             $dueDate,
-            $fromDate,
-            $toDate,
-            $customerId,
+            $customerName,
             $serviceIdsJson,
+            $fromLocation,
+            $toLocation,
             $description,
+            $totalAmount,
             $createdBy,
-            $invoiceTitle,
-            $travelDate
+            $passengerDetailsJson,
+            $customerAddress
         );
 
         // Execute the query
@@ -200,6 +227,8 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['submit'])) {
 
         $stmt->close();
 
+
+
         $_SESSION['success'] = 'Invoice created successfully!';
         header("Location: manage-invoice.php");
         exit;
@@ -207,6 +236,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['submit'])) {
         $_SESSION['error'] = $e->getMessage();
     }
 }
+
 ?>
 
 <!DOCTYPE html>
@@ -398,17 +428,15 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['submit'])) {
                                                                 *</span></label>
                                                         <select id="payment_method" name="payment_method"
                                                             class="form-control" required>
-                                                            <option>Select Method</option>
+                                                            <option value="">Select Method</option>
                                                             <option value="CASH">Cash</option>
                                                             <option value="CREDIT_CARD">Credit Card</option>
                                                             <option value="DEBIT_CARD">Debit Card</option>
                                                             <option value="NET_BANKING">Net Banking</option>
-                                                            <option value="PAYPAL">Paypal</option>
                                                             <option value="OTHER">Other</option>
                                                         </select>
                                                     </div>
                                                 </div>
-
 
                                                 <div class="col-lg-4 col-sm-6 col-12">
                                                     <div class="input-blocks add-product list">
@@ -436,31 +464,23 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['submit'])) {
                                                     </div>
                                                 </div>
 
-                                                <div class="col-lg-4 col-sm-6 col-12">
+                                                <div class="col-lg-4 col-sm-6 col-12 due-date">
                                                     <div class="mb-3 add-product">
                                                         <label class="form-label">Due Date: <span> *</span></label>
                                                         <input type="date" id="due_date" name="due_date"
                                                             placeholder="Enter Due Date" class="form-control"
-                                                            autocomplete="off" required>
+                                                            autocomplete="off">
                                                     </div>
                                                 </div>
+
                                                 <div class="col-lg-4 col-sm-6 col-12">
                                                     <div class="mb-3 add-product">
                                                         <label class="form-label">Customer <span> *</span></label>
-
-                                                        <select class="select2 form-control" id="" name="customerName"
-                                                            required>
-                                                            <option>Select Customer</option>
-                                                            <?php foreach ($customers->fetch_all(MYSQLI_ASSOC) as $customer) { ?>
-                                                                <option value="<?php echo $customer['customer_id']; ?>">
-                                                                    <?php echo $customer['customer_name'] . " | " . $customer['customer_phone'] . " | " . $customer['customer_email']; ?>
-                                                                </option>
-                                                            <?php } ?>
-                                                        </select>
-
-
+                                                        <input class="form-control" type="text" name="customerName"
+                                                            placeholder="Enter Customer Name" required>
                                                     </div>
                                                 </div>
+
                                                 <div class="col-lg-4 col-sm-6 col-12">
                                                     <div class="mb-3 add-product">
                                                         <label class="form-label">Services <span> *</span></label>
@@ -480,10 +500,56 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['submit'])) {
 
                                                 <div class="col-lg-4 col-sm-6 col-12">
                                                     <div class="mb-3 add-product">
+                                                        <label class="form-label">From <span> *</span></label>
+
+                                                        <select class="select2 form-select" name="fromLocation">
+                                                            <option value="">Select</option>
+                                                            <?php foreach ($airports['data'] as $airport) { ?>
+                                                                <option value="<?php echo $airport['airport']; ?>">
+                                                                    <?php echo $airport['airport']; ?>
+                                                                </option>
+                                                            <?php } ?>
+                                                        </select>
+
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-4 col-sm-6 col-12">
+                                                    <div class="mb-3 add-product">
+                                                        <label class="form-label">To <span> *</span></label>
+
+                                                        <select class="select2 form-select" name="toLocation">
+                                                            <option value="">Select</option>
+                                                            <?php foreach ($airports['data'] as $airport) { ?>
+                                                                <option value="<?php echo $airport['airport']; ?>">
+                                                                    <?php echo $airport['airport']; ?>
+                                                                </option>
+                                                            <?php } ?>
+                                                        </select>
+
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-lg-4 col-sm-6 col-12">
+                                                    <div class="mb-3 add-product">
+                                                        <label class="form-label">Airline <span> *</span></label>
+                                                        <input class="form-control" type="text" name="airlineName"
+                                                            placeholder="Enter Airline Name" required>
+                                                    </div>
+                                                </div>
+
+                                                <div class="col-lg-4 col-sm-6 col-12">
+                                                    <div class="mb-3 add-product">
                                                         <label class="form-label">Travel Date: <span> *</span></label>
                                                         <input type="date" id="travel_date" name="travel_date"
                                                             placeholder="Enter Due Date" class="form-control"
                                                             autocomplete="off" required>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-4 col-sm-6 col-12">
+                                                    <div class="mb-3 add-product">
+                                                        <label class="form-label">Customer Address</label>
+                                                        <input class="form-control" type="text" name="customerAddress"
+                                                            placeholder="Enter Address">
                                                     </div>
                                                 </div>
 
@@ -526,58 +592,54 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['submit'])) {
                                                 <div class="tab-pane fade show active" id="pills-home" role="tabpanel"
                                                     aria-labelledby="pills-home-tab">
                                                     <div class="row">
-                                                        <div class="col-lg-3 col-sm-6 col-12">
-                                                            <div class="mb-3 add-product">
-                                                                <label class="form-label">Amount <span> *</span></label>
-                                                                <input type="number" id="invoiceAmount" name="amount"
-                                                                    class="form-control" placeholder="Enter Price"
-                                                                    required>
+
+                                                        <div class="col-12">
+                                                            <label class="form-label">Passengers <span>*</span></label>
+                                                            <div id="passengerContainer">
+                                                                <!-- Initial passenger row -->
+                                                                <div
+                                                                    class="row passenger-row mb-2 d-flex align-items-center">
+                                                                    <div class="col-3">
+                                                                        <select class="form-control"
+                                                                            name="passenger_type[]" required>
+                                                                            <option value="">Select Type</option>
+                                                                            <option value="ADULT">Adult (12 years+)
+                                                                            </option>
+                                                                            <option value="CHILDREN">Children (2-12
+                                                                                years)</option>
+                                                                            <option value="INFANT">Infant (Below 2
+                                                                                years)</option>
+                                                                        </select>
+                                                                    </div>
+                                                                    <div class="col-3">
+                                                                        <input type="number" class="form-control"
+                                                                            name="quantity[]" id="quantity"
+                                                                            placeholder="Quantity" min="1" required>
+                                                                    </div>
+                                                                    <div class="col-4">
+                                                                        <input type="number" id="invoiceAmount"
+                                                                            class="form-control" name="amount[]"
+                                                                            placeholder="Amount" step="0.01" min="1"
+                                                                            required>
+                                                                    </div>
+                                                                    <div class="col-2">
+                                                                        <button type="button"
+                                                                            class="btn btn-danger btn-remove">–</button>
+                                                                    </div>
+                                                                </div>
                                                             </div>
-                                                        </div>
-                                                        <div class="col-lg-3 col-sm-6 col-12">
-                                                            <div class="mb-3 add-product">
-                                                                <label class="form-label">Quantity <span>
-                                                                        *</span></label>
-                                                                <input type="number" id="quantity" name="quantity"
-                                                                    class="form-control" placeholder="Enter Quantity"
-                                                                    value="1" min="1" step="1" style="appearance: auto;"
-                                                                    required>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-lg-3 col-sm-6 col-12">
-                                                            <div class="mb-3 add-product">
-                                                                <label class="form-label">Tax (%) <span>
-                                                                        *</span></label>
-                                                                <select id="tax" name="tax" class="form-control"
-                                                                    required>
-                                                                    <option>Select Tax Rate
-                                                                    </option>
-                                                                    <?php foreach ($taxOptions->fetch_all(MYSQLI_ASSOC) as $tax) { ?>
-                                                                        <option
-                                                                            data-value="<?= htmlspecialchars($tax['tax_rate']) ?>"
-                                                                            value="<?= htmlspecialchars($tax['tax_id']) ?>">
-                                                                            <?= htmlspecialchars($tax['tax_name']) ?>
-                                                                            (<?= htmlspecialchars($tax['tax_rate']) ?>)
-                                                                        </option>
-                                                                    <?php } ?>
-                                                                </select>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-lg-3 col-sm-6 col-12">
-                                                            <div class="mb-3 add-product">
-                                                                <label class="form-label">Discount (%)</label>
-                                                                <input type="number" id="discount" value="0"
-                                                                    name="discount" class="form-control"
-                                                                    placeholder="Enter Discount">
-                                                            </div>
+                                                            <button type="button" id="addPassenger"
+                                                                class="btn btn-primary mt-1 mb-1">+ Add
+                                                                Passenger</button>
                                                         </div>
 
-                                                        <div class="col-lg-3 col-sm-6 col-12">
+                                                        <div class="col-lg-3 col-sm-6 col-12 m-2">
                                                             <div class="mb-3 add-product">
-                                                                <label class="form-label">Total Amount</label>
+                                                                <label class="form-label">Total Amount <span>
+                                                                        *</span></label>
                                                                 <input type="text" id="total_amount" name="total_amount"
                                                                     class="form-control"
-                                                                    placeholder="Enter Total Amount" readonly>
+                                                                    placeholder="Enter Total Amount">
                                                             </div>
                                                         </div>
                                                     </div>
@@ -687,121 +749,59 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['submit'])) {
 
             });
 
-
-            $(document).on('input', '#quantity', function (event) {
-                event.preventDefault();
-
-                function calculateTotal() {
-                    const amount = parseFloat($('#invoiceAmount').val()) || 0;
-                    const quantity = parseInt($('#quantity').val()) || 1;
-                    const taxRate = parseFloat($('#tax option:selected').attr('data-value')) / 100 || 0;
-                    const discount = parseFloat($('#discount').val()) / 100 || 0;
-
-                    // Calculate subtotal (amount × quantity)
-                    const subtotal = amount * quantity;
-                    // Apply tax (subtotal × tax%)
-                    const taxAmount = subtotal * taxRate;
-                    // Apply discount (subtotal × discount%)
-                    const discountAmount = subtotal * discount;
-                    // Final total (subtotal + tax - discount)
-                    const total = subtotal + taxAmount - discountAmount;
-
-                    return total.toFixed(2); // Return with 2 decimal places
-                }
-
-                // Update total amount
-                $('#total_amount').val(calculateTotal());
-            });
-            $(document).on('input', '#discount', function (event) {
-                event.preventDefault();
-
-                function calculateTotal() {
-                    const amount = parseFloat($('#invoiceAmount').val()) || 0;
-                    const quantity = parseInt($('#quantity').val()) || 1;
-                    const taxRate = parseFloat($('#tax option:selected').attr('data-value')) / 100 || 0;
-                    const discount = parseFloat($('#discount').val()) / 100 || 0;
-
-                    // Calculate subtotal (amount × quantity)
-                    const subtotal = amount * quantity;
-                    // Apply tax (subtotal × tax%)
-                    const taxAmount = subtotal * taxRate;
-                    // Apply discount (subtotal × discount%)
-                    const discountAmount = subtotal * discount;
-                    // Final total (subtotal + tax - discount)
-                    const total = subtotal + taxAmount - discountAmount;
-
-                    return total.toFixed(2); // Return with 2 decimal places
-                }
-
-                // Update total amount
-                $('#total_amount').val(calculateTotal());
-            });
-
-            $(document).on('input', '#tax', function (event) {
-                event.preventDefault();
-
-                function calculateTotal() {
-                    const amount = parseFloat($('#invoiceAmount').val()) || 0;
-                    const quantity = parseInt($('#quantity').val()) || 1;
-                    const taxRate = parseFloat($('#tax option:selected').attr('data-value')) / 100 || 0;
-                    const discount = parseFloat($('#discount').val()) / 100 || 0;
-
-                    // Calculate subtotal (amount × quantity)
-                    const subtotal = amount * quantity;
-                    // Apply tax (subtotal × tax%)
-                    const taxAmount = subtotal * taxRate;
-                    // Apply discount (subtotal × discount%)
-                    const discountAmount = subtotal * discount;
-                    // Final total (subtotal + tax - discount)
-                    const total = subtotal + taxAmount - discountAmount;
-
-                    return total.toFixed(2); // Return with 2 decimal places
-                }
-
-                // Update total amount
-                $('#total_amount').val(calculateTotal());
-            });
-
-            $(document).on('input', '#invoiceAmount', function (event) {
-                event.preventDefault();
-
-                function calculateTotal() {
-                    const amount = parseFloat($('#invoiceAmount').val()) || 0;
-                    const quantity = parseInt($('#quantity').val()) || 1;
-                    const taxRate = parseFloat($('#tax option:selected').attr('data-value')) / 100 || 0;
-                    const discount = parseFloat($('#discount').val()) / 100 || 0;
-
-                    // Calculate subtotal (amount × quantity)
-                    const subtotal = amount * quantity;
-                    // Apply tax (subtotal × tax%)
-                    const taxAmount = subtotal * taxRate;
-                    // Apply discount (subtotal × discount%)
-                    const discountAmount = subtotal * discount;
-                    // Final total (subtotal + tax - discount)
-                    const total = subtotal + taxAmount - discountAmount;
-
-                    return total.toFixed(2); // Return with 2 decimal places
-                }
-
-                // Update total amount
-                $('#total_amount').val(calculateTotal());
-            });
-
-            $(document).on('change', "#invoice_type", function (e) {
+            $(document).on('change', "#payment_status", function (e) {
                 const selectedType = $(this).val();
 
-                if (selectedType === 'FIXED') {
-                    $('.from-date').addClass('apexcharts-toolbar');
-                    $('.to-date').addClass('apexcharts-toolbar');
-                    $('.repeat-cycle').addClass('apexcharts-toolbar');
-                    $('.create-before').addClass('apexcharts-toolbar');
-                } else if (selectedType === 'RECURSIVE') {
-                    $('.from-date').removeClass('apexcharts-toolbar');
-                    $('.to-date').removeClass('apexcharts-toolbar');
-                    $('.repeat-cycle').removeClass('apexcharts-toolbar');
-                    $('.create-before').removeClass('apexcharts-toolbar');
+                if (selectedType === 'PAID') {
+                    $('.due-date').addClass('apexcharts-toolbar');
+                } else {
+                    $('.due-date').removeClass('apexcharts-toolbar');
+
                 }
             })
+
+
+
+            $('#addPassenger').click(function () {
+                const newRow = `
+        <div class="row passenger-row mb-2 d-flex align-items-center">
+            <div class="col-3">
+               <select class="form-control"
+                   name="passenger_type[]" required>
+                   <option value="">Select Type</option>
+                   <option value="ADULT">Adult (12 years+)
+                   </option>
+                   <option value="CHILDREN">Children (2-12
+                       years)</option>
+                   <option value="INFANT">Infant (Below 2
+                       years)</option>
+               </select>
+           </div>
+           <div class="col-3">
+               <input type="number" class="form-control"
+                   name="quantity[]" placeholder="Quantity"
+                   min="1" required>
+           </div>
+           <div class="col-4">
+               <input type="number" class="form-control"
+                   name="amount[]" placeholder="Amount" step="0.01" min="1"
+                   required>
+           </div>
+           <div class="col-2">
+               <button type="button"
+                   class="btn btn-danger btn-remove">–</button>
+           </div>
+        </div>
+    `;
+                $('#passengerContainer').append(newRow);
+            });
+
+            // Use event delegation for dynamically created elements
+            $('#passengerContainer').on('click', '.btn-remove', function () {
+                $(this).closest('.passenger-row').remove();
+            });
+
+
         });
     </script>
 

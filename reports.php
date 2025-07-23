@@ -45,8 +45,6 @@ try {
                 $query = "
             SELECT *, invoice.status as paymentStatus 
             FROM invoice 
-            INNER JOIN customer ON customer.customer_id = invoice.customer_id
-            INNER JOIN tax ON tax.tax_id = invoice.tax
             WHERE invoice.status = ?
               AND invoice.is_active = 1
         ";
@@ -88,19 +86,10 @@ try {
             $cancelledInvoices = buildInvoiceQuery($db, 'CANCELLED', $customerId, $startDate, $endDate);
             $refundedInvoices = buildInvoiceQuery($db, 'REFUNDED', $customerId, $startDate, $endDate);
 
-            // Fetch customers
-            $stmtFetchCustomers = $db->prepare("SELECT * FROM customer WHERE isActive = 1");
-            $stmtFetchCustomers->execute();
-            $customers = $stmtFetchCustomers->get_result()->fetch_all(MYSQLI_ASSOC);
-            $stmtFetchCustomers->close();
 
         } else {
             // paid 
             $stmtFetchPaid = $db->prepare("SELECT *,invoice.status as paymentStatus FROM invoice 
-            INNER JOIN customer
-            ON customer.customer_id = invoice.customer_id
-            LEFT JOIN tax
-            ON tax.tax_id = invoice.tax
             WHERE invoice.status = 'PAID' AND invoice.is_active = 1  ");
             if ($stmtFetchPaid->execute()) {
                 $paidInvoices = $stmtFetchPaid->get_result();
@@ -108,10 +97,6 @@ try {
 
             // pending
             $stmtFetchPending = $db->prepare("SELECT *,invoice.status as paymentStatus FROM invoice 
-            INNER JOIN customer
-            ON customer.customer_id = invoice.customer_id
-            INNER JOIN tax
-            ON tax.tax_id = invoice.tax
             WHERE invoice.status = 'PENDING' AND invoice.is_active = 1");
             if ($stmtFetchPending->execute()) {
                 $pendingInvoices = $stmtFetchPending->get_result();
@@ -119,10 +104,6 @@ try {
 
             // cancelled
             $stmtFetchCancelled = $db->prepare("SELECT *,invoice.status as paymentStatus FROM invoice 
-            INNER JOIN customer
-            ON customer.customer_id = invoice.customer_id
-            INNER JOIN tax
-            ON tax.tax_id = invoice.tax
             WHERE invoice.status = 'CANCELLED' AND invoice.is_active = 1  ");
             if ($stmtFetchCancelled->execute()) {
                 $cancelledInvoices = $stmtFetchCancelled->get_result();
@@ -130,31 +111,10 @@ try {
 
             // refunded
             $stmtFetchRefunded = $db->prepare("SELECT *,invoice.status as paymentStatus FROM invoice 
-            INNER JOIN customer
-            ON customer.customer_id = invoice.customer_id
-            INNER JOIN tax
-            ON tax.tax_id = invoice.tax
             WHERE invoice.status = 'REFUNDED' AND invoice.is_active = 1");
             if ($stmtFetchRefunded->execute()) {
                 $refundedInvoices = $stmtFetchRefunded->get_result();
             }
-
-            $stmtFetchCustomers = $db->prepare("
-            SELECT 
-            *
-            FROM customer
-            WHERE isActive = 1
-            ");
-
-            // Execute the query and fetch results
-            if ($stmtFetchCustomers->execute()) {
-                $customers = $stmtFetchCustomers->get_result()->fetch_all(MYSQLI_ASSOC);
-            } else {
-                $customers = []; // Return an empty array if execution fails
-            }
-
-            // Close the statement
-            $stmtFetchCustomers->close();
         }
     }
 
@@ -371,14 +331,8 @@ ob_end_clean();
                                                 <div class="col-lg-3 col-sm-6 col-12">
                                                     <div class="input-blocks">
                                                         <i data-feather="user" class="info-img"></i>
-                                                        <select class="select" name="customerId">
-                                                            <option value="">Choose Name</option>
-                                                            <?php foreach ($customers as $customer) { ?>
-                                                                <option value="<?php echo $customer['customer_id'] ?>">
-                                                                    <?php echo $customer['customer_name'] ?>
-                                                                </option>
-                                                            <?php } ?>
-                                                        </select>
+                                                        <input class="form-control" placeholder="Enter Customer Name"
+                                                            type="text" name="customerId" required>
                                                     </div>
                                                 </div>
 
@@ -423,8 +377,6 @@ ob_end_clean();
                                                     <th>Invoice No</th>
                                                     <th>Total Amount</th>
                                                     <th>Payment Method</th>
-                                                    <th>Discount</th>
-                                                    <th>Tax Amount</th>
                                                     <th>Created At</th>
                                                 </tr>
                                             </thead>
@@ -433,7 +385,6 @@ ob_end_clean();
                                                 $totalAmountSum = 0; // Initialize total
                                                 foreach ($paidInvoices->fetch_all(MYSQLI_ASSOC) as $paidInvoice) {
                                                     $totalAmountSum += $paidInvoice['total_amount']; // Add to total
-                                                
                                                     ?>
                                                     <tr>
                                                         <td>
@@ -444,8 +395,11 @@ ob_end_clean();
                                                         </td>
                                                         <td><?php echo htmlspecialchars($paidInvoice['customer_name']); ?>
                                                         </td>
-                                                        <td><?php $date = new DateTime($paidInvoice['updated_at']);
-                                                        echo htmlspecialchars($date->format(isset($localizationSettings["date_format"]) ? $localizationSettings["date_format"] : "d M Y")); ?>
+                                                        <td>
+                                                            <?php
+                                                            $date = new DateTime($paidInvoice['updated_at']);
+                                                            echo htmlspecialchars($date->format(isset($localizationSettings["date_format"]) ? $localizationSettings["date_format"] : "d M Y"));
+                                                            ?>
                                                         </td>
                                                         <td class="ref-number">
                                                             <?php echo htmlspecialchars($paidInvoice['transaction_id']); ?>
@@ -453,9 +407,11 @@ ob_end_clean();
                                                         <td class="ref-number">
                                                             <?php echo htmlspecialchars($paidInvoice['invoice_number']); ?>
                                                         </td>
-                                                        <td><?php echo (isset($localizationSettings["currency_symbol"]) ? $localizationSettings["currency_symbol"] : "$") . " " . htmlspecialchars($paidInvoice['total_amount']); ?>
+                                                        <td>
+                                                            <?php
+                                                            echo (isset($localizationSettings["currency_symbol"]) ? $localizationSettings["currency_symbol"] : "$") . " " . htmlspecialchars($paidInvoice['total_amount']);
+                                                            ?>
                                                         </td>
-
                                                         <td>
                                                             <?php if ($paidInvoice['paymentStatus'] == 'PAID') { ?>
                                                                 <span class="badge badge-lg bg-success">Paid</span>
@@ -467,25 +423,30 @@ ob_end_clean();
                                                                 <span class="badge badge-lg bg-primary">Refunded</span>
                                                             <?php } ?>
                                                         </td>
-                                                        <td><?php echo htmlspecialchars($paidInvoice['discount']); ?>%</td>
-                                                        <td><?php echo htmlspecialchars($paidInvoice['tax_rate']); ?></td>
-                                                        <td><?php $date = new DateTime($paidInvoice['created_at']);
-                                                        echo htmlspecialchars($date->format("d M Y h:i:A")); ?>
+                                                        <td>
+                                                            <?php
+                                                            $date = new DateTime($paidInvoice['created_at']);
+                                                            echo htmlspecialchars($date->format("d M Y h:i:A"));
+                                                            ?>
                                                         </td>
                                                     </tr>
                                                 <?php } ?>
-
                                             </tbody>
                                             <tfoot>
                                                 <tr>
                                                     <td colspan="5"></td>
-                                                    <td><strong><span class="text-danger">Total:
-                                                                <?php echo (isset($localizationSettings["currency_symbol"]) ? $localizationSettings["currency_symbol"] : "$") . " " . number_format($totalAmountSum, 2); ?></span></strong>
+                                                    <td>
+                                                        <strong>
+                                                            <span class="text-danger">Total:
+                                                                <?php
+                                                                echo (isset($localizationSettings["currency_symbol"]) ? $localizationSettings["currency_symbol"] : "$") . " " . number_format($totalAmountSum, 2);
+                                                                ?>
+                                                            </span>
+                                                        </strong>
                                                     </td>
-                                                    <td colspan="4"></td>
+                                                    <td colspan="2"></td>
                                                 </tr>
                                             </tfoot>
-
                                         </table>
                                     </div>
                                 </div>
@@ -515,14 +476,9 @@ ob_end_clean();
                                                 <div class="col-lg-3 col-sm-6 col-12">
                                                     <div class="input-blocks">
                                                         <i data-feather="user" class="info-img"></i>
-                                                        <select class="select" name="customerId">
-                                                            <option value="">Choose Name</option>
-                                                            <?php foreach ($customers as $customer) { ?>
-                                                                <option value="<?php echo $customer['customer_id'] ?>">
-                                                                    <?php echo $customer['customer_name'] ?>
-                                                                </option>
-                                                            <?php } ?>
-                                                        </select>
+
+                                                        <input class="form-control" placeholder="Enter Customer Name"
+                                                            type="text" name="customerId" required>
                                                     </div>
                                                 </div>
 
@@ -569,13 +525,12 @@ ob_end_clean();
                                                     <th>Invoice No</th>
                                                     <th>Total Amount</th>
                                                     <th>Payment Method</th>
-                                                    <th>Discount</th>
-                                                    <th>Tax Amount</th>
                                                     <th>Created At</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                <?php $pendingAmountSum = 0; // Total pending amount
+                                                <?php
+                                                $pendingAmountSum = 0; // Total pending amount
                                                 foreach ($pendingInvoices->fetch_all(MYSQLI_ASSOC) as $pendingInvoice) {
                                                     $pendingAmountSum += $pendingInvoice['total_amount']; // Add each total amount
                                                     ?>
@@ -598,7 +553,6 @@ ob_end_clean();
                                                             }
                                                             ?>
                                                         </td>
-
                                                         <td class="ref-number">
                                                             <?php echo htmlspecialchars($pendingInvoice['transaction_id']); ?>
                                                         </td>
@@ -607,7 +561,6 @@ ob_end_clean();
                                                         </td>
                                                         <td><?php echo (isset($localizationSettings["currency_symbol"]) ? $localizationSettings["currency_symbol"] : "$") . " " . htmlspecialchars($pendingInvoice['total_amount']); ?>
                                                         </td>
-
                                                         <td>
                                                             <?php if ($pendingInvoice['paymentStatus'] == 'PAID') { ?>
                                                                 <span class="badge badge-lg bg-success">Paid</span>
@@ -619,8 +572,6 @@ ob_end_clean();
                                                                 <span class="badge badge-lg bg-primary">Refunded</span>
                                                             <?php } ?>
                                                         </td>
-                                                        <td><?php echo $pendingInvoice['discount']; ?>%</td>
-                                                        <td><?php echo $pendingInvoice['tax_rate']; ?></td>
                                                         <td><?php $date = new DateTime($pendingInvoice['created_at']);
                                                         echo htmlspecialchars($date->format(isset($localizationSettings["date_format"]) ? $localizationSettings["date_format"] : "d M Y")); ?>
                                                         </td>
@@ -633,10 +584,9 @@ ob_end_clean();
                                                     <td><strong><span class="text-danger">Total Pending:
                                                                 <?php echo (isset($localizationSettings["currency_symbol"]) ? $localizationSettings["currency_symbol"] : "$") . " " . number_format($pendingAmountSum, 2); ?></span></strong>
                                                     </td>
-                                                    <td colspan="4"></td>
+                                                    <td colspan="2"></td>
                                                 </tr>
                                             </tfoot>
-
                                         </table>
                                     </div>
                                 </div>
@@ -666,14 +616,9 @@ ob_end_clean();
                                                 <div class="col-lg-3 col-sm-6 col-12">
                                                     <div class="input-blocks">
                                                         <i data-feather="user" class="info-img"></i>
-                                                        <select class="select" name="customerId">
-                                                            <option value="">Choose Name</option>
-                                                            <?php foreach ($customers as $customer) { ?>
-                                                                <option value="<?php echo $customer['customer_id'] ?>">
-                                                                    <?php echo $customer['customer_name'] ?>
-                                                                </option>
-                                                            <?php } ?>
-                                                        </select>
+
+                                                        <input class="form-control" placeholder="Enter Customer Name"
+                                                            type="text" name="customerId" required>
                                                     </div>
                                                 </div>
 
@@ -720,16 +665,14 @@ ob_end_clean();
                                                     <th>Invoice No</th>
                                                     <th>Total Amount</th>
                                                     <th>Payment Method</th>
-                                                    <th>Discount</th>
-                                                    <th>Tax Amount</th>
                                                     <th>Created At</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                <?php $cancelledAmountSum = 0;
+                                                <?php
+                                                $cancelledAmountSum = 0; // Total cancelled amount
                                                 foreach ($cancelledInvoices->fetch_all(MYSQLI_ASSOC) as $cancelledInvoice) {
                                                     $cancelledAmountSum += $cancelledInvoice['total_amount'];
-
                                                     ?>
                                                     <tr>
                                                         <td>
@@ -740,9 +683,10 @@ ob_end_clean();
                                                         </td>
                                                         <td><?php echo htmlspecialchars($cancelledInvoice['customer_name']); ?>
                                                         </td>
-                                                        <td><?php $date = new DateTime($cancelledInvoice['updated_at']);
-                                                        echo htmlspecialchars($date->format(isset($localizationSettings["date_format"]) ? $localizationSettings["date_format"] : "d M Y")); ?>
-                                                        </td>
+                                                        <td><?php
+                                                        $date = new DateTime($cancelledInvoice['updated_at']);
+                                                        echo htmlspecialchars($date->format(isset($localizationSettings["date_format"]) ? $localizationSettings["date_format"] : "d M Y"));
+                                                        ?></td>
                                                         <td class="ref-number">
                                                             <?php echo htmlspecialchars($cancelledInvoice['transaction_id']); ?>
                                                         </td>
@@ -751,7 +695,6 @@ ob_end_clean();
                                                         </td>
                                                         <td><?php echo (isset($localizationSettings["currency_symbol"]) ? $localizationSettings["currency_symbol"] : "$") . " " . htmlspecialchars($cancelledInvoice['total_amount']); ?>
                                                         </td>
-
                                                         <td>
                                                             <?php if ($cancelledInvoice['paymentStatus'] == 'PAID') { ?>
                                                                 <span class="badge badge-lg bg-success">Paid</span>
@@ -763,14 +706,10 @@ ob_end_clean();
                                                                 <span class="badge badge-lg bg-primary">Refunded</span>
                                                             <?php } ?>
                                                         </td>
-                                                        <td><?php echo htmlspecialchars($cancelledInvoice['discount']); ?>%
-                                                        </td>
-                                                        <td><?php echo htmlspecialchars($cancelledInvoice['tax_rate']); ?>
-                                                        </td>
-                                                        <td><?php $date = new DateTime($cancelledInvoice['created_at']);
-                                                        echo htmlspecialchars($date->format(isset($localizationSettings["date_format"]) ? $localizationSettings["date_format"] : "d M Y")); ?>
-                                                        </td>
-
+                                                        <td><?php
+                                                        $date = new DateTime($cancelledInvoice['created_at']);
+                                                        echo htmlspecialchars($date->format(isset($localizationSettings["date_format"]) ? $localizationSettings["date_format"] : "d M Y"));
+                                                        ?></td>
                                                     </tr>
                                                 <?php } ?>
                                             </tbody>
@@ -780,10 +719,9 @@ ob_end_clean();
                                                     <td><strong><span class="text-danger">Total Cancelled:
                                                                 <?php echo (isset($localizationSettings["currency_symbol"]) ? $localizationSettings["currency_symbol"] : "$") . " " . number_format($cancelledAmountSum, 2); ?></span></strong>
                                                     </td>
-                                                    <td colspan="4"></td>
+                                                    <td colspan="2"></td>
                                                 </tr>
                                             </tfoot>
-
                                         </table>
                                     </div>
                                 </div>
@@ -812,14 +750,8 @@ ob_end_clean();
                                             <div class="row">
                                                 <div class="col-lg-3 col-sm-6 col-12">
                                                     <div class="input-blocks">
-                                                        <select class="select" name="customerId">
-                                                            <option>Choose Name</option>
-                                                            <?php foreach ($customers as $customer) { ?>
-                                                                <option value="<?php echo $customer['customer_id'] ?>">
-                                                                    <?php echo $customer['customer_name'] ?>
-                                                                </option>
-                                                            <?php } ?>
-                                                        </select>
+                                                        <input class="form-control" placeholder="Enter Customer Name"
+                                                            type="text" name="customerId" required>
                                                     </div>
                                                 </div>
 
@@ -866,13 +798,12 @@ ob_end_clean();
                                                     <th>Invoice No</th>
                                                     <th>Total Amount</th>
                                                     <th>Payment Method</th>
-                                                    <th>Discount</th>
-                                                    <th>Tax Amount</th>
                                                     <th>Created At</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                <?php $refundedAmountSum = 0;
+                                                <?php
+                                                $refundedAmountSum = 0; // Total refunded amount
                                                 foreach ($refundedInvoices->fetch_all(MYSQLI_ASSOC) as $refundedInvoice) {
                                                     $refundedAmountSum += $refundedInvoice['total_amount'];
                                                     ?>
@@ -885,9 +816,10 @@ ob_end_clean();
                                                         </td>
                                                         <td><?php echo htmlspecialchars($refundedInvoice['customer_name']); ?>
                                                         </td>
-                                                        <td><?php $date = new DateTime($refundedInvoice['updated_at']);
-                                                        echo htmlspecialchars($date->format(isset($localizationSettings["date_format"]) ? $localizationSettings["date_format"] : "d M Y")); ?>
-                                                        </td>
+                                                        <td><?php
+                                                        $date = new DateTime($refundedInvoice['updated_at']);
+                                                        echo htmlspecialchars($date->format(isset($localizationSettings["date_format"]) ? $localizationSettings["date_format"] : "d M Y"));
+                                                        ?></td>
                                                         <td class="ref-number">
                                                             <?php echo htmlspecialchars($refundedInvoice['transaction_id']); ?>
                                                         </td>
@@ -896,7 +828,6 @@ ob_end_clean();
                                                         </td>
                                                         <td><?php echo (isset($localizationSettings["currency_symbol"]) ? $localizationSettings["currency_symbol"] : "$") . " " . htmlspecialchars($refundedInvoice['total_amount']); ?>
                                                         </td>
-
                                                         <td>
                                                             <?php if ($refundedInvoice['paymentStatus'] == 'PAID') { ?>
                                                                 <span class="badge badge-lg bg-success">Paid</span>
@@ -908,13 +839,10 @@ ob_end_clean();
                                                                 <span class="badge badge-lg bg-primary">Refunded</span>
                                                             <?php } ?>
                                                         </td>
-                                                        <td><?php echo htmlspecialchars($refundedInvoice['discount']); ?>%
-                                                        </td>
-                                                        <td><?php echo htmlspecialchars($refundedInvoice['tax_rate']); ?>
-                                                        </td>
-                                                        <td><?php $date = new DateTime($refundedInvoice['created_at']);
-                                                        echo htmlspecialchars($date->format(isset($localizationSettings["date_format"]) ? $localizationSettings["date_format"] : "d M Y")); ?>
-                                                        </td>
+                                                        <td><?php
+                                                        $date = new DateTime($refundedInvoice['created_at']);
+                                                        echo htmlspecialchars($date->format(isset($localizationSettings["date_format"]) ? $localizationSettings["date_format"] : "d M Y"));
+                                                        ?></td>
                                                     </tr>
                                                 <?php } ?>
                                             </tbody>
@@ -924,11 +852,9 @@ ob_end_clean();
                                                     <td><strong><span class="text-danger">Total Refunded:
                                                                 <?php echo (isset($localizationSettings["currency_symbol"]) ? $localizationSettings["currency_symbol"] : "$") . " " . number_format($refundedAmountSum, 2); ?></span></strong>
                                                     </td>
-                                                    <td colspan="4"></td>
+                                                    <td colspan="2"></td>
                                                 </tr>
                                             </tfoot>
-
-
                                         </table>
                                     </div>
                                 </div>

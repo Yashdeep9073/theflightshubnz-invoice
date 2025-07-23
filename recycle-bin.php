@@ -10,12 +10,8 @@ if (!isset($_SESSION["admin_id"])) {
 
 try {
     $stmtFetchInvoices = $db->prepare("SELECT 
-     invoice.*,
-     customer.customer_id,
-     customer.customer_name
+     invoice.*
      FROM invoice 
-    INNER JOIN customer
-    ON customer.customer_id = invoice.customer_id
      WHERE invoice.is_active = 0
     ");
     if ($stmtFetchInvoices->execute()) {

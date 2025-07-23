@@ -113,26 +113,6 @@ $isAdmin = strtolower($roleData['0']['role_name']) === 'admin';
                 </li>
             <?php endif; ?>
 
-            <?php if ($isAdmin || hasPermission('GST', $privileges, $roleData['0']['role_name'])): ?>
-                <li class="submenu-open">
-                    <h6 class="submenu-hdr">GST</h6>
-                    <ul>
-
-                        <li class="submenu">
-                            <a href="javascript:void(0);"><i data-feather="file-text"></i><span>GST Slab</span><span
-                                    class="menu-arrow"></span></a>
-                            <ul>
-                                <?php if ($isAdmin || hasPermission('Manage GST', $privileges, $roleData['0']['role_name'])): ?>
-                                    <li><a href="manage-gst.php">Manage GST</a></li>
-                                <?php endif; ?>
-
-                            </ul>
-                        </li>
-
-                    </ul>
-                </li>
-            <?php endif; ?>
-
             <?php if ($isAdmin || hasPermission('Payments', $privileges, $roleData['0']['role_name'])): ?>
                 <li class="submenu-open">
                     <h6 class="submenu-hdr">Payments</h6>
@@ -169,14 +149,11 @@ $isAdmin = strtolower($roleData['0']['role_name']) === 'admin';
                                     class="menu-arrow"></span></a>
                             <ul>
                                 <li>
-                                    <a href="customer-details.php">Customers</a>
-                                </li>
-                                <li>
                                     <a href="services.php">Services</a>
                                 </li>
-                                <li>
+                                <!-- <li>
                                     <a href="tax-details.php">Tax</a>
-                                </li>
+                                </li> -->
                             </ul>
                         </li>
 
@@ -194,9 +171,6 @@ $isAdmin = strtolower($roleData['0']['role_name']) === 'admin';
                                     class="menu-arrow"></span></a>
                             <ul>
                                 <li><a href="reports.php">Invoice Report</a></li>
-                                <li>
-                                    <a href="customer-reports.php">Customer Report</a>
-                                </li>
                             </ul>
                         </li>
                     </ul>

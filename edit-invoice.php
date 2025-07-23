@@ -3,6 +3,7 @@ ob_start();
 session_start();
 
 require "./database/config.php";
+require "./utility/env.php";
 if (!isset($_SESSION["admin_id"])) {
     header("Location: login.php");
     exit();
@@ -19,9 +20,7 @@ try {
         $result = $stmtInvoice->get_result();
         $invoices = $result->fetch_all(MYSQLI_ASSOC);
 
-        // echo "<pre>";
-        // print_r($invoices[0]['repeat_cycle']);
-        // exit;
+        $passengers = json_decode($invoices[0]['passenger_details'], true);
     }
 
 
@@ -53,6 +52,34 @@ try {
     $stmtFetchCompanySettings = $db->prepare("SELECT * FROM company_settings");
     $stmtFetchCompanySettings->execute();
     $companySettings = $stmtFetchCompanySettings->get_result()->fetch_array(MYSQLI_ASSOC);
+
+
+    $token = "TheFlighshubnz@123";
+    $secretKey = getenv("SECRET_KEY");
+    $timestamp = time();
+    $signature = hash_hmac('sha256', $token . $timestamp, $secretKey);
+    $apiUrl = "https://www.theflightshub.co.nz/airport-data-api.php?token=" . urlencode($token) . "&ts=" . $timestamp . "&sig=" . $signature;
+
+
+    // Initialize cURL
+    $ch = curl_init();
+
+    // Set cURL options
+    curl_setopt($ch, CURLOPT_URL, $apiUrl);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); // Return response instead of printing
+    curl_setopt($ch, CURLOPT_HTTPGET, true); // HTTP GET request
+
+    // Execute cURL request
+    $response = curl_exec($ch);
+
+    // Check for errors
+    if (curl_errno($ch)) {
+        echo "cURL Error: " . curl_error($ch);
+    } else {
+        // Convert JSON response to PHP array
+        $airports = json_decode($response, true);
+    }
+
 
 
 } catch (Exception $e) {
@@ -124,70 +151,21 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['edit'])) {
         // print_r($_POST);
         // exit();
 
-        // Sanitize and validate inputs
-        $invoiceNumber = filter_input(INPUT_POST, 'invoice_number', FILTER_UNSAFE_RAW) ?? '';
-        $invoiceNumber = trim(htmlspecialchars($invoiceNumber, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'));
-
-        $paymentMethod = filter_input(INPUT_POST, 'payment_method', FILTER_UNSAFE_RAW) ?? '';
-        $paymentMethod = trim(htmlspecialchars($paymentMethod, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'));
-
-        $transactionId = filter_input(INPUT_POST, 'transaction_id', FILTER_UNSAFE_RAW) ?? '';
-        $transactionId = trim(htmlspecialchars($transactionId, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'));
-
-        $status = filter_input(INPUT_POST, 'status', FILTER_UNSAFE_RAW) ?? '';
-        $status = trim(htmlspecialchars($status, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'));
-
-        $dueDate = filter_input(INPUT_POST, 'due_date', FILTER_UNSAFE_RAW) ?? '';
-        $dueDate = trim(htmlspecialchars($dueDate, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'));
-        // Validate date format (e.g., YYYY-MM-DD)
-        if ($dueDate !== '' && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $dueDate)) {
-            $dueDate = ''; // Reset to empty if invalid
-        }
-
-        $fromDate = filter_input(INPUT_POST, 'from_date', FILTER_UNSAFE_RAW) ?? '';
-        $fromDate = trim(htmlspecialchars($fromDate, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'));
-        // Validate date format (e.g., YYYY-MM-DD)
-        if ($fromDate !== '' && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $fromDate)) {
-            $fromDate = ''; // Reset to empty if invalid
-        }
-
-        $toDate = filter_input(INPUT_POST, 'to_date', FILTER_UNSAFE_RAW) ?? '';
-        $toDate = trim(htmlspecialchars($toDate, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'));
-        // Validate date format (e.g., YYYY-MM-DD)
-        if ($toDate !== '' && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $toDate)) {
-            $toDate = ''; // Reset to empty if invalid
-        }
-
         $invoiceTitle = htmlspecialchars($_POST["invoice_title"], ENT_QUOTES, 'UTF-8');
-
-        $customerId = filter_input(INPUT_POST, 'customerName', FILTER_SANITIZE_NUMBER_INT) ?? 0;
-        // Ensure customerId is a positive integer
-        $customerId = max(0, (int) $customerId);
-
-        $description = filter_input(INPUT_POST, 'description', FILTER_UNSAFE_RAW) ?? '';
-        $description = trim(htmlspecialchars($description, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'));
-
-        $amount = filter_input(INPUT_POST, 'amount', FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION) ?? 0.0;
-        $amount = (float) $amount;
-
-        $quantity = filter_input(INPUT_POST, 'quantity', FILTER_SANITIZE_NUMBER_INT) ?? 0;
-        $quantity = max(0, (int) $quantity);
-
-        $tax = filter_input(INPUT_POST, 'tax', FILTER_SANITIZE_NUMBER_INT) ?? 0;
-        $tax = max(0, (int) $tax);
-
-        $discount = filter_input(INPUT_POST, 'discount', FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION) ?? 0.0;
-        $discount = (float) $discount;
-
-        $totalAmount = filter_input(INPUT_POST, 'total_amount', FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION) ?? 0.0;
-        $totalAmount = (float) $totalAmount;
-
-        $setReminder = isset($_POST['setReminder']) ? (int) $_POST['setReminder'] : 0;
-
+        $invoiceNumber = htmlspecialchars($_POST['invoice_number'] ?? '', ENT_QUOTES, 'UTF-8');
+        $paymentMethod = htmlspecialchars($_POST['payment_method'] ?? '', ENT_QUOTES, 'UTF-8');
+        $transactionId = htmlspecialchars($_POST['transaction_id'] ?? '', ENT_QUOTES, 'UTF-8');
+        $status = htmlspecialchars($_POST['status'] ?? '', ENT_QUOTES, 'UTF-8');
+        $dueDate = htmlspecialchars($_POST['due_date'] ?? '', ENT_QUOTES, 'UTF-8');
+        $customerName = htmlspecialchars($_POST['customerName'] ?? '', ENT_QUOTES, 'UTF-8');
+        $fromLocation = htmlspecialchars($_POST['fromLocation'] ?? '', ENT_QUOTES, 'UTF-8');
+        $toLocation = htmlspecialchars($_POST['toLocation'] ?? '', ENT_QUOTES, 'UTF-8');
+        $airlineName = htmlspecialchars($_POST['airlineName'] ?? '', ENT_QUOTES, 'UTF-8');
         $travelDate = htmlspecialchars($_POST["travel_date"], ENT_QUOTES, 'UTF-8');
-
-
-
+        $customerAddress = htmlspecialchars($_POST["customerAddress"], ENT_QUOTES, 'UTF-8');
+        $description = htmlspecialchars($_POST['description'] ?? '', ENT_QUOTES, 'UTF-8');
+        $totalAmount = filter_input(INPUT_POST, 'total_amount', FILTER_VALIDATE_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
+        $createdBy = base64_decode($_SESSION['admin_id']);
 
         // Handle serviceName array
         $serviceIds = isset($_POST['serviceName']) && is_array($_POST['serviceName'])
@@ -195,20 +173,11 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['edit'])) {
             : [];
         $serviceIdsJson = json_encode($serviceIds); // Convert to JSON string, e.g., "[2, 3, 5]"
 
-        // Validate required fields
-        if (
-            empty($invoiceNumber) || empty($paymentMethod) || empty($transactionId) || empty($status) ||
-            empty($dueDate) || empty($customerId) || empty($amount) || empty($quantity) ||
-            empty($totalAmount) || empty($serviceIds)
-        ) {
-            throw new Exception('All required fields must be filled, and at least one service must be selected.');
-        }
 
         // Validate payment_method and status enums
         $validPaymentMethods = ['CREDIT_CARD', 'DEBIT_CARD', 'CASH', 'NET_BANKING', 'PAYPAL', 'OTHER'];
-
         $validStatuses = ['PAID', 'PENDING', 'CANCELLED', 'REFUNDED'];
-
+        $validTypes = ['FIXED', 'RECURSIVE'];
 
         if (!in_array($paymentMethod, $validPaymentMethods)) {
             throw new Exception('Invalid payment method.');
@@ -217,27 +186,38 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['edit'])) {
             throw new Exception('Invalid status.');
         }
 
+        $passengerDetails = [];
+        foreach ($_POST['passenger_type'] as $index => $type) {
+            $passengerDetails[] = [
+                'type' => $type,
+                'quantity' => $_POST['quantity'][$index],
+                'amount' => $_POST['amount'][$index],
+            ];
+        }
 
-        // Prepare and execute the SQL UPDATE query
+        // Convert to JSON for DB insertion
+        $passengerDetailsJson = json_encode($passengerDetails);
+
+
+        // Prepare and execute the SQL UPDATE query 
         $sql = "UPDATE `invoice` SET
-        `invoice_number` = ?, 
-        `payment_method` = ?, 
-        `transaction_id` = ?, 
-        `status` = ?, 
-        `amount` = ?, 
-        `quantity` = ?, 
-        `tax` = ?, 
-        `discount` = ?, 
-        `total_amount` = ?, 
-        `due_date` = ?, 
-        `from_date` = ?, 
-        `to_date` = ?, 
-        `customer_id` = ?, 
-        `service_id` = ?, 
-        `description` = ?,
-        `reminder_enabled` = ?,
-        `invoice_title` = ?,
-        `travel_date` = ?
+            `invoice_number` = ?, 
+            `invoice_title` = ?, 
+            `payment_method` = ?, 
+            `transaction_id` = ?, 
+            `status` = ?, 
+            `airline_name` = ?, 
+            `travel_date` = ?, 
+            `due_date` = ?, 
+            `customer_name` = ?, 
+            `service_id` = ?, 
+            `from_location` = ?, 
+            `to_location` = ?, 
+            `description` = ?, 
+            `total_amount` = ?, 
+            `created_by` = ?, 
+            `passenger_details` = ?,
+            `customer_address` = ?
         WHERE `invoice_id` = ?";
 
         $stmt = $db->prepare($sql);
@@ -246,33 +226,35 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['edit'])) {
         }
 
         $stmt->bind_param(
-            'ssssdiiddsssississi',
+            'sssssssssssssdissi',
             $invoiceNumber,
+            $invoiceTitle,
             $paymentMethod,
             $transactionId,
             $status,
-            $amount,
-            $quantity,
-            $tax,
-            $discount,
-            $totalAmount,
-            $dueDate,
-            $fromDate,
-            $toDate,
-            $customerId,
-            $serviceIdsJson,
-            $description,
-            $setReminder,
-            $invoiceTitle,
+            $airlineName,
             $travelDate,
+            $dueDate,
+            $customerName,
+            $serviceIdsJson,
+            $fromLocation,
+            $toLocation,
+            $description,
+            $totalAmount,
+            $createdBy,
+            $passengerDetailsJson,
+            $customerAddress,
             $invoiceId
         );
+
         // Execute the query
         if (!$stmt->execute()) {
             throw new Exception('Execute failed: ' . $stmt->error);
         }
 
         $stmt->close();
+
+
 
         $_SESSION['success'] = 'Invoice Updated successfully!';
         header('Location: edit-invoice.php?id=' . base64_encode($invoiceId));
@@ -527,32 +509,23 @@ ob_end_flush();
                                                     </div>
                                                 </div>
 
-                                                <div class="col-lg-4 col-sm-6 col-12">
+                                                <div class="col-lg-4 col-sm-6 col-12 due-date">
                                                     <div class="mb-3 add-product">
                                                         <label class="form-label">Due Date:</label>
                                                         <input type="date"
                                                             value="<?php echo $invoices[0]['due_date'] ?>" id="due_date"
                                                             name="due_date" placeholder="Enter Due Date"
-                                                            class="form-control" autocomplete="off" required>
+                                                            class="form-control" autocomplete="off">
                                                     </div>
                                                 </div>
+
                                                 <div class="col-lg-4 col-sm-6 col-12">
                                                     <div class="mb-3 add-product">
-                                                        <label class="form-label">Customer</label>
-
-                                                        <select class="select2 form-control" id="" name="customerName"
-                                                            required>
-                                                            <option>Select Customer</option>
-                                                            <?php foreach ($customers->fetch_all(MYSQLI_ASSOC) as $customer) { ?>
-                                                                <option value="<?php echo $customer['customer_id']; ?>"
-                                                                    <?php if ($invoices[0]['customer_id'] == $customer['customer_id'])
-                                                                        echo 'selected' ?>>
-                                                                    <?php echo $customer['customer_name'] . " | " . $customer['customer_phone'] . " | " . $customer['customer_email']; ?>
-                                                                </option>
-                                                            <?php } ?>
-                                                        </select>
-
-
+                                                        <label class="form-label">Customer <span> *</span></label>
+                                                        <input class="form-control"
+                                                            value="<?php echo $invoices[0]['customer_name'] ?>"
+                                                            type="text" name="customerName"
+                                                            placeholder="Enter Customer Name" required>
                                                     </div>
                                                 </div>
                                                 <div class="col-lg-4 col-sm-6 col-12">
@@ -575,147 +548,181 @@ ob_end_flush();
 
                                                 <div class="col-lg-4 col-sm-6 col-12">
                                                     <div class="mb-3 add-product">
-                                                        <label class="form-label">Travel Date: <span> *</span></label>
-                                                        <input type="date" id="travel_date"
-                                                            value="<?php echo $invoices[0]['travel_date'] ?>"
-                                                            name="travel_date" placeholder="Enter Due Date"
-                                                            class="form-control" autocomplete="off" required>
+                                                        <label class="form-label">From <span> *</span></label>
+
+                                                        <select class="select2 form-select" name="fromLocation">
+                                                            <option value="">Select</option>
+                                                            <?php foreach ($airports['data'] as $airport) { ?>
+                                                                <option value="<?php echo $airport['airport']; ?>" <?php if ($invoices['0']['from_location'] == $airport['airport'])
+                                                                       echo 'selected'; ?>>
+                                                                    <?php echo $airport['airport']; ?>
+                                                                </option>
+                                                            <?php } ?>
+                                                        </select>
+
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-4 col-sm-6 col-12">
+                                                    <div class="mb-3 add-product">
+                                                        <label class="form-label">To <span> *</span></label>
+
+                                                        <select class="select2 form-select" name="toLocation">
+                                                            <option value="">Select</option>
+                                                            <?php foreach ($airports['data'] as $airport) { ?>
+                                                                <option value="<?php echo $airport['airport']; ?>" <?php if ($invoices['0']['to_location'] == $airport['airport'])
+                                                                       echo 'selected'; ?>>
+                                                                    <?php echo $airport['airport']; ?>
+                                                                </option>
+                                                            <?php } ?>
+                                                        </select>
+
                                                     </div>
                                                 </div>
 
                                                 <div class="col-lg-4 col-sm-6 col-12">
                                                     <div class="mb-3 add-product">
-                                                        <label class="form-label">Reminder</label>
-
-                                                        <select class="form-select" name="setReminder" required>
-                                                            <option value="1" <?php if ($invoices['0']['reminder_enabled'] == "1")
-                                                                echo 'selected' ?>>Auto Mail</option>
-                                                                <option value="0" <?php if ($invoices['0']['reminder_enabled'] == "0")
-                                                                echo 'selected' ?>>Manual </option>
-                                                            </select>
-                                                        </div>
-
+                                                        <label class="form-label">Airline <span> *</span></label>
+                                                        <input class="form-control" type="text"
+                                                            value="<?= $invoices[0]['airline_name'] ?>"
+                                                            name="airlineName" placeholder="Enter Airline Name"
+                                                            required>
                                                     </div>
+                                                </div>
 
+                                                <div class="col-lg-4 col-sm-6 col-12">
+                                                    <div class="mb-3 add-product">
+                                                        <label class="form-label">Travel Date: <span> *</span></label>
+                                                        <input type="date" id="travel_date" name="travel_date"
+                                                            value="<?= $invoices[0]['travel_date'] ?>"
+                                                            placeholder="Enter Due Date" class="form-control"
+                                                            autocomplete="off" required>
+                                                    </div>
+                                                </div>
 
+                                                <div class="col-lg-4 col-sm-6 col-12">
+                                                    <div class="mb-3 add-product">
+                                                        <label class="form-label">Customer Address</label>
+                                                        <input class="form-control" type="text" name="customerAddress"
+                                                            value="<?= $invoices[0]['customer_address'] ?>"
+                                                            placeholder="Enter Address">
+                                                    </div>
+                                                </div>
 
-                                                    <div class="col-lg-12">
-                                                        <div class="input-blocks summer-description-box transfer mb-3">
-                                                            <label>Description</label>
-                                                            <textarea class="form-control h-100" name="description"
-                                                                rows="5"><?php echo htmlspecialchars($invoices[0]['description']); ?></textarea>
+                                                <div class="col-lg-12">
+                                                    <div class="input-blocks summer-description-box transfer mb-3">
+                                                        <label>Description</label>
+                                                        <textarea class="form-control h-100" name="description"
+                                                            rows="5"><?php echo htmlspecialchars($invoices[0]['description']); ?></textarea>
                                                         <p class="mt-1">Maximum 60 Characters</p>
                                                     </div>
-
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="accordion-card-one accordion" id="accordionExample2">
-                                <div class="accordion-item">
-                                    <div class="accordion-header" id="headingTwo">
-                                        <div class="accordion-button" data-bs-toggle="collapse"
-                                            data-bs-target="#collapseTwo" aria-controls="collapseTwo">
-                                            <div class="text-editor add-list">
-                                                <div class="addproduct-icon list icon">
-                                                    <h5>
-                                                        <i data-feather="life-buoy" class="add-info"></i><span>Amount
-                                                            Details</span>
-                                                    </h5>
-                                                    <a href="javascript:void(0);"><i data-feather="chevron-down"
-                                                            class="chevron-down-add"></i></a>
+                                <div class="accordion-card-one accordion" id="accordionExample2">
+                                    <div class="accordion-item">
+                                        <div class="accordion-header" id="headingTwo">
+                                            <div class="accordion-button" data-bs-toggle="collapse"
+                                                data-bs-target="#collapseTwo" aria-controls="collapseTwo">
+                                                <div class="text-editor add-list">
+                                                    <div class="addproduct-icon list icon">
+                                                        <h5>
+                                                            <i data-feather="life-buoy"
+                                                                class="add-info"></i><span>Amount
+                                                                Details</span>
+                                                        </h5>
+                                                        <a href="javascript:void(0);"><i data-feather="chevron-down"
+                                                                class="chevron-down-add"></i></a>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div id="collapseTwo" class="accordion-collapse collapse show"
-                                        aria-labelledby="headingTwo" data-bs-parent="#accordionExample2">
-                                        <div class="accordion-body">
+                                        <div id="collapseTwo" class="accordion-collapse collapse show"
+                                            aria-labelledby="headingTwo" data-bs-parent="#accordionExample2">
+                                            <div class="accordion-body">
 
-                                            <div class="tab-content" id="pills-tabContent">
-                                                <div class="tab-pane fade show active" id="pills-home" role="tabpanel"
-                                                    aria-labelledby="pills-home-tab">
-                                                    <div class="row">
-                                                        <div class="col-lg-3 col-sm-6 col-12">
-                                                            <div class="mb-3 add-product">
-                                                                <label class="form-label">Amount</label>
-                                                                <input type="number"
-                                                                    value='<?php echo htmlspecialchars($invoices[0]['amount']); ?>'
-                                                                    id="invoiceAmount" name="amount"
-                                                                    class="form-control" placeholder="Enter Price"
-                                                                    required>
+                                                <div class="tab-content" id="pills-tabContent">
+                                                    <div class="tab-pane fade show active" id="pills-home"
+                                                        role="tabpanel" aria-labelledby="pills-home-tab">
+                                                        <div class="row">
+
+                                                            <div class="col-12">
+                                                                <label class="form-label">Passengers
+                                                                    <span>*</span></label>
+                                                                <div id="passengerContainer">
+                                                                    <?php foreach ($passengers as $passenger): ?>
+                                                                        <div
+                                                                            class="row passenger-row mb-2 d-flex align-items-center">
+                                                                            <div class="col-3">
+                                                                                <select class="form-control"
+                                                                                    name="passenger_type[]" required>
+                                                                                    <option value="">Select Type</option>
+                                                                                    <option value="ADULT" <?php echo $passenger['type'] === 'ADULT' ? 'selected' : ''; ?>>Adult (12
+                                                                                        years+)</option>
+                                                                                    <option value="CHILDREN" <?php echo $passenger['type'] === 'CHILDREN' ? 'selected' : ''; ?>>Children (2-12
+                                                                                        years)</option>
+                                                                                    <option value="INFANT" <?php echo $passenger['type'] === 'INFANT' ? 'selected' : ''; ?>>Infant (Below 2
+                                                                                        years)</option>
+                                                                                </select>
+                                                                            </div>
+                                                                            <div class="col-3">
+                                                                                <input type="number" class="form-control"
+                                                                                    name="quantity[]" placeholder="Quantity"
+                                                                                    min="1"
+                                                                                    value="<?php echo htmlspecialchars($passenger['quantity']); ?>"
+                                                                                    required>
+                                                                            </div>
+                                                                            <div class="col-4">
+                                                                                <input type="number" class="form-control"
+                                                                                    name="amount[]" placeholder="Amount"
+                                                                                    step="0.01" min="1"
+                                                                                    value="<?php echo htmlspecialchars($passenger['amount']); ?>"
+                                                                                    required>
+                                                                            </div>
+                                                                            <div class="col-2">
+                                                                                <button type="button"
+                                                                                    class="btn btn-danger btn-remove">–</button>
+                                                                            </div>
+                                                                        </div>
+                                                                    <?php endforeach; ?>
+                                                                </div>
+                                                                <button type="button" id="addPassenger"
+                                                                    class="btn btn-primary mt-1 mb-1">+ Add
+                                                                    Passenger</button>
                                                             </div>
-                                                        </div>
-                                                        <div class="col-lg-3 col-sm-6 col-12">
-                                                            <div class="mb-3 add-product">
-                                                                <label class="form-label">Quantity</label>
-                                                                <input type="number" id="quantity" name="quantity"
-                                                                    class="form-control" placeholder="Enter Quantity"
-                                                                    value="1" min="1" step="1" style="appearance: auto;"
-                                                                    required>
+
+                                                            <div class="col-lg-3 col-sm-6 col-12 m-2">
+                                                                <div class="mb-3 add-product">
+                                                                    <label class="form-label">Total Amount</label>
+                                                                    <input type="text" id="total_amount"
+                                                                        name="total_amount" class="form-control"
+                                                                        value='<?php echo htmlspecialchars($invoices[0]['total_amount']); ?>'
+                                                                        placeholder="Enter Total Amount" readonly>
+                                                                </div>
                                                             </div>
-                                                        </div>
-                                                        <div class="col-lg-3 col-sm-6 col-12">
-                                                            <div class="mb-3 add-product">
-                                                                <label class="form-label">Tax (%)</label>
-                                                                <select id="tax" name="tax" class="form-control"
-                                                                    required>
-                                                                    <option>Select Tax Rate
-                                                                    </option>
-                                                                    <?php foreach ($taxOptions->fetch_all(MYSQLI_ASSOC) as $tax) { ?>
-                                                                        <option
-                                                                            data-value="<?= htmlspecialchars($tax['tax_rate']) ?>"
-                                                                            value="<?= htmlspecialchars($tax['tax_id']) ?>"
-                                                                            <?php if ($invoices[0]['tax'] == $tax['tax_id'])
-                                                                                echo 'selected' ?>>
-                                                                            <?= htmlspecialchars($tax['tax_name'] . "(" . $tax['tax_rate']) . ")" ?>
-                                                                        </option>
-                                                                    <?php } ?>
-                                                                </select>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-lg-3 col-sm-6 col-12">
-                                                            <div class="mb-3 add-product">
-                                                                <label class="form-label">Discount (%)</label>
-                                                                <input type="number" id="discount" name="discount"
-                                                                    class="form-control"
-                                                                    value='<?php echo $invoices[0]['discount']; ?>'
-                                                                    placeholder="Enter Discount" required>
-                                                            </div>
+
                                                         </div>
 
-                                                        <div class="col-lg-3 col-sm-6 col-12">
-                                                            <div class="mb-3 add-product">
-                                                                <label class="form-label">Total Amount</label>
-                                                                <input type="text" id="total_amount" name="total_amount"
-                                                                    class="form-control"
-                                                                    value='<?php echo htmlspecialchars($invoices[0]['total_amount']); ?>'
-                                                                    placeholder="Enter Total Amount" readonly>
-                                                            </div>
-                                                        </div>
                                                     </div>
 
                                                 </div>
-
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="col-lg-12">
-                        <div class="btn-addproduct mb-4">
-                            <button type="button" class="btn btn-cancel me-2">
-                                Cancel
-                            </button>
-                            <button type="submit" name="edit" class="btn btn-submit">
-                                Save
-                            </button>
+                        <div class="col-lg-12">
+                            <div class="btn-addproduct mb-4">
+                                <button type="button" class="btn btn-cancel me-2">
+                                    Cancel
+                                </button>
+                                <button type="submit" name="edit" class="btn btn-submit">
+                                    Save
+                                </button>
+                            </div>
                         </div>
-                    </div>
                 </form>
             </div>
 
@@ -801,97 +808,67 @@ ob_end_flush();
             });
 
 
-            $(document).on('input', '#discount', function (event) {
-                event.preventDefault();
-
-                function calculateTotal() {
-                    const amount = parseFloat($('#invoiceAmount').val()) || 0;
-                    const quantity = parseInt($('#quantity').val()) || 1;
-                    const taxRate = parseFloat($('#tax option:selected').attr('data-value')) / 100 || 0;
-                    const discount = parseFloat($('#discount').val()) / 100 || 0;
-
-                    // Calculate subtotal (amount × quantity)
-                    const subtotal = amount * quantity;
-                    // Apply tax (subtotal × tax%)
-                    const taxAmount = subtotal * taxRate;
-                    // Apply discount (subtotal × discount%)
-                    const discountAmount = subtotal * discount;
-                    // Final total (subtotal + tax - discount)
-                    const total = subtotal + taxAmount - discountAmount;
-
-                    return total.toFixed(2); // Return with 2 decimal places
-                }
-
-                // Update total amount
-                $('#total_amount').val(calculateTotal());
-            });
-            $(document).on('input', '#quantity', function (event) {
-                event.preventDefault();
-
-                function calculateTotal() {
-                    const amount = parseFloat($('#invoiceAmount').val()) || 0;
-                    const quantity = parseInt($('#quantity').val()) || 1;
-                    const taxRate = parseFloat($('#tax option:selected').attr('data-value')) / 100 || 0;
-                    const discount = parseFloat($('#discount').val()) / 100 || 0;
-
-                    // Calculate subtotal (amount × quantity)
-                    const subtotal = amount * quantity;
-                    // Apply tax (subtotal × tax%)
-                    const taxAmount = subtotal * taxRate;
-                    // Apply discount (subtotal × discount%)
-                    const discountAmount = subtotal * discount;
-                    // Final total (subtotal + tax - discount)
-                    const total = subtotal + taxAmount - discountAmount;
-
-                    return total.toFixed(2); // Return with 2 decimal places
-                }
-
-                // Update total amount
-                $('#total_amount').val(calculateTotal());
-            });
-
-            $(document).on('input', '#tax', function (event) {
-                event.preventDefault();
-
-                function calculateTotal() {
-                    const amount = parseFloat($('#invoiceAmount').val()) || 0;
-                    const quantity = parseInt($('#quantity').val()) || 1;
-                    const taxRate = parseFloat($('#tax option:selected').attr('data-value')) / 100 || 0;
-                    const discount = parseFloat($('#discount').val()) / 100 || 0;
-
-                    // Calculate subtotal (amount × quantity)
-                    const subtotal = amount * quantity;
-                    // Apply tax (subtotal × tax%)
-                    const taxAmount = subtotal * taxRate;
-                    // Apply discount (subtotal × discount%)
-                    const discountAmount = subtotal * discount;
-                    // Final total (subtotal + tax - discount)
-                    const total = subtotal + taxAmount - discountAmount;
-
-                    return total.toFixed(2); // Return with 2 decimal places
-                }
-
-                // Update total amount
-                $('#total_amount').val(calculateTotal());
-            });
-
-
-
-            $(document).on('change', "#invoice_type", function (e) {
+            $(document).on('change', "#payment_status", function (e) {
                 const selectedType = $(this).val();
 
-                if (selectedType === 'FIXED') {
-                    $('.from-date').addClass('apexcharts-toolbar');
-                    $('.to-date').addClass('apexcharts-toolbar');
-                    $('.repeat-cycle').addClass('apexcharts-toolbar');
-                    $('.create-before').addClass('apexcharts-toolbar');
-                } else if (selectedType === 'RECURSIVE') {
-                    $('.from-date').removeClass('apexcharts-toolbar');
-                    $('.to-date').removeClass('apexcharts-toolbar');
-                    $('.repeat-cycle').removeClass('apexcharts-toolbar');
-                    $('.create-before').removeClass('apexcharts-toolbar');
+                if (selectedType === 'PAID') {
+                    $('.due-date').addClass('apexcharts-toolbar');
+                } else {
+                    $('.due-date').removeClass('apexcharts-toolbar');
+
                 }
-            })
+            });
+            const selectedType = $("#payment_status").val();
+
+            if (selectedType === 'PAID') {
+                $('.due-date').addClass('apexcharts-toolbar');
+            } else {
+                $('.due-date').removeClass('apexcharts-toolbar');
+
+            }
+
+
+
+            $(document).on('click', '#addPassenger', function () {
+                const newRow = `
+        <div class="row passenger-row mb-2 d-flex align-items-center">
+            <div class="col-3">
+               <select class="form-control"
+                   name="passenger_type[]" required>
+                   <option value="">Select Type</option>
+                   <option value="ADULT">Adult (12 years+)
+                   </option>
+                   <option value="CHILDREN">Children (2-12
+                       years)</option>
+                   <option value="INFANT">Infant (Below 2
+                       years)</option>
+               </select>
+           </div>
+           <div class="col-3">
+               <input type="number" class="form-control"
+                   name="quantity[]" placeholder="Quantity"
+                   min="1" required>
+           </div>
+           <div class="col-4">
+               <input type="number" class="form-control"
+                   name="amount[]" placeholder="Amount" step="0.01" min="1"
+                   required>
+           </div>
+           <div class="col-2">
+               <button type="button"
+                   class="btn btn-danger btn-remove">–</button>
+           </div>
+        </div>
+    `;
+                $('#passengerContainer').append(newRow);
+            });
+
+            // Use event delegation for dynamically created elements
+            $('#passengerContainer').on('click', '.btn-remove', function () {
+                $(this).closest('.passenger-row').remove();
+            });
+
+
         });
     </script>
 

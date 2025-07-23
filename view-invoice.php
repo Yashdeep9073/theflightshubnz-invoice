@@ -17,7 +17,6 @@ if (!isset($_GET['id'])) {
 }
 
 try {
-
     function numberToWords($number)
     {
         $ones = array(
@@ -134,15 +133,8 @@ try {
 
     // Fetch invoice data
     $stmtFetch = $db->prepare('
-        SELECT invoice.*, tax.tax_rate, invoice.status AS paymentStatus,
-               customer.customer_name, customer.customer_address, customer.customer_phone, customer.customer_email,customer.gst_number,
-               COALESCE(customer.ship_name, customer.customer_name) AS ship_name,
-               COALESCE(customer.ship_address, customer.customer_address) AS ship_address,
-               COALESCE(customer.ship_phone, customer.customer_phone) AS ship_phone,
-               COALESCE(customer.ship_email, customer.customer_email) AS ship_email
+        SELECT invoice.*,  invoice.status AS paymentStatus
         FROM invoice 
-        INNER JOIN customer ON customer.customer_id = invoice.customer_id
-        INNER JOIN tax ON tax.tax_id = invoice.tax
         WHERE invoice_id = ?
     ');
     $stmtFetch->bind_param('i', $invoiceId);
@@ -190,11 +182,9 @@ try {
     $localizationSettings = $stmtFetchLocalizationSettings->get_result()->fetch_array(MYSQLI_ASSOC);
     $currencySymbol = $localizationSettings["currency_code"] ?? "$";
 
-
-
     // echo "<pre>";
     // print_r($invoice);
-    // print_r($currencySymbol);
+    // // print_r($currencySymbol);
     // exit;
 
     ob_start();
@@ -209,19 +199,6 @@ try {
         $serviceList .= '<li>' . htmlspecialchars($service['name']) . '</li>';
         $hsnCode = $service['sac_code'];
     }
-
-    // Given values
-    $pricePerService = $invoice['quantity'] > 0 ? $invoice['total_amount'] / $invoice['quantity'] : 0;
-    $taxRateStr = $invoice['tax_rate']; // "18%"
-
-    // Convert tax rate string to integer (remove % and convert to int)
-    $taxRate = intval(str_replace('%', '', $taxRateStr)); // Converts "18%" to 18
-
-    // Calculate price without tax
-    $priceWithoutTax = $taxRate > 0 ? $pricePerService / (1 + $taxRate / 100) : $pricePerService;
-
-    // Calculate tax amount per unit
-    $taxAmount = $pricePerService - $priceWithoutTax;
     ?>
 
     <?php
@@ -245,25 +222,40 @@ try {
 
 
     // Invoice Info (top-right, adjust based on template)
-    $pdf->SetFont('FuturaBT-Medium', '', 25); // Set font to normal Times
-    $pdf->SetTextColor(0, 0, 0); // Set text color to black
-    $pdf->SetXY(50, 45);
+    $pdf->SetFont('FuturaBT-Medium', '', 25); // Set font to FuturaBT-Medium
+    $pdf->SetXY(20, 45); // Set position for text
+
+    // Render "THE" in rgba(14, 139, 206, 1)
     $pdf->SetTextColor(14, 139, 206); // Set text color to rgba(14, 139, 206, 1)
-    $pdf->Cell(22, 10, 'THE FLIGHTSHUB PVT LTD.', 0, 0); // Render "Invoice No:" in black, normal font
-    $pdf->SetTextColor(0, 0, 0); // Reset text color to black
+    $pdf->Cell(18, 10, 'THE', 0, 0); // Increased width to 25 to prevent clipping
+
+    // Render "FLIGHTSHUB" in #f9522b (RGB: 249, 82, 43)
+    $pdf->SetTextColor(249, 82, 43); // Set text color to #f9522b
+    $pdf->Cell(35, 10, 'FLIGHTS', 0, 0); // Increased width to 65 for longer text
+
+    $pdf->SetTextColor(14, 139, 206); // Set text color to rgba(14, 139, 206, 1)
+    $pdf->Cell(20, 10, 'HUB', 0, 0); // Increased width to 65 for longer text
+
+    // Render "PVTLTD." in rgba(14, 139, 206, 1)
+    $pdf->SetTextColor(14, 139, 206); // Set text color to rgba(14, 139, 206, 1)
+    $pdf->Cell(50, 10, 'PVT LTD.', 0, 0); // Adjusted width to 50 for "PVTLTD."
+
+    // Reset text color to black for subsequent text
+    $pdf->SetTextColor(0, 0, 0);
+
     $pdf->SetFont('FuturaBT-Medium', '', 8); // Set font to bold
-    $pdf->SetXY(60, 50);
+    $pdf->SetXY(20, 50);
     $pdf->Cell(22, 10, $companySettings['address'] . " " . $companySettings['state'] . "," . $companySettings['country'], 0, 0); // Render "Invoice No:" in black, normal font
     $pdf->SetTextColor(0, 0, 0); // Reset text color to black
     $pdf->SetFont('FuturaBT-Medium', '', 12); // Reset font to normal
-    $pdf->SetXY(140, 25);
+    $pdf->SetXY(140, 43);
     $labelWidth = $pdf->GetStringWidth('NZBN No: ') + 1; // Calculate width of "Date:" with small padding
     $pdf->Cell($labelWidth, 10, 'NZBN No: ', 0, 0); // Render "Date:" in black, normal font with exact width
     $pdf->SetFont('FuturaBT-Medium', '', 12); // Set font to bold
     $pdf->Cell(0, 10, $companySettings['bz_number'], 0, 1); // Render date in bold blue, no gap
     $pdf->SetTextColor(0, 0, 0); // Reset text color to black
     $pdf->SetFont('FuturaBT-Medium', '', 12); // Reset font to normal
-    $pdf->SetXY(140, 30);
+    $pdf->SetXY(140, 49);
     $labelWidth = $pdf->GetStringWidth('GST No: ') + 1; // Calculate width of "Date:" with small padding
     $pdf->Cell($labelWidth, 10, 'GST No: ', 0, 0); // Render "Date:" in black, normal font with exact width
     $pdf->SetFont('FuturaBT-Medium', '', 12); // Set font to bold
@@ -362,16 +354,34 @@ try {
     $y = 135;
     $lineHeight = 7;
 
+    $passenger_details = json_decode($invoice['passenger_details'], true);
+    $total_quantity = 0; // Initialize as integer
+    $output = []; // Array to store type-quantity strings
+
+    foreach ($passenger_details as $passenger) {
+        $total_quantity += (int) $passenger['quantity']; // Sum quantities
+        $output[] = $passenger['type'] . '-' . $passenger['quantity']; // Build type-quantity string
+    }
+    $result = implode(', ', $output); // Join strings with comma and space
+
+
+
+
     foreach ($services as $item) {
+        $pdf->SetFont('FuturaBT-Medium', '', 8);
+        $pdf->SetXY(20, 130);
+        $pdf->Cell(0, $lineHeight, $invoice['airline_name'] . " " . $invoice['from_location'] . "-" . $invoice['to_location'], 0, 0);
+
         $pdf->SetFont('FuturaBT-Medium', '', 12);
         $pdf->SetXY(20, $y);
         $pdf->Cell(0, $lineHeight, $item['name'], 0, 0);
 
+        $pdf->SetFont('FuturaBT-Medium', '', 8);
         $pdf->SetXY(80, $y);
-        $pdf->Cell(0, $lineHeight, $invoice['quantity'], 0, 0);
+        $pdf->Cell(0, $lineHeight, $result, 0, 0);
 
         $pdf->SetXY(120, $y);
-        $pdf->Cell(0, $lineHeight, $invoice['amount'], 0, 0);
+        $pdf->Cell(0, $lineHeight, $invoice['total_amount'], 0, 0);
 
         $pdf->SetTextColor(14, 139, 206); // Set text color to rgba(14, 139, 206, 1)
         $pdf->SetXY(160, $y);
@@ -396,7 +406,7 @@ try {
     $pdf->Cell(0, 5, 'Sub Total:', 0, 0);
     $pdf->SetXY(160, $y);
     $pdf->SetTextColor(14, 139, 206); // Set text color to rgba(14, 139, 206, 1)
-    $pdf->Cell(0, 5, $currencySymbol . "." . $invoice['amount'], 0, 0);
+    $pdf->Cell(0, 5, $currencySymbol . "." . $invoice['total_amount'], 0, 0);
     $pdf->SetTextColor(0, 0, 0);
 
     $y += 7;

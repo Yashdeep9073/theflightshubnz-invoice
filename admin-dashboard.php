@@ -74,11 +74,8 @@ try {
 
     $stmtFetchInvoices = $db->prepare("SELECT 
         invoice.*,
-        customer.customer_id,
-        customer.customer_name,
         admin.admin_username
         FROM invoice 
-        INNER JOIN customer ON customer.customer_id = invoice.customer_id
         LEFT JOIN admin ON admin.admin_id = invoice.created_by 
         WHERE invoice.is_active = 1
         ORDER BY invoice.created_at DESC
@@ -386,7 +383,6 @@ ob_end_flush();
                                             </label>
                                         </th>
                                         <th>Invoice Number</th>
-                                        <th>Customer</th>
                                         <th>Due Date</th>
                                         <th>Created Date</th>
                                         <th class="no-sort">Amount</th>
@@ -403,9 +399,7 @@ ob_end_flush();
                                                 </label>
                                             </td>
                                             <td class="ref-number"><?php echo $invoice['invoice_number'] ?></td>
-                                            <td><a
-                                                    href="view-customer-report.php?id=<?= base64_encode($invoice['customer_id']) ?>"><?php echo $invoice['customer_name'] ?></a>
-                                            </td>
+                                            
                                             <td><?php $date = new DateTime($invoice['due_date']);
                                             echo $date->format(isset($localizationSettings["date_format"]) ? $localizationSettings["date_format"] : "d M Y") ?>
                                             </td>
