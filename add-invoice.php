@@ -65,6 +65,11 @@ try {
         $airports = json_decode($response, true);
     }
 
+    // get airlines data
+    $stmtFetchAirlines = $db->prepare("SELECT * FROM airlines WHERE is_active = 1");
+    $stmtFetchAirlines->execute();
+    $airlines = $stmtFetchAirlines->get_result()->fetch_all(MYSQLI_ASSOC);
+
 
 } catch (Exception $e) {
     $_SESSION['error'] = $e->getMessage();
@@ -149,6 +154,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['submit'])) {
         $airlineName = htmlspecialchars($_POST['airlineName'] ?? '', ENT_QUOTES, 'UTF-8');
         $travelDate = htmlspecialchars($_POST["travel_date"], ENT_QUOTES, 'UTF-8');
         $customerAddress = htmlspecialchars($_POST["customerAddress"], ENT_QUOTES, 'UTF-8');
+        $organizationName = htmlspecialchars($_POST['organizationName'] ?? '', ENT_QUOTES, 'UTF-8');
         $description = htmlspecialchars($_POST['description'] ?? '', ENT_QUOTES, 'UTF-8');
         $totalAmount = filter_input(INPUT_POST, 'total_amount', FILTER_VALIDATE_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
         $createdBy = base64_decode($_SESSION['admin_id']);
@@ -161,7 +167,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['submit'])) {
 
 
         // Validate payment_method and status enums
-        $validPaymentMethods = ['CREDIT_CARD', 'DEBIT_CARD', 'CASH', 'NET_BANKING', 'PAYPAL', 'OTHER'];
+        $validPaymentMethods = ['CREDIT_CARD', 'DEBIT_CARD', 'CASH', 'NET_BANKING', 'PAYPAL', 'OTHER','CASH_DEPOSIT'];  
         $validStatuses = ['PAID', 'PENDING', 'CANCELLED', 'REFUNDED'];
         $validTypes = ['FIXED', 'RECURSIVE'];
 
@@ -189,8 +195,8 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['submit'])) {
             invoice_number, invoice_title, payment_method, transaction_id, status, 
             airline_name, travel_date, due_date, customer_name, service_id, 
             from_location, to_location, description, total_amount, created_by, 
-            passenger_details,customer_address
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)";
+            passenger_details,customer_address,organization
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?,?)";
 
         $stmt = $db->prepare($sql);
         if ($stmt === false) {
@@ -200,7 +206,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['submit'])) {
         // $toLocation = 1;
         // Bind parameters
         $stmt->bind_param(
-            'sssssssssssssdiss',
+            'sssssssssssssdisss',
             $invoiceNumber,
             $invoiceTitle,
             $paymentMethod,
@@ -217,7 +223,8 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['submit'])) {
             $totalAmount,
             $createdBy,
             $passengerDetailsJson,
-            $customerAddress
+            $customerAddress,
+            $organizationName
         );
 
         // Execute the query
@@ -430,6 +437,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['submit'])) {
                                                             class="form-control" required>
                                                             <option value="">Select Method</option>
                                                             <option value="CASH">Cash</option>
+                                                            <option value="CASH_DEPOSIT">Cash Deposit</option>
                                                             <option value="CREDIT_CARD">Credit Card</option>
                                                             <option value="DEBIT_CARD">Debit Card</option>
                                                             <option value="NET_BANKING">Net Banking</option>
@@ -532,10 +540,19 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['submit'])) {
                                                 <div class="col-lg-4 col-sm-6 col-12">
                                                     <div class="mb-3 add-product">
                                                         <label class="form-label">Airline <span> *</span></label>
-                                                        <input class="form-control" type="text" name="airlineName"
-                                                            placeholder="Enter Airline Name" required>
+
+                                                        <select class="select2 form-select" name="airlineName">
+                                                            <option value="">Select</option>
+                                                            <?php foreach ($airlines as $airline) { ?>
+                                                                <option value="<?php echo $airline['airline_name']; ?>">
+                                                                    <?php echo $airline['airline_name']; ?>
+                                                                </option>
+                                                            <?php } ?>
+                                                        </select>
+
                                                     </div>
                                                 </div>
+
 
                                                 <div class="col-lg-4 col-sm-6 col-12">
                                                     <div class="mb-3 add-product">
@@ -553,10 +570,17 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['submit'])) {
                                                     </div>
                                                 </div>
 
+                                                <div class="col-lg-4 col-sm-6 col-12">
+                                                    <div class="mb-3 add-product">
+                                                        <label class="form-label">Company/Organization</label>
+                                                        <input class="form-control" type="text" name="organizationName"
+                                                            placeholder="Enter Organization Name">
+                                                    </div>
+                                                </div>
 
                                                 <div class="col-lg-12">
                                                     <div class="input-blocks summer-description-box transfer mb-3">
-                                                        <label>Description</label>
+                                                        <label>Note</label>
                                                         <textarea class="form-control h-100" name="description"
                                                             rows="5"></textarea>
                                                         <p class="mt-1">Maximum 60 Characters</p>

@@ -49,6 +49,33 @@ INSERT INTO `admin` VALUES (1,'Admin','admin@gmail.com','$2y$10$vItEhNfuzS1vkcSW
 UNLOCK TABLES;
 
 --
+-- Table structure for table `airlines`
+--
+
+DROP TABLE IF EXISTS `airlines`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `airlines` (
+  `airline_id` int NOT NULL AUTO_INCREMENT,
+  `airline_name` longtext,
+  `is_active` int DEFAULT '1',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`airline_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=57 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_520_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `airlines`
+--
+
+LOCK TABLES `airlines` WRITE;
+/*!40000 ALTER TABLE `airlines` DISABLE KEYS */;
+INSERT INTO `airlines` VALUES (1,'Air New Zealand',1,'2025-07-24 07:04:36','2025-07-24 07:04:36'),(2,'Fiji Airways',1,'2025-07-24 07:04:36','2025-07-24 07:04:36'),(3,'Thai Airways',1,'2025-07-24 07:04:36','2025-07-24 07:04:36'),(4,'Malaysian Airline',1,'2025-07-24 07:04:36','2025-07-24 07:04:36'),(5,'China Southern',1,'2025-07-24 07:04:36','2025-07-24 07:04:36'),(6,'Chian Eastern',1,'2025-07-24 07:04:36','2025-07-24 07:04:36'),(7,'Balik Airline',1,'2025-07-24 07:04:36','2025-07-24 07:04:36'),(8,'Srilankan Airlines',1,'2025-07-24 07:04:36','2025-07-24 07:04:36'),(9,'Etihad Airways',1,'2025-07-24 07:04:36','2025-07-24 07:04:36'),(10,'Vietnam Airlines',1,'2025-07-24 07:04:36','2025-07-24 07:04:36'),(11,'Virgin Atlantic',1,'2025-07-24 07:04:36','2025-07-24 07:04:36'),(12,'Air India',1,'2025-07-24 07:04:36','2025-07-24 07:04:36'),(13,'Emirates Airline',1,'2025-07-24 07:04:36','2025-07-24 07:04:36'),(14,'Singapore Airline',1,'2025-07-24 07:04:36','2025-07-24 07:04:36'),(15,'Qatar Airways',1,'2025-07-24 07:04:36','2025-07-24 07:04:36'),(16,'Jet Star',1,'2025-07-24 07:04:36','2025-07-24 07:04:36'),(17,'Qantas Airline',1,'2025-07-24 07:04:36','2025-07-24 07:04:36'),(18,'Cathay Pacific',1,'2025-07-24 07:04:36','2025-07-24 07:04:36'),(19,'Virgin Australia',1,'2025-07-24 07:04:36','2025-07-24 07:04:36'),(20,'Delta Airline',1,'2025-07-24 07:04:36','2025-07-24 07:04:36'),(21,'United Airline',1,'2025-07-24 07:04:36','2025-07-24 07:04:36'),(22,'British Airways',1,'2025-07-24 07:04:36','2025-07-24 07:04:36'),(23,'Royal Brunai',1,'2025-07-24 07:04:36','2025-07-24 07:04:36'),(24,'WestJet',1,'2025-07-24 07:04:36','2025-07-24 07:04:36'),(25,'American Airline',1,'2025-07-24 07:04:36','2025-07-24 07:04:36'),(26,'China Airline',1,'2025-07-24 07:04:36','2025-07-24 07:04:36'),(27,'Air China',1,'2025-07-24 07:04:36','2025-07-24 07:04:36'),(28,'ANA All Nippon Airways',1,'2025-07-24 07:04:36','2025-07-24 07:04:36'),(29,'Turkish Airlines',1,'2025-07-24 07:04:36','2025-07-24 07:04:36'),(30,'Korean Air',1,'2025-07-24 07:04:36','2025-07-24 07:04:36'),(31,'Air France',1,'2025-07-24 07:04:36','2025-07-24 07:04:36'),(32,'Japan Airlines',1,'2025-07-24 07:04:36','2025-07-24 07:04:36'),(33,'Hainan Airlines',1,'2025-07-24 07:04:36','2025-07-24 07:04:36'),(34,'LOT Polish Airlines',1,'2025-07-24 07:04:36','2025-07-24 07:04:36'),(35,'IndiGo Airlines',1,'2025-07-24 07:04:36','2025-07-24 07:04:36'),(36,'Spice Jet',1,'2025-07-24 07:04:36','2025-07-24 07:04:36'),(37,'AirAsia',1,'2025-07-24 07:04:36','2025-07-24 07:04:36'),(38,'Bangkok Airways',1,'2025-07-24 07:04:36','2025-07-24 07:04:36'),(39,'Egyptair',1,'2025-07-24 07:04:36','2025-07-24 07:04:36'),(40,'Ethiopian Airlines',1,'2025-07-24 07:04:36','2025-07-24 07:04:36'),(41,'EVA Air',1,'2025-07-24 07:04:36','2025-07-24 07:04:36'),(42,'Finnair',1,'2025-07-24 07:04:36','2025-07-24 07:04:36'),(43,'flydubai',1,'2025-07-24 07:04:36','2025-07-24 07:04:36'),(44,'Gulf Air',1,'2025-07-24 07:04:36','2025-07-24 07:04:36'),(45,'JetBlue',1,'2025-07-24 07:04:36','2025-07-24 07:04:36'),(46,'KLM Airline',1,'2025-07-24 07:04:36','2025-07-24 07:04:36'),(47,'LATAM Airways',1,'2025-07-24 07:04:36','2025-07-24 07:04:36'),(48,'Lufthansa Airline',1,'2025-07-24 07:04:36','2025-07-24 07:04:36'),(49,'Oman Air',1,'2025-07-24 07:04:36','2025-07-24 07:04:36'),(50,'Philippine Airlines',1,'2025-07-24 07:04:36','2025-07-24 07:04:36'),(51,'Ryanair',1,'2025-07-24 07:04:36','2025-07-24 07:04:36'),(52,'Scoot Airlines',1,'2025-07-24 07:04:36','2025-07-24 07:04:36'),(53,'South African Airways',1,'2025-07-24 07:04:36','2025-07-24 07:04:36');
+/*!40000 ALTER TABLE `airlines` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `cities`
 --
 
@@ -263,7 +290,7 @@ CREATE TABLE `invoice` (
   `invoice_id` int NOT NULL AUTO_INCREMENT,
   `invoice_number` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `invoice_title` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_520_ci DEFAULT NULL,
-  `payment_method` enum('CREDIT_CARD','DEBIT_CARD','CASH','NET_BANKING','PAYPAL','OTHER') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `payment_method` enum('CREDIT_CARD','DEBIT_CARD','CASH','CASH_DEPOSIT','NET_BANKING','PAYPAL','OTHER') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_520_ci NOT NULL,
   `transaction_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `status` enum('PAID','PENDING','CANCELLED','REFUNDED') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `airline_name` text COLLATE utf8mb4_general_ci,
@@ -277,6 +304,7 @@ CREATE TABLE `invoice` (
   `description` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `reminder_enabled` int NOT NULL DEFAULT '0',
   `reminder_count` int NOT NULL DEFAULT '0',
+  `organization` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `passenger_details` json DEFAULT NULL,
   `total_amount` decimal(10,2) NOT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
@@ -286,7 +314,7 @@ CREATE TABLE `invoice` (
   PRIMARY KEY (`invoice_id`),
   UNIQUE KEY `invoice_number_UNIQUE` (`invoice_number`),
   UNIQUE KEY `transaction_id_UNIQUE` (`transaction_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=225 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=226 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -295,7 +323,7 @@ CREATE TABLE `invoice` (
 
 LOCK TABLES `invoice` WRITE;
 /*!40000 ALTER TABLE `invoice` DISABLE KEYS */;
-INSERT INTO `invoice` VALUES (224,'INV-20250723-00012','Air-ticket invoice','CASH','TX-20250723-85454-R3JR','PAID','Air India','2025-07-24','','Alex','[2]','Goa','Cotonou','Phase-8, D-185,Mohali ','THIS IS TESTING',0,0,'[{\"type\": \"ADULT\", \"amount\": \"1132\", \"quantity\": \"2\"}, {\"type\": \"CHILDREN\", \"amount\": \"500\", \"quantity\": \"2\"}]',1632.00,'2025-07-23 11:55:07','2025-07-23 12:55:55',1,1);
+INSERT INTO `invoice` VALUES (224,'INV-20250723-00012','Air-ticket invoice','CASH','TX-20250723-85454-R3JR','PAID','Air India','2025-07-24','','Alex','[2]','Goa','Cotonou','Phase-8, D-185,Mohali ','THIS IS TESTING',0,0,'The Flights Hub PVT LTD.','[{\"type\": \"ADULT\", \"amount\": \"1132\", \"quantity\": \"2\"}, {\"type\": \"CHILDREN\", \"amount\": \"500\", \"quantity\": \"2\"}]',1632.00,'2025-07-23 11:55:07','2025-07-24 10:46:13',1,1),(225,'INV-20250724-00002','Air-ticket invoice','CASH_DEPOSIT','TX-20250724-35394-GP6E','PENDING','China Southern','2025-07-23','2025-07-18','Alex','[2]','Luxor','Cotonou','Phase-8, D-185,Mohali ','This is testing',0,0,'VIS PVT LTD','[{\"type\": \"ADULT\", \"amount\": \"1200\", \"quantity\": \"2\"}]',2000.00,'2025-07-24 08:04:07','2025-07-24 08:40:53',1,1);
 /*!40000 ALTER TABLE `invoice` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -314,7 +342,7 @@ CREATE TABLE `invoice_sequence` (
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `date` (`date`)
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_520_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_520_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -323,7 +351,7 @@ CREATE TABLE `invoice_sequence` (
 
 LOCK TABLES `invoice_sequence` WRITE;
 /*!40000 ALTER TABLE `invoice_sequence` DISABLE KEYS */;
-INSERT INTO `invoice_sequence` VALUES (3,'20250606',19,'2025-06-06 07:17:17','2025-06-06 08:47:30'),(4,'20250613',1,'2025-06-13 09:47:44','2025-06-13 09:47:44'),(5,'20250617',1,'2025-06-17 06:49:58','2025-06-17 06:49:58'),(6,'20250623',1,'2025-06-23 05:39:12','2025-06-23 05:39:12'),(7,'20250624',29,'2025-06-24 05:10:24','2025-06-24 11:30:58'),(8,'20250630',1,'2025-06-30 14:26:46','2025-06-30 14:26:46'),(9,'20250704',9,'2025-07-04 07:26:25','2025-07-04 13:46:40'),(10,'20250711',80,'2025-07-11 08:34:06','2025-07-11 12:52:29'),(11,'20250716',5,'2025-07-16 08:46:49','2025-07-16 09:46:10'),(12,'20250721',2,'2025-07-21 07:43:38','2025-07-21 07:43:38'),(13,'20250723',12,'2025-07-23 06:43:38','2025-07-23 11:53:42');
+INSERT INTO `invoice_sequence` VALUES (3,'20250606',19,'2025-06-06 07:17:17','2025-06-06 08:47:30'),(4,'20250613',1,'2025-06-13 09:47:44','2025-06-13 09:47:44'),(5,'20250617',1,'2025-06-17 06:49:58','2025-06-17 06:49:58'),(6,'20250623',1,'2025-06-23 05:39:12','2025-06-23 05:39:12'),(7,'20250624',29,'2025-06-24 05:10:24','2025-06-24 11:30:58'),(8,'20250630',1,'2025-06-30 14:26:46','2025-06-30 14:26:46'),(9,'20250704',9,'2025-07-04 07:26:25','2025-07-04 13:46:40'),(10,'20250711',80,'2025-07-11 08:34:06','2025-07-11 12:52:29'),(11,'20250716',5,'2025-07-16 08:46:49','2025-07-16 09:46:10'),(12,'20250721',2,'2025-07-21 07:43:38','2025-07-21 07:43:38'),(13,'20250723',12,'2025-07-23 06:43:38','2025-07-23 11:53:42'),(14,'20250724',2,'2025-07-24 07:52:57','2025-07-24 08:01:45');
 /*!40000 ALTER TABLE `invoice_sequence` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -355,7 +383,7 @@ CREATE TABLE `invoice_settings` (
 
 LOCK TABLES `invoice_settings` WRITE;
 /*!40000 ALTER TABLE `invoice_settings` DISABLE KEYS */;
-INSERT INTO `invoice_settings` VALUES (1,'INV','public/upload/invoice/images/img_687753ba8d88d4.95365622.svg','INVOICE NOTE:\r\n•	ALL THE PAYMENTS MUST BE PAID IN NZD BY THE DUE DATE UNLESS MENTIONED OR CREDIT LIMIT OFFERED.\r\n•	ANY PAYMENTS MADE BY BANK CREDIT CARD WILL ATTRACT 2.5% CC FEE.\r\nALL ACCOUNT TRANSFERS SHALL BE MADE INTO BELOW ACCOUNT DETAILS\r\nACCOUNT NAME: THE FLIGHTSHUB PVT LTD\r\nANZ :: 01-1842-0636659-00\r\nASB :: 12-3142-0494687-00\r\nBNZ :: 02-0528-0567582-000\r\n','INVOICE NOTE:\r\n•	ALL THE PAYMENTS MUST BE PAID IN NZD BY THE DUE DATE UNLESS MENTIONED OR CREDIT LIMIT OFFERED.\r\n•	ANY PAYMENTS MADE BY BANK CREDIT CARD WILL ATTRACT 2.5% CC FEE.\r\nALL ACCOUNT TRANSFERS SHALL BE MADE INTO BELOW ACCOUNT DETAILS\r\nACCOUNT NAME: THE FLIGHTSHUB PVT LTD\r\nANZ :: 01-1842-0636659-00\r\nASB :: 12-3142-0494687-00\r\nBNZ :: 02-0528-0567582-000\r\n','public/upload/invoice/images/img_6880b8dd985bb8.48174650.pdf','2025-06-16 07:36:32','2025-07-23 10:26:37',1,1);
+INSERT INTO `invoice_settings` VALUES (1,'INV','public/upload/invoice/images/img_687753ba8d88d4.95365622.svg','INVOICE NOTE:\r\n•	ALL THE PAYMENTS MUST BE PAID IN NZD BY THE DUE DATE UNLESS MENTIONED OR CREDIT LIMIT OFFERED.\r\n•	ANY PAYMENTS MADE BY BANK CREDIT CARD WILL ATTRACT 2.5% CC FEE.\r\nALL ACCOUNT TRANSFERS SHALL BE MADE INTO BELOW ACCOUNT DETAILS\r\nACCOUNT NAME: THE FLIGHTSHUB PVT LTD\r\nANZ :: 01-1842-0636659-00\r\nASB :: 12-3142-0494687-00\r\nBNZ :: 02-0528-0567582-000\r\n','INVOICE NOTE:\r\n•	ALL THE PAYMENTS MUST BE PAID IN NZD BY THE DUE DATE UNLESS MENTIONED OR CREDIT LIMIT OFFERED.\r\n•	ANY PAYMENTS MADE BY BANK CREDIT CARD WILL ATTRACT 2.5% CC FEE.\r\nALL ACCOUNT TRANSFERS SHALL BE MADE INTO BELOW ACCOUNT DETAILS\r\nACCOUNT NAME: THE FLIGHTSHUB PVT LTD\r\nANZ :: 01-1842-0636659-00\r\nASB :: 12-3142-0494687-00\r\nBNZ :: 02-0528-0567582-000\r\n','public/upload/invoice/images/img_688211b47f9263.29287253.pdf','2025-06-16 07:36:32','2025-07-24 10:57:56',1,1);
 /*!40000 ALTER TABLE `invoice_settings` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -487,7 +515,7 @@ CREATE TABLE `services` (
   `update_at` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
   `isActive` int DEFAULT '1',
   PRIMARY KEY (`service_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_520_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_520_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -496,7 +524,7 @@ CREATE TABLE `services` (
 
 LOCK TABLES `services` WRITE;
 /*!40000 ALTER TABLE `services` DISABLE KEYS */;
-INSERT INTO `services` VALUES (2,'Flight booking',998314,'2025-04-16 11:53:29','2025-07-23 11:49:50',1);
+INSERT INTO `services` VALUES (2,'Flight Booking',998314,'2025-04-16 11:53:29','2025-07-24 09:57:44',1),(11,'Travel Insurance',998314,'2025-07-24 06:39:33',NULL,1);
 /*!40000 ALTER TABLE `services` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -590,4 +618,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-07-23 18:28:09
+-- Dump completed on 2025-07-24 16:46:36

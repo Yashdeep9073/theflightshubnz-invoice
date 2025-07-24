@@ -272,10 +272,17 @@ try {
     // Invoice Info (top-right, adjust based on template)
     $pdf->SetFont('FuturaBT-Medium', '', 25); // Set font to normal Times
     $pdf->SetTextColor(0, 0, 0); // Set text color to black
-    $pdf->SetXY(65, 70);
+    $pdf->SetXY(65, 68);
     // $pdf->SetTextColor(249, 82, 43); // Set text color to rgba(249, 82, 43, 1)
     $pdf->Cell(22, 10, 'PAYMENT INVOICE', 0, 0); // Render "Invoice No:" in black, normal font
     // $pdf->SetTextColor(0, 0, 0); // Reset text color to black
+
+
+    // Line under headers
+    $pdf->SetLineWidth(0.1);
+    $pdf->SetDrawColor(158, 158, 158); // Set line color to rgba(158, 158, 158, 1)
+    $pdf->Line(20, 80, 190, 80);
+    $pdf->SetTextColor(0, 0, 0); // Reset text color to black
 
     // Invoice Info (top-right, adjust based on template)
     $pdf->SetFont('FuturaBT-Medium', '', 12); // Set font to normal Times
@@ -286,14 +293,24 @@ try {
     $pdf->SetTextColor(14, 139, 206); // Set text color to rgba(14, 139, 206, 1)
     $pdf->Cell(0, 10, $invoice['invoice_number'], 0, 0); // Render invoice number in bold blue
     $pdf->SetTextColor(0, 0, 0); // Reset text color to black
-    $pdf->SetFont('FuturaBT-Medium', '', 12); // Reset font to normal
+
+    // Determine which label and date to show based on status
+    if ($invoice['status'] == "PAID") {
+        $dateLabel = 'Date: ';
+        $displayDate = date('d M Y', strtotime($invoice['created_at']));
+    } else {
+        $dateLabel = 'Invoice Due: ';
+        $displayDate = date('d M Y', strtotime($invoice['due_date']));
+    }
+
     $pdf->SetXY(140, 85);
-    $labelWidth = $pdf->GetStringWidth('Invoice Due: ') + 1; // Calculate width of "Date:" with small padding
-    $pdf->Cell($labelWidth, 10, 'Invoice Due: ', 0, 0); // Render "Date:" in black, normal font with exact width
-    $pdf->SetFont('FuturaBT-Medium', '', 12); // Set font to bold
-    $pdf->Cell(0, 10, date('d M Y', strtotime($invoice['due_date'])), 0, 1); // Render date in bold blue, no gap
-    $pdf->SetTextColor(0, 0, 0); // Reset text color to black
-    $pdf->SetFont('FuturaBT-Medium', '', 12); // Reset font to normal
+    $labelWidth = $pdf->GetStringWidth($dateLabel) + 1;
+    $pdf->Cell($labelWidth, 10, $dateLabel, 0, 0);
+    $pdf->SetFont('FuturaBT-Medium', '', 12);
+    $pdf->SetTextColor(14, 139, 206);
+    $pdf->Cell(0, 10, $displayDate, 0, 1);
+    $pdf->SetTextColor(0, 0, 0);
+    $pdf->SetFont('FuturaBT-Medium', '', 12);
 
     $pdf->SetXY(20, 95);
     $pdf->Cell(22, 10, 'Bill To:', 0, 0); // Render "Invoice No:" in black, normal font
@@ -329,6 +346,10 @@ try {
     // Render the address with reduced line height
     $pdf->SetXY(20, 107);
     $pdf->MultiCell($width, 6, $formatted_address, 0, 'L'); // Reduced line height from 8 to 6 rgba(158, 158, 158, 1)
+
+    $organizationName = $invoice['organization'] ?? '';
+    $pdf->SetXY(20, 112);
+    $pdf->MultiCell($width, 6, $organizationName, 0, 'L'); // Reduced line height from 8 to 6 rgba(158, 158, 158, 1)
 
     // Table headers (just labels, not a formal table)
     $pdf->SetFont('FuturaBT-Medium', '', 10);
@@ -368,12 +389,15 @@ try {
 
 
     foreach ($services as $item) {
-        $pdf->SetFont('FuturaBT-Medium', '', 8);
+        $pdf->SetFont('FuturaBT-Medium', '', 10);
         $pdf->SetXY(20, 130);
-        $pdf->Cell(0, $lineHeight, $invoice['airline_name'] . " " . $invoice['from_location'] . "-" . $invoice['to_location'], 0, 0);
+        $pdf->Cell(0, $lineHeight, $invoice['airline_name'], 0, 1); // First line: Airline name
+        $pdf->SetXY(20, 133);
+        $pdf->Cell(0, $lineHeight, $invoice['from_location'] . "-" . $invoice['to_location'], 0, 0); // Second line: Route
 
-        $pdf->SetFont('FuturaBT-Medium', '', 12);
-        $pdf->SetXY(20, $y);
+
+        $pdf->SetFont('FuturaBT-Medium', '', 14);
+        $pdf->SetXY(20, 137);
         $pdf->Cell(0, $lineHeight, $item['name'], 0, 0);
 
         $pdf->SetFont('FuturaBT-Medium', '', 8);
@@ -435,23 +459,22 @@ try {
     $pdf->SetFont('FuturaBT-Medium', '', 12);
     $pdf->SetTextColor(0, 0, 0);
     $pdf->SetXY(20, 185);
-    $pdf->Cell(0, 10, 'INVOICE NOTE:', 0, 1);
+    $pdf->Cell(0, 10, 'Invoice Note:', 0, 1);
 
     // Start bullet points
     $yPos = 195;
-    $pdf->SetFont('FuturaBT-Medium', '', 8);
-
+    $pdf->SetFont('FuturaBT-Medium', '', 10);
     $pdf->SetXY(25, $yPos);
-    $pdf->Cell(0, 10, 'ALL THE PAYMENTS MUST BE PAID IN NZD BY THE DUE DATE UNLESS MENTIONED OR CREDIT LIMIT OFFERED.', 0, 1);
+    $pdf->Cell(0, 10, 'All the payments must be paid in NZD by the due date unless mentioned or credit limit offered.', 0, 1);
     $yPos += 5;
 
     $pdf->SetXY(25, $yPos);
-    $pdf->Cell(0, 10, 'ANY PAYMENTS MADE BY BANK CREDIT CARD WILL ATTRACT 2.5% CC FEE.', 0, 1);
+    $pdf->Cell(0, 10, 'Any payments made by bank credit card will attract 2.5% CC fee.', 0, 1);
     $yPos += 10;
 
     $pdf->SetFont('FuturaBT-Medium', '', 10);
     $pdf->SetXY(25, $yPos);
-    $pdf->Cell(0, 10, 'ALL ACCOUNT TRANSFERS SHALL BE MADE INTO BELOW ACCOUNT DETAILS', 0, 1);
+    $pdf->Cell(0, 10, 'All account transfers shall be made into below account details', 0, 1);
     $yPos += 7;
 
     $pdf->SetXY(25, $yPos);
@@ -472,9 +495,19 @@ try {
     $pdf->SetFont('FuturaBT-Medium', '', 12); // Reset font to normal
     $pdf->SetXY(70, 240);
     $pdf->SetTextColor(0, 0, 0);
-    $pdf->Cell(22, 10, 'THANK YOU FOR THE BUSINESS', 0, 0); // Render "Invoice No:" in black, normal font
+    $pdf->Cell(22, 10, 'Thank you for the business', 0, 0); // Render "Invoice No:" in black, normal font
     $pdf->SetXY(55, 245);
-    $pdf->Cell(22, 10, 'WE WISH YOU A SAFE AND PLEASANT JOURNEY', 0, 0); // Render "Invoice No:" in black, normal font
+    $pdf->Cell(22, 10, 'We wish you a safe and pleasant journey', 0, 0); // Render "Invoice No:" in black, normal font
+
+
+    // Add paid stamp if invoice is paid
+    if ($invoice['status'] == "PAID") {
+        $stampPath = 'public/assets/stamp/paid_stamp.png';
+        if (file_exists($stampPath)) {
+            $pdf->Image($stampPath, 162, 175, 30, 20);
+        }
+    }
+
 
     // Output final PDF
     $pdf->Output('D', ucfirst(str_replace(" ", "-", $invoice['invoice_title'])) . "-" . $invoice['invoice_number'] . '.pdf');

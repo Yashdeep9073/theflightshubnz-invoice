@@ -147,9 +147,7 @@ if (isset($_POST['invoiceNumber']) && $_SERVER['REQUEST_METHOD'] == "POST") {
 
 if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['edit'])) {
     try {
-        // echo "<pre>";
-        // print_r($_POST);
-        // exit();
+
 
         $invoiceTitle = htmlspecialchars($_POST["invoice_title"], ENT_QUOTES, 'UTF-8');
         $invoiceNumber = htmlspecialchars($_POST['invoice_number'] ?? '', ENT_QUOTES, 'UTF-8');
@@ -163,9 +161,12 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['edit'])) {
         $airlineName = htmlspecialchars($_POST['airlineName'] ?? '', ENT_QUOTES, 'UTF-8');
         $travelDate = htmlspecialchars($_POST["travel_date"], ENT_QUOTES, 'UTF-8');
         $customerAddress = htmlspecialchars($_POST["customerAddress"], ENT_QUOTES, 'UTF-8');
+        $organizationName = htmlspecialchars($_POST['organizationName'] ?? '', ENT_QUOTES, 'UTF-8');
         $description = htmlspecialchars($_POST['description'] ?? '', ENT_QUOTES, 'UTF-8');
         $totalAmount = filter_input(INPUT_POST, 'total_amount', FILTER_VALIDATE_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
         $createdBy = base64_decode($_SESSION['admin_id']);
+
+
 
         // Handle serviceName array
         $serviceIds = isset($_POST['serviceName']) && is_array($_POST['serviceName'])
@@ -175,7 +176,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['edit'])) {
 
 
         // Validate payment_method and status enums
-        $validPaymentMethods = ['CREDIT_CARD', 'DEBIT_CARD', 'CASH', 'NET_BANKING', 'PAYPAL', 'OTHER'];
+        $validPaymentMethods = ['CREDIT_CARD', 'DEBIT_CARD', 'CASH', 'NET_BANKING', 'PAYPAL', 'OTHER', 'CASH_DEPOSIT'];
         $validStatuses = ['PAID', 'PENDING', 'CANCELLED', 'REFUNDED'];
         $validTypes = ['FIXED', 'RECURSIVE'];
 
@@ -199,6 +200,10 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['edit'])) {
         $passengerDetailsJson = json_encode($passengerDetails);
 
 
+        // echo "<pre>";
+        // print_r($organizationName);
+        // exit();
+
         // Prepare and execute the SQL UPDATE query 
         $sql = "UPDATE `invoice` SET
             `invoice_number` = ?, 
@@ -217,7 +222,8 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['edit'])) {
             `total_amount` = ?, 
             `created_by` = ?, 
             `passenger_details` = ?,
-            `customer_address` = ?
+            `customer_address` = ?,
+            `organization` = ?
         WHERE `invoice_id` = ?";
 
         $stmt = $db->prepare($sql);
@@ -226,7 +232,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['edit'])) {
         }
 
         $stmt->bind_param(
-            'sssssssssssssdissi',
+            'sssssssssssssdisssi',
             $invoiceNumber,
             $invoiceTitle,
             $paymentMethod,
@@ -244,6 +250,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['edit'])) {
             $createdBy,
             $passengerDetailsJson,
             $customerAddress,
+            $organizationName,
             $invoiceId
         );
 
@@ -463,6 +470,8 @@ ob_end_flush();
                                                                 echo 'selected'; ?>>Cash</option>
                                                             <option value="CREDIT_CARD" <?php if ($invoices['0']['payment_method'] == 'CREDIT_CARD')
                                                                 echo 'selected'; ?>>Credit Card</option>
+                                                            <option value="CASH_DEPOSIT" <?php if ($invoices['0']['payment_method'] == 'CASH_DEPOSIT')
+                                                                echo 'selected'; ?>>Cash Deposit</option>
                                                             <option value="DEBIT_CARD" <?php if ($invoices['0']['payment_method'] == 'DEBIT_CARD')
                                                                 echo 'selected'; ?>>Debit Card</option>
                                                             <option value="NET_BANKING" <?php if ($invoices['0']['payment_method'] == 'NET_BANKING')
@@ -608,9 +617,19 @@ ob_end_flush();
                                                     </div>
                                                 </div>
 
+                                                <div class="col-lg-4 col-sm-6 col-12">
+                                                    <div class="mb-3 add-product">
+                                                        <label class="form-label">Company/Organization</label>
+                                                        <input class="form-control" type="text"
+                                                            value="<?= $invoices[0]['organization'] ?>"
+                                                            name="organizationName"
+                                                            placeholder="Enter Organization Name">
+                                                    </div>
+                                                </div>
+
                                                 <div class="col-lg-12">
                                                     <div class="input-blocks summer-description-box transfer mb-3">
-                                                        <label>Description</label>
+                                                        <label>Note</label>
                                                         <textarea class="form-control h-100" name="description"
                                                             rows="5"><?php echo htmlspecialchars($invoices[0]['description']); ?></textarea>
                                                         <p class="mt-1">Maximum 60 Characters</p>

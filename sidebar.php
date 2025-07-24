@@ -149,11 +149,11 @@ $isAdmin = strtolower($roleData['0']['role_name']) === 'admin';
                                     class="menu-arrow"></span></a>
                             <ul>
                                 <li>
+                                    <a href="airlines.php">Airlines</a>
+                                </li>
+                                <li>
                                     <a href="services.php">Services</a>
                                 </li>
-                                <!-- <li>
-                                    <a href="tax-details.php">Tax</a>
-                                </li> -->
                             </ul>
                         </li>
 
