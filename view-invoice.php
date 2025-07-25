@@ -509,7 +509,7 @@ try {
     if ($invoice['status'] == "PAID") {
         $stampPath = 'public/assets/stamp/paid_stamp.png';
         if (file_exists($stampPath)) {
-            $pdf->Image($stampPath, 160, 170, 35, 25);
+            $pdf->Image($stampPath, 155, 173, 35, 25);
         }
     }
 
@@ -518,23 +518,16 @@ try {
         $stampPath = 'public/assets/stamp/pending_stamp.png';
         if (file_exists($stampPath)) {
             // Medium stamp (30x30 pixels) - recommended
-            $pdf->Image($stampPath, 150, 170, 50, 20);
+            $pdf->Image($stampPath, 140, 170, 50, 20);
         }
     }
-    // Add paid stamp if invoice is REFUNDED
-    if ($invoice['status'] == "REFUNDED") {
-        $stampPath = 'public/assets/stamp/refund_stamp.png';
-        if (file_exists($stampPath)) {
-            // Medium stamp (30x30 pixels) - recommended
-            $pdf->Image($stampPath, 80, 110, 100, 100);
-        }
-    }
+    
     // Add paid stamp if invoice is paid
     if ($invoice['status'] == "CANCELLED") {
         $stampPath = 'public/assets/stamp/cancel_stamp.png';
         if (file_exists($stampPath)) {
             // Medium stamp (30x30 pixels) - recommended
-            $pdf->Image($stampPath, 80, 150, 80, 35);
+            $pdf->Image($stampPath, 60, 145, 80, 35);
         }
     }
 
