@@ -202,12 +202,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['invoiceIdForReminder']
     try {
 
         $invoiceId = intval($_POST['invoiceIdForReminder']);
-        $stmtFetchCustomer = $db->prepare("SELECT invoice.*, customer.*, tax.* FROM invoice 
-        INNER JOIN customer
-        ON customer.customer_id = invoice.customer_id
-        INNER JOIN tax
-        ON tax.tax_id = invoice.tax
-        WHERE invoice.is_active = 1 AND invoice.invoice_id = ? AND invoice.status = 'PENDING'");
+        $stmtFetchCustomer = $db->prepare("SELECT * FROM invoice 
+        WHERE is_active = 1 AND invoice_id = ? AND status IN ('PENDING', 'CANCELLED', 'REFUNDED')");
 
         $stmtFetchCustomer->bind_param('i', $invoiceId);
 
@@ -257,9 +253,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['invoiceIdForReminder']
         $customerEmail = htmlspecialchars($invoices['customer_email']);
         $invoiceNumber = htmlspecialchars($invoices['invoice_number']);
         $dueDate = htmlspecialchars($invoices['due_date']);
-        $amount = number_format((float) $invoices['amount'], 2);
-        $taxRate = htmlspecialchars($invoices['tax_rate']) ?: '0';
-        $discount = number_format((float) $invoices['discount'], 2);
         $totalAmount = number_format((float) $invoices['total_amount'], 2);
 
         // Initialize PHPMailer
@@ -409,9 +402,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['invoiceIdForReminder']
                                 <tr>
                                     <th>Invoice Number</th>
                                     <th>Due Date</th>
-                                    <th>Amount</th>
-                                    <th>Tax</th>
-                                    <th>Discount</th>
                                     <th>Total Amount</th>
                                 </tr>
                             </thead>
@@ -419,10 +409,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['invoiceIdForReminder']
                                 <tr>
                                     <td>{$invoiceNumber}</td>
                                     <td>{$dueDate}</td>
-                                    <td>Rs: {$amount}</td>
-                                    <td>{$taxRate}</td>
-                                    <td>Rs: {$discount}</td>
-                                    <td><strong>Rs: {$totalAmount}</strong></td>
+                                    <td><strong>{$localizationSettings["currency_symbol"]}: {$totalAmount}</strong></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -484,12 +471,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['invoiceIdForSend'])) {
     try {
 
         $invoiceId = intval($_POST['invoiceIdForSend']);
-        $stmtFetchCustomer = $db->prepare("SELECT invoice.*, customer.*, tax.* FROM invoice 
-        INNER JOIN customer
-        ON customer.customer_id = invoice.customer_id
-        INNER JOIN tax
-        ON tax.tax_id = invoice.tax
-        WHERE invoice.is_active = 1 AND invoice.invoice_id = ? AND invoice.status = 'PENDING'");
+        $stmtFetchCustomer = $db->prepare("SELECT * FROM invoice 
+        WHERE invoice.is_active = 1 AND invoice.invoice_id = ? AND status IN ('PAID')");
 
         $stmtFetchCustomer->bind_param('i', $invoiceId);
 
@@ -500,7 +483,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['invoiceIdForSend'])) {
             if (empty($invoices)) {
                 echo json_encode([
                     'status' => 404,
-                    'message' => "Invoice Status is Not Pending"
+                    'message' => "Invoice Status is Not Paid"
                 ]);
                 exit; // Stop further execution
             }
@@ -552,10 +535,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['invoiceIdForSend'])) {
         $customerName = htmlspecialchars($invoices['customer_name']);
         $customerEmail = htmlspecialchars($invoices['customer_email']);
         $invoiceNumber = htmlspecialchars($invoices['invoice_number']);
-        $dueDate = htmlspecialchars($invoices['due_date']);
-        $amount = number_format((float) $invoices['amount'], 2);
-        $taxRate = htmlspecialchars($invoices['tax_rate']) ?: '0';
-        $discount = number_format((float) $invoices['discount'], 2);
+        $travel_date = htmlspecialchars($invoices['travel_date']);
         $totalAmount = number_format((float) $invoices['total_amount'], 2);
 
         // Initialize PHPMailer
@@ -704,21 +684,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['invoiceIdForSend'])) {
                             <thead>
                                 <tr>
                                     <th>Invoice Number</th>
-                                    <th>Due Date</th>
-                                    <th>Amount</th>
-                                    <th>Tax</th>
-                                    <th>Discount</th>
+                                    <th>Travel Date</th>
                                     <th>Total Amount</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
                                     <td>{$invoiceNumber}</td>
-                                    <td>{$dueDate}</td>
-                                    <td>Rs: {$amount}</td>
-                                    <td>{$taxRate}</td>
-                                    <td>Rs: {$discount}</td>
-                                    <td><strong>Rs: {$totalAmount}</strong></td>
+                                    <td>{$travel_date}</td>
+                                    <td><strong>{$localizationSettings["currency_symbol"]}: {$totalAmount}</strong></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -1140,6 +1114,26 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['invoiceIds'])) {
                                                                 data-invoice-id="<?php echo $invoice['invoice_id'] ?>"
                                                                 class="dropdown-item deleteButton mb-0"><i
                                                                     data-feather="trash-2" class="info-img"></i>Delete </a>
+                                                        </li>
+                                                    <?php endif; ?>
+
+                                                    <?php if ($isAdmin || hasPermission('Send Reminder', $privileges, $roleData['0']['role_name'])): ?>
+
+                                                        <li>
+                                                            <a href="javascript:void(0);"
+                                                                data-invoice-id="<?php echo $invoice['invoice_id'] ?>"
+                                                                class="dropdown-item sendReminder mb-0"><i data-feather="bell"
+                                                                    class="info-img"></i>Send Reminder </a>
+                                                        </li>
+                                                    <?php endif; ?>
+
+                                                    <?php if ($isAdmin || hasPermission('Send Invoice', $privileges, $roleData['0']['role_name'])): ?>
+
+                                                        <li>
+                                                            <a href="javascript:void(0);"
+                                                                data-invoice-id="<?php echo $invoice['invoice_id'] ?>"
+                                                                class="dropdown-item sendInvoice mb-0"><i data-feather="send"
+                                                                    class="info-img"></i>Send Invoice </a>
                                                         </li>
                                                     <?php endif; ?>
                                                 </ul>

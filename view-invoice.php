@@ -345,11 +345,16 @@ try {
 
     // Render the address with reduced line height
     $pdf->SetXY(20, 107);
-    $pdf->MultiCell($width, 6, $formatted_address, 0, 'L'); // Reduced line height from 8 to 6 rgba(158, 158, 158, 1)
+    $pdf->MultiCell($width, 6, $formatted_address, 0, 'L'); // Reduced line height from 8 to 6
 
+    // Calculate the Y position for the organization name based on the address height
+    $address_lines = substr_count($formatted_address, "\n") + 1; // Number of lines in address
+    $y_position = 107 + ($address_lines * 6); // Adjust Y based on number of lines and line height
+
+    // Render the organization name
     $organizationName = $invoice['organization'] ?? '';
-    $pdf->SetXY(20, 112);
-    $pdf->MultiCell($width, 6, $organizationName, 0, 'L'); // Reduced line height from 8 to 6 rgba(158, 158, 158, 1)
+    $pdf->SetXY(20, $y_position);
+    $pdf->MultiCell($width, 6, $organizationName, 0, 'L'); // Reduced line height from 8 to 6
 
     // Table headers (just labels, not a formal table)
     $pdf->SetFont('FuturaBT-Medium', '', 10);
@@ -504,7 +509,32 @@ try {
     if ($invoice['status'] == "PAID") {
         $stampPath = 'public/assets/stamp/paid_stamp.png';
         if (file_exists($stampPath)) {
-            $pdf->Image($stampPath, 162, 175, 30, 20);
+            $pdf->Image($stampPath, 160, 170, 35, 25);
+        }
+    }
+
+    // Add paid stamp if invoice is PENDING 
+    if ($invoice['status'] == "PENDING") {
+        $stampPath = 'public/assets/stamp/pending_stamp.png';
+        if (file_exists($stampPath)) {
+            // Medium stamp (30x30 pixels) - recommended
+            $pdf->Image($stampPath, 150, 170, 50, 20);
+        }
+    }
+    // Add paid stamp if invoice is REFUNDED
+    if ($invoice['status'] == "REFUNDED") {
+        $stampPath = 'public/assets/stamp/refund_stamp.png';
+        if (file_exists($stampPath)) {
+            // Medium stamp (30x30 pixels) - recommended
+            $pdf->Image($stampPath, 80, 110, 100, 100);
+        }
+    }
+    // Add paid stamp if invoice is paid
+    if ($invoice['status'] == "CANCELLED") {
+        $stampPath = 'public/assets/stamp/cancel_stamp.png';
+        if (file_exists($stampPath)) {
+            // Medium stamp (30x30 pixels) - recommended
+            $pdf->Image($stampPath, 80, 150, 80, 35);
         }
     }
 

@@ -324,15 +324,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['invoiceIdsDelete'])) {
                     </div>
                     <ul class="table-top-head">
 
-                        <!-- <li>
+                        <li>
                             <a data-bs-toggle="tooltip" class="multi-delete-button" data-bs-placement="top"
                                 title="Delete"><img src="assets/img/icons/delete.png" alt="img" /></a>
-                        </li> -->
+                        </li>
 
-                        <!-- <li>
+                        <li>
                             <a data-bs-toggle="tooltip" class="multi-restore-button" data-bs-placement="top"
                                 title="Restore"><img src="assets/img/icons/folder-restore.png" alt="img" /></a>
-                        </li> -->
+                        </li>
                         <li>
                             <a data-bs-toggle="tooltip" onclick="exportToPDF()" data-bs-placement="top" title="Pdf"><img
                                     src="assets/img/icons/pdf.svg" alt="img" /></a>

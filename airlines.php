@@ -101,6 +101,53 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['airlineId'])) {
 }
 
 
+// delete multiple airlines
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['airlineIds'])) {
+
+
+    $airlineIds = $_POST['airlineIds'];
+
+    // Validate: Must be an array of integers
+    if (!is_array($airlineIds)) {
+        echo json_encode([
+            'status' => 400,
+            'message' => 'Invalid data format.'
+        ]);
+        exit;
+    }
+
+    try {
+        // Prepare the SQL dynamically
+        $placeholders = implode(',', array_fill(0, count($airlineIds), '?'));
+        $types = str_repeat('i', count($airlineIds)); // All integers
+
+        $stmt = $db->prepare("DELETE FROM airlines WHERE airline_id IN ($placeholders)");
+        $stmt->bind_param($types, ...$airlineIds);
+
+        if ($stmt->execute()) {
+            echo json_encode([
+                'status' => 200,
+                'message' => 'Selected airlines deleted successfully.',
+                'deleted_ids' => $airlineIds
+            ]);
+        } else {
+            echo json_encode([
+                'status' => 400,
+                'message' => $stmt->error
+            ]);
+        }
+
+        exit;
+    } catch (Exception $e) {
+        echo json_encode([
+            'status' => 500,
+            'message' => $e->getMessage()
+        ]);
+        exit;
+    }
+}
+
+
 try {
     $stmtFetch = $db->prepare("SELECT * FROM airlines");
     $stmtFetch->execute();
@@ -233,6 +280,15 @@ try {
                         </div>
                     </div>
 
+                    <ul class="table-top-head">
+                        <?php if ($isAdmin || hasPermission('Delete Airline', $privileges, $roleData['0']['role_name'])): ?>
+                            <li>
+                                <a data-bs-toggle="tooltip" class="multi-delete-button" data-bs-placement="top"
+                                    title="Delete"><img src="assets/img/icons/delete.png" alt="img" /></a>
+                            </li>
+                        <?php endif; ?>
+                    </ul>
+
                     <?php if ($isAdmin || hasPermission('Add Service', $privileges, $roleData['0']['role_name'])): ?>
                         <div class="page-btn">
                             <a href="#" class="btn btn-added" data-bs-toggle="modal" data-bs-target="#add-units"><i
@@ -262,7 +318,7 @@ try {
                                     <tr>
                                         <th class="no-sort">
                                             <label class="checkboxs">
-                                                <input type="checkbox" id="select-all">
+                                                <input type="checkbox" id="select-all" >
                                                 <span class="checkmarks"></span>
                                             </label>
                                         </th>
@@ -276,7 +332,8 @@ try {
                                         <tr>
                                             <td>
                                                 <label class="checkboxs">
-                                                    <input type="checkbox">
+                                                    <input type="checkbox" name="airlineIds"
+                                                    value="<?php echo $airline['airline_id'] ?>">
                                                     <span class="checkmarks"></span>
                                                 </label>
                                             </td>
@@ -510,6 +567,60 @@ try {
                         });
                     }
                 });
+            });
+
+            $(document).on('click', '.multi-delete-button', function (e) {
+                e.preventDefault();
+
+                let airlineIds = [];
+                $('input[name="airlineIds"]:checked').each(function () {
+                    airlineIds.push(parseInt($(this).val()));
+                });
+                
+                if (airlineIds.length == 0) {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Oops...",
+                        text: "Please select airline!",
+                    });
+                    return;
+                }
+
+                Swal.fire({
+                    title: "Are you sure?",
+                    text: "You won't be able to revert this!",
+                    showCancelButton: true,
+                    confirmButtonColor: "#ff9f43",
+                    cancelButtonColor: "#d33",
+                    confirmButtonText: "Yes, delete it!"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+
+                        $.ajax({
+                            url: "airlines.php",
+                            type: "post",
+                            data: { airlineIds: airlineIds },
+                            success: function (response) {
+
+                                Swal.fire(
+                                    'Deleted!',
+                                    'The Airline has been deleted.',
+                                    'success'
+                                ).then(() => {
+                                    // Reload the page
+                                    location.reload();
+                                });
+
+                            },
+                            error: function (error) {
+                                console.log(error);
+                            },
+                        });
+
+                    }
+                })
+
+
             });
 
         })

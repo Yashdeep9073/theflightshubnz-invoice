@@ -86,29 +86,29 @@ try {
     $_SESSION['error'] = $e->getMessage();
 }
 
+
 if (isset($_POST['invoiceNumber']) && $_SERVER['REQUEST_METHOD'] == "POST") {
-    // Get current date in YYYYMMDD format
-    $date = date('Ymd'); // e.g., '20250530'
+    // Get current timestamp in YYYYMMDDHHMMSS format
+    $timestamp = date('YmdHis'); // e.g., '20250725152030' for July 25, 2025, 15:20:30
 
     // Use a transaction to ensure atomicity
     try {
         $db->begin_transaction();
 
+        // Fetch invoice settings
         $stmtFetchInvoiceSettings = $db->prepare("SELECT * FROM invoice_settings");
         $stmtFetchInvoiceSettings->execute();
         $invoiceSettings = $stmtFetchInvoiceSettings->get_result()->fetch_array(MYSQLI_ASSOC);
         $prefix = isset($invoiceSettings['invoice_prefix']) ? $invoiceSettings['invoice_prefix'] : "VIS";
 
-        // Lock the row for the current date
-        $stmt = $db->prepare("SELECT last_sequence FROM invoice_sequence WHERE date = ? FOR UPDATE");
-        $stmt->bind_param("s", $date);
+        // Lock the sequence row
+        $stmt = $db->prepare("SELECT last_sequence FROM invoice_sequence WHERE id = 1 FOR UPDATE");
         $stmt->execute();
         $result = $stmt->get_result();
 
         if ($result->num_rows === 0) {
-            // No sequence for today, create one
-            $stmt = $db->prepare("INSERT INTO invoice_sequence (date, last_sequence) VALUES (?, 0)");
-            $stmt->bind_param("s", $date);
+            // No sequence row, create one
+            $stmt = $db->prepare("INSERT INTO invoice_sequence (id, last_sequence) VALUES (1, 0)");
             $stmt->execute();
             $lastSequence = 0;
         } else {
@@ -120,14 +120,14 @@ if (isset($_POST['invoiceNumber']) && $_SERVER['REQUEST_METHOD'] == "POST") {
         $newSequence = $lastSequence + 1;
 
         // Update sequence
-        $stmt = $db->prepare("UPDATE invoice_sequence SET last_sequence = ? WHERE date = ?");
-        $stmt->bind_param("is", $newSequence, $date);
+        $stmt = $db->prepare("UPDATE invoice_sequence SET last_sequence = ? WHERE id = 1");
+        $stmt->bind_param("i", $newSequence);
         $stmt->execute();
 
         $db->commit();
 
-        // Format invoice number
-        $invoiceNumber = sprintf("$prefix-%s-%05d", $date, $newSequence); // e.g., VIS-20250530-00001
+        // Format invoice number with prefix, timestamp, and sequence
+        $invoiceNumber = sprintf("%s-%s-%05d", $prefix, $timestamp, $newSequence); // e.g., VIS-20250725152030-00001
         echo json_encode([
             "status" => 201,
             "data" => $invoiceNumber
@@ -165,7 +165,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['edit'])) {
         $description = htmlspecialchars($_POST['description'] ?? '', ENT_QUOTES, 'UTF-8');
         $totalAmount = filter_input(INPUT_POST, 'total_amount', FILTER_VALIDATE_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
         $createdBy = base64_decode($_SESSION['admin_id']);
-
+        $customerEmail = $_POST['customerEmail'];
 
 
         // Handle serviceName array
@@ -223,7 +223,8 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['edit'])) {
             `created_by` = ?, 
             `passenger_details` = ?,
             `customer_address` = ?,
-            `organization` = ?
+            `organization` = ?,
+            `customer_email` = ?
         WHERE `invoice_id` = ?";
 
         $stmt = $db->prepare($sql);
@@ -232,7 +233,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['edit'])) {
         }
 
         $stmt->bind_param(
-            'sssssssssssssdisssi',
+            'sssssssssssssdissssi',
             $invoiceNumber,
             $invoiceTitle,
             $paymentMethod,
@@ -251,6 +252,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['edit'])) {
             $passengerDetailsJson,
             $customerAddress,
             $organizationName,
+            $customerEmail,
             $invoiceId
         );
 
@@ -537,6 +539,16 @@ ob_end_flush();
                                                             placeholder="Enter Customer Name" required>
                                                     </div>
                                                 </div>
+
+                                                <div class="col-lg-4 col-sm-6 col-12">
+                                                    <div class="mb-3 add-product">
+                                                        <label class="form-label">Customer Email <span> *</span></label>
+                                                        <input class="form-control" type="email" name="customerEmail"
+                                                            value="<?php echo $invoices[0]['customer_email'] ?>"
+                                                            placeholder="Enter Customer Email" required>
+                                                    </div>
+                                                </div>
+
                                                 <div class="col-lg-4 col-sm-6 col-12">
                                                     <div class="mb-3 add-product">
                                                         <label class="form-label">Services</label>

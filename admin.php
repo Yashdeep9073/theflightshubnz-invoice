@@ -65,7 +65,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['editAdminId'])) {
 
 
     // Validate required inputs
-    if (!$editAdminId || !$editAdminName || !$editAdminPhone || !$editAdminEmail || !$editAdminStatus) {
+    if (
+      empty($editAdminId) ||
+      empty($editAdminName) ||
+      empty($editAdminPhone) ||
+      $editAdminEmail === false ||
+      !isset($editAdminStatus)
+    ) {
+
       $_SESSION['error'] = 'All required fields must be valid.';
       header('Location: admin.php'); // Adjust to your form page
       exit;
@@ -504,7 +511,7 @@ try {
                   <div class="col-lg-6">
                     <div class="input-blocks">
                       <label>Admin Phone <span> *</span></label>
-                      <input type="tel" class="form-control" name="adminPhone" placeholder="Admin Name" required>
+                      <input type="tel" class="form-control" name="adminPhone" placeholder="Admin Phone" required>
                     </div>
                   </div>
                   <div class="col-lg-6">
