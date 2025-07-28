@@ -203,7 +203,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['invoiceIdForReminder']
 
         $invoiceId = intval($_POST['invoiceIdForReminder']);
         $stmtFetchCustomer = $db->prepare("SELECT * FROM invoice 
-        WHERE is_active = 1 AND invoice_id = ? AND status IN ('PENDING', 'CANCELLED', 'REFUNDED')");
+        WHERE is_active = 1 AND invoice_id = ? AND status IN ('PENDING')");
 
         $stmtFetchCustomer->bind_param('i', $invoiceId);
 
