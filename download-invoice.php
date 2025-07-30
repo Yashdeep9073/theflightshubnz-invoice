@@ -222,23 +222,23 @@ try {
 
 
     // Invoice Info (top-right, adjust based on template)
-    $pdf->SetFont('FuturaBT-Medium', '', 25); // Set font to FuturaBT-Medium
+    $pdf->SetFont('FuturaBT-Medium', '', 22); // Set font to FuturaBT-Medium
     $pdf->SetXY(20, 45); // Set position for text
 
     // Render "THE" in rgba(14, 139, 206, 1)
     $pdf->SetTextColor(14, 139, 206); // Set text color to rgba(14, 139, 206, 1)
-    $pdf->Cell(18, 10, 'THE', 0, 0); // Increased width to 25 to prevent clipping
+    $pdf->Cell(15, 10, 'THE', 0, 0); // Increased width to 25 to prevent clipping
 
     // Render "FLIGHTSHUB" in #f9522b (RGB: 249, 82, 43)
     $pdf->SetTextColor(249, 82, 43); // Set text color to #f9522b
-    $pdf->Cell(35, 10, 'FLIGHTS', 0, 0); // Increased width to 65 for longer text
+    $pdf->Cell(30, 10, 'FLIGHTS', 0, 0); // Increased width to 65 for longer text
 
     $pdf->SetTextColor(14, 139, 206); // Set text color to rgba(14, 139, 206, 1)
-    $pdf->Cell(20, 10, 'HUB', 0, 0); // Increased width to 65 for longer text
+    $pdf->Cell(18, 10, 'HUB', 0, 0); // Increased width to 65 for longer text
 
     // Render "PVTLTD." in rgba(14, 139, 206, 1)
     $pdf->SetTextColor(14, 139, 206); // Set text color to rgba(14, 139, 206, 1)
-    $pdf->Cell(50, 10, 'PVT LTD.', 0, 0); // Adjusted width to 50 for "PVTLTD."
+    $pdf->Cell(50, 10, 'PTY LIMITED.', 0, 0); // Adjusted width to 50 for "PVTLTD."
 
     // Reset text color to black for subsequent text
     $pdf->SetTextColor(0, 0, 0);
@@ -270,7 +270,7 @@ try {
     $pdf->SetTextColor(0, 0, 0); // Reset text color to black
 
     // Invoice Info (top-right, adjust based on template)
-    $pdf->SetFont('FuturaBT-Medium', '', 25); // Set font to normal Times
+    $pdf->SetFont('FuturaBT-Medium', '', 22); // Set font to normal Times
     $pdf->SetTextColor(0, 0, 0); // Set text color to black
     $pdf->SetXY(65, 68);
     // $pdf->SetTextColor(249, 82, 43); // Set text color to rgba(249, 82, 43, 1)
@@ -530,7 +530,6 @@ try {
             $pdf->Image($stampPath, 60, 145, 80, 35);
         }
     }
-
 
     // Output final PDF
     $pdf->Output('D', ucfirst(str_replace(" ", "-", $invoice['invoice_title'])) . "-" . $invoice['invoice_number'] . '.pdf');
