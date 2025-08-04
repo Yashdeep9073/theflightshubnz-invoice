@@ -238,7 +238,7 @@ try {
 
     // Render "PVTLTD." in rgba(14, 139, 206, 1)
     $pdf->SetTextColor(14, 139, 206); // Set text color to rgba(14, 139, 206, 1)
-    $pdf->Cell(50, 10, 'PTY LIMITED.', 0, 0); // Adjusted width to 50 for "PVTLTD."
+    $pdf->Cell(50, 10, 'PVT. LIMITED.', 0, 0); // Adjusted width to 50 for "PVTLTD."
 
     // Reset text color to black for subsequent text
     $pdf->SetTextColor(0, 0, 0);
@@ -361,13 +361,13 @@ try {
     $pdf->SetXY(20, 125);
     $pdf->Cell(0, 5, 'Description', 0, 0);
 
-    $pdf->SetXY(80, 125);
+    $pdf->SetXY(90, 125);
     $pdf->Cell(0, 5, 'Quantity', 0, 0);
 
-    $pdf->SetXY(120, 125);
+    $pdf->SetXY(130, 125);
     $pdf->Cell(0, 5, 'Rate', 0, 0);
 
-    $pdf->SetXY(160, 125);
+    $pdf->SetXY(170, 125);
     $pdf->Cell(0, 5, 'Amount', 0, 0);
 
     // Line under headers
@@ -397,23 +397,25 @@ try {
         $pdf->SetFont('FuturaBT-Medium', '', 10);
         $pdf->SetXY(20, 130);
         $pdf->Cell(0, $lineHeight, $invoice['airline_name'], 0, 1); // First line: Airline name
+        $pdf->SetFont('FuturaBT-Medium', '', 9.5);
         $pdf->SetXY(20, 133);
-        $pdf->Cell(0, $lineHeight, $invoice['from_location'] . "-" . $invoice['to_location'], 0, 0); // Second line: Route
-
+        $pdf->Cell(0, $lineHeight, "(" . $invoice['from_location'] . ") -", 0, 1); // Second line: Route
+        $pdf->SetXY(20, 136);
+        $pdf->Cell(0, $lineHeight, "(" . $invoice['to_location'] . ")", 0, 1); // Second line: Route
 
         $pdf->SetFont('FuturaBT-Medium', '', 14);
-        $pdf->SetXY(20, 137);
+        $pdf->SetXY(20, 140);
         $pdf->Cell(0, $lineHeight, $item['name'], 0, 0);
 
         $pdf->SetFont('FuturaBT-Medium', '', 8);
-        $pdf->SetXY(80, $y);
+        $pdf->SetXY(90, $y);
         $pdf->Cell(0, $lineHeight, $result, 0, 0);
 
-        $pdf->SetXY(120, $y);
-        $pdf->Cell(0, $lineHeight, $invoice['total_amount'], 0, 0);
+        $pdf->SetXY(130, $y);
+        $pdf->Cell(0, $lineHeight, $currencySymbol . "." . $invoice['total_amount'], 0, 0);
 
         $pdf->SetTextColor(14, 139, 206); // Set text color to rgba(14, 139, 206, 1)
-        $pdf->SetXY(160, $y);
+        $pdf->SetXY(170, $y);
         $pdf->Cell(0, $lineHeight, $currencySymbol . "." . $invoice['total_amount'], 0, 0);
         $pdf->SetTextColor(0, 0, 0);
 
@@ -423,7 +425,7 @@ try {
     // Line after items
     $pdf->SetLineWidth(0.1);
     $pdf->SetDrawColor(158, 158, 158); // Set line color to rgba(158, 158, 158, 1)
-    $pdf->Line(20, $y + 2, 190, $y + 2);
+    $pdf->Line(20, $y + 5, 190, $y + 5);
     $pdf->SetTextColor(0, 0, 0); // Reset text color to black
 
 
@@ -483,7 +485,7 @@ try {
     $yPos += 7;
 
     $pdf->SetXY(25, $yPos);
-    $pdf->Cell(0, 10, 'ACCOUNT NAME: THE FLIGHTSHUB PVT LTD', 0, 1);
+    $pdf->Cell(0, 10, 'ACCOUNT NAME: THE FLIGHTSHUB PVT. LTD.', 0, 1);
     $yPos += 5;
 
     $pdf->SetTextColor(14, 139, 206);
@@ -500,7 +502,7 @@ try {
     $pdf->SetFont('FuturaBT-Medium', '', 12); // Reset font to normal
     $pdf->SetXY(70, 240);
     $pdf->SetTextColor(0, 0, 0);
-    $pdf->Cell(22, 10, 'Thank you for the business', 0, 0); // Render "Invoice No:" in black, normal font
+    $pdf->Cell(22, 10, 'Thank you for your business', 0, 0); // Render "Invoice No:" in black, normal font
     $pdf->SetXY(55, 245);
     $pdf->Cell(22, 10, 'We wish you a safe and pleasant journey', 0, 0); // Render "Invoice No:" in black, normal font
 
@@ -521,7 +523,7 @@ try {
             $pdf->Image($stampPath, 140, 170, 50, 20);
         }
     }
-    
+
     // Add paid stamp if invoice is paid
     if ($invoice['status'] == "CANCELLED") {
         $stampPath = 'public/assets/stamp/cancel_stamp.png';

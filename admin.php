@@ -14,11 +14,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
     // print_r($_POST);
     // exit;
 
-    $adminName = filter_input(INPUT_POST, 'adminName', FILTER_SANITIZE_STRING);
+    $adminName = $_POST['adminName'];
     $adminPhone = filter_input(INPUT_POST, 'adminPhone', FILTER_SANITIZE_NUMBER_INT);
-    $adminEmail = filter_input(INPUT_POST, 'adminEmail', FILTER_SANITIZE_STRING);
+    $adminEmail = $_POST['adminEmail'];
     $adminRole = filter_input(INPUT_POST, 'adminRole', FILTER_SANITIZE_NUMBER_INT);
-    $adminPassword = password_hash(filter_input(INPUT_POST, 'adminPassword', FILTER_SANITIZE_STRING), PASSWORD_DEFAULT);
+    $adminPassword = password_hash($_POST['adminPassword'], PASSWORD_DEFAULT);
     $stmtInsert = $db->prepare('INSERT INTO admin 
         (
         admin_username,
@@ -187,7 +187,7 @@ try {
   $localizationSettings = $stmtFetchLocalizationSettings->get_result()->fetch_array(MYSQLI_ASSOC);
 
 
-  $stmtFetch = $db->prepare("SELECT * FROM admin");
+  $stmtFetch = $db->prepare("SELECT admin.*, roles.role_name FROM admin INNER JOIN roles ON admin.admin_role = roles.role_id;");
   $stmtFetch->execute();
   $admins = $stmtFetch->get_result();
 
@@ -393,6 +393,7 @@ try {
                     <th>Customer Name</th>
                     <th>Phone</th>
                     <th>email</th>
+                    <th>Role</th>
                     <th>Created On</th>
                     <th>Status</th>
                     <th class="no-sort text-center">Action</th>
@@ -417,6 +418,9 @@ try {
                       <td><?php echo $admin['admin_phone_number'] ?></td>
                       <td>
                         <?php echo $admin['admin_email'] ?>
+                      </td>
+                      <td>
+                        <?php echo $admin['role_name'] ?>
                       </td>
                       <td>
                         <?php $date = new DateTime($admin['created_at']);
