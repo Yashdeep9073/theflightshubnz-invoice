@@ -238,7 +238,7 @@ try {
 
     // Render "PVTLTD." in rgba(14, 139, 206, 1)
     $pdf->SetTextColor(14, 139, 206); // Set text color to rgba(14, 139, 206, 1)
-    $pdf->Cell(50, 10, 'PVT. LIMITED.', 0, 0); // Adjusted width to 50 for "PVTLTD."
+    $pdf->Cell(50, 10, 'PVT. LIMITED', 0, 0); // Adjusted width to 50 for "PVTLTD."
 
     // Reset text color to black for subsequent text
     $pdf->SetTextColor(0, 0, 0);
@@ -502,9 +502,9 @@ try {
     $pdf->SetFont('FuturaBT-Medium', '', 12); // Reset font to normal
     $pdf->SetXY(70, 240);
     $pdf->SetTextColor(0, 0, 0);
-    $pdf->Cell(22, 10, 'Thank you for your business', 0, 0); // Render "Invoice No:" in black, normal font
+    $pdf->Cell(22, 10, 'Thank you for your business.', 0, 0); // Render "Invoice No:" in black, normal font
     $pdf->SetXY(55, 245);
-    $pdf->Cell(22, 10, 'We wish you a safe and pleasant journey', 0, 0); // Render "Invoice No:" in black, normal font
+    $pdf->Cell(22, 10, 'We wish you a safe and pleasant journey.', 0, 0); // Render "Invoice No:" in black, normal font
 
 
     // Add paid stamp if invoice is paid
