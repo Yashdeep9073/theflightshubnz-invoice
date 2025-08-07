@@ -398,13 +398,13 @@ try {
         $pdf->SetXY(20, 130);
         $pdf->Cell(0, $lineHeight, $invoice['airline_name'], 0, 1); // First line: Airline name
         $pdf->SetFont('FuturaBT-Medium', '', 9.5);
-        $pdf->SetXY(20, 133);
+        $pdf->SetXY(20, 135);
         $pdf->Cell(0, $lineHeight, "(" . $invoice['from_location'] . ") -", 0, 1); // Second line: Route
-        $pdf->SetXY(20, 136);
+        $pdf->SetXY(20, 139);
         $pdf->Cell(0, $lineHeight, "(" . $invoice['to_location'] . ")", 0, 1); // Second line: Route
 
         $pdf->SetFont('FuturaBT-Medium', '', 14);
-        $pdf->SetXY(20, 140);
+        $pdf->SetXY(20, 143);
         $pdf->Cell(0, $lineHeight, $item['name'], 0, 0);
 
         $pdf->SetFont('FuturaBT-Medium', '', 8);
@@ -425,7 +425,7 @@ try {
     // Line after items
     $pdf->SetLineWidth(0.1);
     $pdf->SetDrawColor(158, 158, 158); // Set line color to rgba(158, 158, 158, 1)
-    $pdf->Line(20, $y + 5, 190, $y + 5);
+    $pdf->Line(20, $y + 8, 190, $y + 8);
     $pdf->SetTextColor(0, 0, 0); // Reset text color to black
 
 
@@ -460,6 +460,11 @@ try {
     // Line under totals
     $pdf->SetLineWidth(0.1);
     $pdf->Line(140, $y + 5, 190, $y + 5);
+
+
+    // Line under invoice notL
+    $pdf->SetLineWidth(0.1);
+    $pdf->Line(20, 184, 190, 184);
 
 
     // Invoice Note
