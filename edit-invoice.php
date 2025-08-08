@@ -729,7 +729,7 @@ ob_end_flush();
                                                                     <input type="text" id="total_amount"
                                                                         name="total_amount" class="form-control"
                                                                         value='<?php echo htmlspecialchars($invoices[0]['total_amount']); ?>'
-                                                                        placeholder="Enter Total Amount" readonly>
+                                                                        placeholder="Enter Total Amount" >
                                                                 </div>
                                                             </div>
 
