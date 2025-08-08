@@ -35003,5 +35003,6 @@ div.dt-buttons > div.dt-button-split .dt-button {
 }
 
 .badge{
-  width:100px;
+  min-width:100px;
+  max-width:120px;
 }

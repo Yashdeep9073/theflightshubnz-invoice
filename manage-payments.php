@@ -229,13 +229,15 @@ try {
                                             </td>
                                             <td> <?php echo (isset($localizationSettings["currency_symbol"]) ? $localizationSettings["currency_symbol"] : "$") . " " . $invoice['total_amount'] ?>
                                             </td>
-                                            <td class="payment-info">
+                                             <td class="payment-info">
                                                 <?php if ($invoice['payment_method'] == 'CREDIT_CARD') { ?>
                                                     <span class="badge badge-lg bg-success">Credit Card</span>
                                                 <?php } elseif ($invoice['payment_method'] == 'DEBIT_CARD') { ?>
                                                     <span class="badge badge-lg bg-success">Debit Card</span>
                                                 <?php } elseif ($invoice['payment_method'] == 'CASH') { ?>
                                                     <span class="badge badge-lg bg-success">Cash</span>
+                                                <?php } elseif ($invoice['payment_method'] == 'CASH_DEPOSIT') { ?>
+                                                    <span class="badge badge-lg bg-success">Cash Deposit</span>
                                                 <?php } elseif ($invoice['payment_method'] == 'NET_BANKING') { ?>
                                                     <span class="badge badge-lg bg-primary">Net Banking</span>
                                                 <?php } elseif ($invoice['payment_method'] == 'PAYPAL') { ?>
