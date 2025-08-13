@@ -11,6 +11,8 @@ if (!isset($_SESSION["admin_id"])) {
 
 try {
 
+
+
     // fetch invoice data
     $invoiceId = intval(base64_decode($_GET['id']));
 
@@ -80,6 +82,11 @@ try {
         $airports = json_decode($response, true);
     }
 
+
+    // get airlines data
+    $stmtFetchAirlines = $db->prepare("SELECT * FROM airlines WHERE is_active = 1");
+    $stmtFetchAirlines->execute();
+    $airlines = $stmtFetchAirlines->get_result()->fetch_all(MYSQLI_ASSOC);
 
 
 } catch (Exception $e) {
@@ -603,10 +610,18 @@ ob_end_flush();
                                                 <div class="col-lg-4 col-sm-6 col-12">
                                                     <div class="mb-3 add-product">
                                                         <label class="form-label">Airline <span> *</span></label>
-                                                        <input class="form-control" type="text"
-                                                            value="<?= $invoices[0]['airline_name'] ?>"
-                                                            name="airlineName" placeholder="Enter Airline Name"
-                                                            required>
+
+                                                        <select class="select2 form-select" name="airlineName">
+                                                            <option value="">Select</option>
+                                                            <?php foreach ($airlines as $airline) { ?>
+                                                                <option value="<?php echo $airline['airline_name']; ?>"
+                                                                    <?php if ($invoices['0']['airline_name'] == $airline['airline_name'])
+                                                                        echo 'selected'; ?>>
+                                                                    <?php echo $airline['airline_name']; ?>
+                                                                </option>
+                                                            <?php } ?>
+                                                        </select>
+
                                                     </div>
                                                 </div>
 
@@ -729,7 +744,7 @@ ob_end_flush();
                                                                     <input type="text" id="total_amount"
                                                                         name="total_amount" class="form-control"
                                                                         value='<?php echo htmlspecialchars($invoices[0]['total_amount']); ?>'
-                                                                        placeholder="Enter Total Amount" >
+                                                                        placeholder="Enter Total Amount">
                                                                 </div>
                                                             </div>
 

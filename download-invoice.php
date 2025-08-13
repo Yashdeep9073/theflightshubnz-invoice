@@ -322,7 +322,7 @@ try {
     $pdf->SetTextColor(0, 0, 0); // Reset text color to black
     $pdf->SetFont('FuturaBT-Medium', '', 12); // Reset font to normal
 
-    $pdf->SetFont('FuturaBT-Medium', '', 14); // Reset font to norma
+    $pdf->SetFont('FuturaBT-Medium', '', 12); // Reset font to norma
     $pdf->SetXY(20, 101);
     $pdf->MultiCell(90, 8, $invoice['customer_name'] . "," ?? 'N/A', 0, 'L');
     $pdf->SetXY(140, 106);
@@ -339,7 +339,7 @@ try {
     $formatted_address = $first_line . ($second_line ? "\n" . $second_line : '');
 
     // Set font and calculate width
-    $pdf->SetFont('FuturaBT-Medium', '', 14);
+    $pdf->SetFont('FuturaBT-Medium', '', 12);
     $width = max($pdf->GetStringWidth($first_line), $pdf->GetStringWidth($second_line)) + 5; // Use widest line for width
     $width = max($width, 90); // Minimum width of 90
 
@@ -400,11 +400,11 @@ try {
         $pdf->SetFont('FuturaBT-Medium', '', 9.5);
         $pdf->SetXY(20, 135);
         $pdf->Cell(0, $lineHeight, "(" . $invoice['from_location'] . ") -", 0, 1); // Second line: Route
-        $pdf->SetXY(20, 139);
+        $pdf->SetXY(20, 140);
         $pdf->Cell(0, $lineHeight, "(" . $invoice['to_location'] . ")", 0, 1); // Second line: Route
 
         $pdf->SetFont('FuturaBT-Medium', '', 14);
-        $pdf->SetXY(20, 143);
+        $pdf->SetXY(20, 145);
         $pdf->Cell(0, $lineHeight, $item['name'], 0, 0);
 
         $pdf->SetFont('FuturaBT-Medium', '', 8);
@@ -425,13 +425,13 @@ try {
     // Line after items
     $pdf->SetLineWidth(0.1);
     $pdf->SetDrawColor(158, 158, 158); // Set line color to rgba(158, 158, 158, 1)
-    $pdf->Line(20, $y + 8, 190, $y + 8);
+    $pdf->Line(20, $y + 10, 190, $y + 10);
     $pdf->SetTextColor(0, 0, 0); // Reset text color to black
 
 
     // Totals section
     $pdf->SetFont('FuturaBT-Medium', '', 10);
-    $y += 10;
+    $y += 13;
 
     $pdf->SetXY(140, $y);
     $pdf->Cell(0, 5, 'Sub Total:', 0, 0);
@@ -510,6 +510,10 @@ try {
     $pdf->Cell(22, 10, 'Thank you for your business.', 0, 0); // Render "Invoice No:" in black, normal font
     $pdf->SetXY(55, 245);
     $pdf->Cell(22, 10, 'We wish you a safe and pleasant journey.', 0, 0); // Render "Invoice No:" in black, normal font
+
+    $pdf->SetFont('FuturaBT-Medium', '', 12); // Reset font to normal
+    $pdf->SetXY(20, 260);
+    $pdf->Cell(22, 10, 'We Accept', 0, 0); // Render "Invoice No:" in black, normal font
 
 
     // Add paid stamp if invoice is paid

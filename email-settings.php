@@ -405,53 +405,53 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['addAddress'])) {
 
     <div class="main-wrapper">
         <?php if (isset($_SESSION['success'])) { ?>
-                <script>
-                    const notyf = new Notyf({
-                        position: {
-                            x: 'center',
-                            y: 'top'
-                        },
-                        duration: 3000,
-                        types: [
-                            {
-                                type: 'success',
-                                background: '#4dc76f', // Change background color
-                                textColor: '#FFFFFF',  // Change text color
-                                dismissible: false,
-                                duration: 3000
-                            }
-                        ]
-                    });
-                    notyf.success("<?php echo $_SESSION['success']; ?>");
-                </script>
-                <?php
-                unset($_SESSION['success']);
-                ?>
+            <script>
+                const notyf = new Notyf({
+                    position: {
+                        x: 'center',
+                        y: 'top'
+                    },
+                    duration: 3000,
+                    types: [
+                        {
+                            type: 'success',
+                            background: '#4dc76f', // Change background color
+                            textColor: '#FFFFFF',  // Change text color
+                            dismissible: false,
+                            duration: 3000
+                        }
+                    ]
+                });
+                notyf.success("<?php echo $_SESSION['success']; ?>");
+            </script>
+            <?php
+            unset($_SESSION['success']);
+            ?>
         <?php } ?>
 
         <?php if (isset($_SESSION['error'])) { ?>
-                <script>
-                    const notyf = new Notyf({
-                        position: {
-                            x: 'center',
-                            y: 'top'
-                        },
-                        duration: 3000,
-                        types: [
-                            {
-                                type: 'error',
-                                background: '#ff1916',
-                                textColor: '#FFFFFF',
-                                dismissible: false,
-                                duration: 3000
-                            }
-                        ]
-                    });
-                    notyf.error("<?php echo $_SESSION['error']; ?>");
-                </script>
-                <?php
-                unset($_SESSION['error']);
-                ?>
+            <script>
+                const notyf = new Notyf({
+                    position: {
+                        x: 'center',
+                        y: 'top'
+                    },
+                    duration: 3000,
+                    types: [
+                        {
+                            type: 'error',
+                            background: '#ff1916',
+                            textColor: '#FFFFFF',
+                            dismissible: false,
+                            duration: 3000
+                        }
+                    ]
+                });
+                notyf.error("<?php echo $_SESSION['error']; ?>");
+            </script>
+            <?php
+            unset($_SESSION['error']);
+            ?>
         <?php } ?>
 
         <!-- Header Start -->
@@ -546,6 +546,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['addAddress'])) {
                                                                         <span class="checkmarks"></span>
                                                                     </label>
                                                                 </th>
+                                                                <th>Logo</th>
                                                                 <th>Title</th>
                                                                 <th>Email</th>
                                                                 <th>Password</th>
@@ -558,99 +559,101 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['addAddress'])) {
                                                         </thead>
                                                         <tbody>
                                                             <?php foreach ($emailSettingData as $data): ?>
-                                                                    <tr>
-                                                                        <td>
-                                                                            <label class="checkboxs">
-                                                                                <input type="checkbox" name="emailSettingsIds"
-                                                                                    value="<?php echo $data['email_settings_id'] ?>">
-                                                                                <span class="checkmarks"></span>
-                                                                            </label>
-                                                                        </td>
+                                                                <tr>
+                                                                    <td>
+                                                                        <label class="checkboxs">
+                                                                            <input type="checkbox" name="emailSettingsIds"
+                                                                                value="<?php echo $data['email_settings_id'] ?>">
+                                                                            <span class="checkmarks"></span>
+                                                                        </label>
+                                                                    </td>
 
-                                                                        <td class="">
-                                                                            <div class="productimgname">
-                                                                                <a href="javascript:void(0);"
-                                                                                    class="product-img stock-img">
-                                                                                    <img src="<?= !empty($emailSettingData[0]["logo_url"]) ? $emailSettingData[0]["logo_url"] : "assets/img/products/stock-img-01.png" ?>"
-                                                                                        alt="product">
-                                                                                </a>
-                                                                                <a href="javascript:void(0);"><?php echo $data['email_from_title'] ?>
-                                                                                </a>
-                                                                            </div>
-                                                                        </td>
-                                                                        <td class="ref-number">
-                                                                            <?php echo $data['email_address'] ?>
-                                                                        </td>
-                                                                        <td><?php echo $data['email_password'] ?></td>
-                                                                        <td><?php echo $data['email_host'] ?></td>
-                                                                        <td><?php echo $data['email_port'] ?>
-                                                                        </td>
-                                                                        <td>
-                                                                            <?php if ($data['is_active'] == 1) { ?>
-                                                                                    <span
-                                                                                        class="badge badge-lg bg-success">Active</span>
-                                                                            <?php } else { ?>
-                                                                                    <span
-                                                                                        class="badge badge-lg bg-danger">Inactive</span>
-                                                                            <?php } ?>
-                                                                        </td>
-                                                                        <td><?php $date = new DateTime($data['created_at']);
-                                                                        echo $date->format('d M Y') ?>
-                                                                        <td class="text-center">
-                                                                            <a class="action-set" href="javascript:void(0);"
-                                                                                data-bs-toggle="dropdown" aria-expanded="true">
-                                                                                <i class="fa fa-ellipsis-v"
-                                                                                    aria-hidden="true"></i>
+                                                                    <td class="">
+                                                                        <div class="productimgname">
+                                                                            <a href="javascript:void(0);"
+                                                                                class="product-img stock-img">
+                                                                                <img src="<?= !empty($emailSettingData[0]["logo_url"]) ? $emailSettingData[0]["logo_url"] : "assets/img/products/stock-img-01.png" ?>"
+                                                                                    alt="product">
                                                                             </a>
-                                                                            <ul class="dropdown-menu">
 
-                                                                                <li>
-                                                                                    <a href="javascript:void(0);"
-                                                                                        data-bs-toggle="modal"
-                                                                                        data-bs-target="#edit-smtp-mail"
-                                                                                        data-emailsetting-id="<?php echo $data['email_settings_id'] ?>"
-                                                                                        data-emailsetting-title="<?php echo $data['email_from_title'] ?>"
-                                                                                        data-emailsetting-email="<?php echo $data['email_address'] ?>"
-                                                                                        data-emailsetting-password="<?php echo $data['email_password'] ?>"
-                                                                                        data-emailsetting-host="<?php echo $data['email_host'] ?>"
-                                                                                        data-emailsetting-port="<?php echo $data['email_port'] ?>"
-                                                                                        data-emailsetting-status="<?php echo $data['is_active'] ?>"
-                                                                                        class="editButton dropdown-item"><i
-                                                                                            data-feather="edit"
-                                                                                            class="info-img"></i>Edit
-                                                                                    </a>
-                                                                                </li>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td>
+                                                                        <?php echo $data['email_from_title'] ?>
+                                                                    </td>
+                                                                    <td class="ref-number">
+                                                                        <?php echo $data['email_address'] ?>
+                                                                    </td>
+                                                                    <td><?php echo $data['email_password'] ?></td>
+                                                                    <td><?php echo $data['email_host'] ?></td>
+                                                                    <td><?php echo $data['email_port'] ?>
+                                                                    </td>
+                                                                    <td>
+                                                                        <?php if ($data['is_active'] == 1) { ?>
+                                                                            <span
+                                                                                class="badge badge-lg bg-success">Active</span>
+                                                                        <?php } else { ?>
+                                                                            <span
+                                                                                class="badge badge-lg bg-danger">Inactive</span>
+                                                                        <?php } ?>
+                                                                    </td>
+                                                                    <td><?php $date = new DateTime($data['created_at']);
+                                                                    echo $date->format('d M Y') ?>
+                                                                    <td class="text-center">
+                                                                        <a class="action-set" href="javascript:void(0);"
+                                                                            data-bs-toggle="dropdown" aria-expanded="true">
+                                                                            <i class="fa fa-ellipsis-v"
+                                                                                aria-hidden="true"></i>
+                                                                        </a>
+                                                                        <ul class="dropdown-menu">
 
-                                                                                <li>
-                                                                                    <a href="javascript:void(0);"
-                                                                                        data-bs-toggle="modal"
-                                                                                        data-bs-target="#add-mail"
-                                                                                        data-emailSetting-id="<?php echo $data['email_settings_id'] ?>"
-                                                                                        class="dropdown-item addAddressButton mb-0"><i
-                                                                                            data-feather="plus-circle"
-                                                                                            class="info-img"></i>Add Address
-                                                                                    </a>
-                                                                                </li>
+                                                                            <li>
+                                                                                <a href="javascript:void(0);"
+                                                                                    data-bs-toggle="modal"
+                                                                                    data-bs-target="#edit-smtp-mail"
+                                                                                    data-emailsetting-id="<?php echo $data['email_settings_id'] ?>"
+                                                                                    data-emailsetting-title="<?php echo $data['email_from_title'] ?>"
+                                                                                    data-emailsetting-email="<?php echo $data['email_address'] ?>"
+                                                                                    data-emailsetting-password="<?php echo $data['email_password'] ?>"
+                                                                                    data-emailsetting-host="<?php echo $data['email_host'] ?>"
+                                                                                    data-emailsetting-port="<?php echo $data['email_port'] ?>"
+                                                                                    data-emailsetting-status="<?php echo $data['is_active'] ?>"
+                                                                                    class="editButton dropdown-item"><i
+                                                                                        data-feather="edit"
+                                                                                        class="info-img"></i>Edit
+                                                                                </a>
+                                                                            </li>
 
-                                                                                <li>
-                                                                                    <a href="javascript:void(0);"
-                                                                                        data-emailSetting-id="<?php echo $data['email_settings_id'] ?>"
-                                                                                        class="dropdown-item deleteButton mb-0"><i
-                                                                                            data-feather="trash-2"
-                                                                                            class="info-img"></i>Delete </a>
-                                                                                </li>
+                                                                            <li>
+                                                                                <a href="javascript:void(0);"
+                                                                                    data-bs-toggle="modal"
+                                                                                    data-bs-target="#add-mail"
+                                                                                    data-emailSetting-id="<?php echo $data['email_settings_id'] ?>"
+                                                                                    class="dropdown-item addAddressButton mb-0"><i
+                                                                                        data-feather="plus-circle"
+                                                                                        class="info-img"></i>Add Address
+                                                                                </a>
+                                                                            </li>
 
-                                                                                <li>
-                                                                                    <a href="javascript:void(0);"
-                                                                                        data-bs-toggle="modal"
-                                                                                        data-bs-target="#test-mail"
-                                                                                        class="dropdown-item sendMail mb-0"><i
-                                                                                            data-feather="send"
-                                                                                            class="info-img"></i>Send Mail </a>
-                                                                                </li>
-                                                                            </ul>
-                                                                        </td>
-                                                                    </tr>
+                                                                            <li>
+                                                                                <a href="javascript:void(0);"
+                                                                                    data-emailSetting-id="<?php echo $data['email_settings_id'] ?>"
+                                                                                    class="dropdown-item deleteButton mb-0"><i
+                                                                                        data-feather="trash-2"
+                                                                                        class="info-img"></i>Delete </a>
+                                                                            </li>
+
+                                                                            <li>
+                                                                                <a href="javascript:void(0);"
+                                                                                    data-bs-toggle="modal"
+                                                                                    data-bs-target="#test-mail"
+                                                                                    class="dropdown-item sendMail mb-0"><i
+                                                                                        data-feather="send"
+                                                                                        class="info-img"></i>Send Mail </a>
+                                                                            </li>
+                                                                        </ul>
+                                                                    </td>
+                                                                </tr>
                                                             <?php endforeach; ?>
 
                                                         </tbody>
