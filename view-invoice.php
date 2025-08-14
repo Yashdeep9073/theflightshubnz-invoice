@@ -511,9 +511,7 @@ try {
     $pdf->SetXY(55, 245);
     $pdf->Cell(22, 10, 'We wish you a safe and pleasant journey.', 0, 0); // Render "Invoice No:" in black, normal font
 
-    $pdf->SetFont('FuturaBT-Medium', '', 12); // Reset font to normal
-    $pdf->SetXY(20, 260);
-    $pdf->Cell(22, 10, 'We Accept', 0, 0); // Render "Invoice No:" in black, normal font
+
 
 
     // Add paid stamp if invoice is paid
