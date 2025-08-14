@@ -227,6 +227,7 @@ ob_end_flush();
                                 <img src="<?= isset($companySettings['company_logo']) ? $companySettings['company_logo'] : "assets/img/logo/vis-logo.png" ?>"
                                     alt="Logo">
                             </div>
+                            <hr>
                             <div class="account-wrapper">
                                 <div class="login-userheading">
 
