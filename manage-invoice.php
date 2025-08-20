@@ -425,6 +425,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['invoiceIdForReminder']
                     <div class="footer">
                         <p>&copy; {$currentYear} {$fromTitle}. All rights reserved.</p>
                         <p>{$address1} <a href='mailto:{$supportEmail}'>{$supportEmail}</a></p>
+                        <p>NZBN No: {$companySettings['bz_number']}</p>
                         <p>
                             <a href='{$googleUrl}' target='_blank'><img src='https://vault.theflightshub.co.nz/assets/img/icons/google.png ' alt='Google'></a>
                             <a href='{$facebook}' target='_blank'><img src='https://vault.theflightshub.co.nz/assets/img/icons/facebook.png ' alt='Facebook'></a>
@@ -711,6 +712,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['invoiceIdForSend'])) {
                     <div class="footer">
                         <p>&copy; {$currentYear} {$fromTitle}. All rights reserved.</p>
                         <p>{$address1} <a href='mailto:{$supportEmail}'>{$supportEmail}</a></p>
+                        <p>NZBN No: {$companySettings['bz_number']}</p>
                         <p>
                             <a href='{$googleUrl}' target='_blank'><img src='https://vault.theflightshub.co.nz/assets/img/icons/google.png ' alt='Google'></a>
                             <a href='{$facebook}' target='_blank'><img src='https://vault.theflightshub.co.nz/assets/img/icons/facebook.png ' alt='Facebook'></a>
