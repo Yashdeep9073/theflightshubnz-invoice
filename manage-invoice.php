@@ -426,10 +426,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['invoiceIdForReminder']
                         <p>&copy; {$currentYear} {$fromTitle}. All rights reserved.</p>
                         <p>{$address1} <a href='mailto:{$supportEmail}'>{$supportEmail}</a></p>
                         <p>
-                            <a href='{$linkedin}' target='_blank'><img src='https://vault.theflightshub.co.nz/assets/img/icons/linkdin.png ' alt='LinkedIn'></a>
-                            <a href='{$instagram}' target='_blank'><img src='https://vault.theflightshub.co.nz/assets/img/icons/instagram.png ' alt='Instagram'></a>
-                            <a href='{$facebook}' target='_blank'><img src='https://vault.theflightshub.co.nz/assets/img/icons/facebook.png ' alt='Facebook'></a>
                             <a href='{$googleUrl}' target='_blank'><img src='https://vault.theflightshub.co.nz/assets/img/icons/google.png ' alt='Google'></a>
+                            <a href='{$facebook}' target='_blank'><img src='https://vault.theflightshub.co.nz/assets/img/icons/facebook.png ' alt='Facebook'></a>
+                            <a href='{$instagram}' target='_blank'><img src='https://vault.theflightshub.co.nz/assets/img/icons/instagram.png ' alt='Instagram'></a>
                             <a href='{$whatsappUrl}' target='_blank'><img src='https://vault.theflightshub.co.nz/assets/img/icons/whatsapp.png ' alt='Whatsapp'></a>
                         </p>
                     </div>
@@ -713,10 +712,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['invoiceIdForSend'])) {
                         <p>&copy; {$currentYear} {$fromTitle}. All rights reserved.</p>
                         <p>{$address1} <a href='mailto:{$supportEmail}'>{$supportEmail}</a></p>
                         <p>
-                            <a href='{$linkedin}' target='_blank'><img src='https://vault.theflightshub.co.nz/assets/img/icons/linkdin.png ' alt='LinkedIn'></a>
-                            <a href='{$instagram}' target='_blank'><img src='https://vault.theflightshub.co.nz/assets/img/icons/instagram.png ' alt='Instagram'></a>
-                            <a href='{$facebook}' target='_blank'><img src='https://vault.theflightshub.co.nz/assets/img/icons/facebook.png ' alt='Facebook'></a>
                             <a href='{$googleUrl}' target='_blank'><img src='https://vault.theflightshub.co.nz/assets/img/icons/google.png ' alt='Google'></a>
+                            <a href='{$facebook}' target='_blank'><img src='https://vault.theflightshub.co.nz/assets/img/icons/facebook.png ' alt='Facebook'></a>
+                            <a href='{$instagram}' target='_blank'><img src='https://vault.theflightshub.co.nz/assets/img/icons/instagram.png ' alt='Instagram'></a>
                             <a href='{$whatsappUrl}' target='_blank'><img src='https://vault.theflightshub.co.nz/assets/img/icons/whatsapp.png ' alt='Whatsapp'></a>
                         </p>
                     </div>
