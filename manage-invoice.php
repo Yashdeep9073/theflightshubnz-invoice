@@ -43,6 +43,8 @@ try {
     $linkedin = $emailSettingData['linkedin_url'] ?? 'https://www.linkedin.com/company/vibrantick-infotech-solutions/posts/?feedView=all';
     $instagram = $emailSettingData['ig_url'] ?? ' https://www.instagram.com/vibrantickinfotech/ ';
     $facebook = $emailSettingData['fb_url'] ?? 'https://www.facebook.com/vibranticksolutions/ ';
+    $googleUrl = $emailSettingData['google_url'] ?? 'https://share.google/TV95iiaQa4aniAgHV';
+    $whatsappUrl = $emailSettingData['whatsapp_url'] ?? 'https://api.whatsapp.com/send?phone=64224226675';
     $currentYear = date("Y");
 
 
@@ -424,9 +426,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['invoiceIdForReminder']
                         <p>&copy; {$currentYear} {$fromTitle}. All rights reserved.</p>
                         <p>{$address1} <a href='mailto:{$supportEmail}'>{$supportEmail}</a></p>
                         <p>
-                            <a href='{$linkedin}' target='_blank'><img src='https://cdn-icons-png.flaticon.com/24/174/174857.png ' alt='LinkedIn'></a>
-                            <a href='{$instagram}' target='_blank'><img src='https://cdn-icons-png.flaticon.com/24/2111/2111463.png ' alt='Instagram'></a>
-                            <a href='{$facebook}' target='_blank'><img src='https://cdn-icons-png.flaticon.com/24/733/733547.png ' alt='Facebook'></a>
+                            <a href='{$linkedin}' target='_blank'><img src='https://vault.theflightshub.co.nz/assets/img/icons/linkdin.png ' alt='LinkedIn'></a>
+                            <a href='{$instagram}' target='_blank'><img src='https://vault.theflightshub.co.nz/assets/img/icons/instagram.png ' alt='Instagram'></a>
+                            <a href='{$facebook}' target='_blank'><img src='https://vault.theflightshub.co.nz/assets/img/icons/facebook.png ' alt='Facebook'></a>
+                            <a href='{$googleUrl}' target='_blank'><img src='https://vault.theflightshub.co.nz/assets/img/icons/google.png ' alt='Google'></a>
+                            <a href='{$whatsappUrl}' target='_blank'><img src='https://vault.theflightshub.co.nz/assets/img/icons/whatsapp.png ' alt='Whatsapp'></a>
                         </p>
                     </div>
                 </div>
@@ -709,9 +713,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['invoiceIdForSend'])) {
                         <p>&copy; {$currentYear} {$fromTitle}. All rights reserved.</p>
                         <p>{$address1} <a href='mailto:{$supportEmail}'>{$supportEmail}</a></p>
                         <p>
-                            <a href='{$linkedin}' target='_blank'><img src='https://cdn-icons-png.flaticon.com/24/174/174857.png ' alt='LinkedIn'></a>
-                            <a href='{$instagram}' target='_blank'><img src='https://cdn-icons-png.flaticon.com/24/2111/2111463.png ' alt='Instagram'></a>
-                            <a href='{$facebook}' target='_blank'><img src='https://cdn-icons-png.flaticon.com/24/733/733547.png ' alt='Facebook'></a>
+                            <a href='{$linkedin}' target='_blank'><img src='https://vault.theflightshub.co.nz/assets/img/icons/linkdin.png ' alt='LinkedIn'></a>
+                            <a href='{$instagram}' target='_blank'><img src='https://vault.theflightshub.co.nz/assets/img/icons/instagram.png ' alt='Instagram'></a>
+                            <a href='{$facebook}' target='_blank'><img src='https://vault.theflightshub.co.nz/assets/img/icons/facebook.png ' alt='Facebook'></a>
+                            <a href='{$googleUrl}' target='_blank'><img src='https://vault.theflightshub.co.nz/assets/img/icons/google.png ' alt='Google'></a>
+                            <a href='{$whatsappUrl}' target='_blank'><img src='https://vault.theflightshub.co.nz/assets/img/icons/whatsapp.png ' alt='Whatsapp'></a>
                         </p>
                     </div>
                 </div>

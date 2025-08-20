@@ -233,6 +233,8 @@ CREATE TABLE `email_settings` (
   `ig_url` longtext,
   `fb_url` longtext,
   `linkedin_url` longtext,
+  `google_url` longtext,
+  `whatsapp_url` longtext,
   PRIMARY KEY (`email_settings_id`),
   UNIQUE KEY `email_address_UNIQUE` (`email_address`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -244,7 +246,7 @@ CREATE TABLE `email_settings` (
 
 LOCK TABLES `email_settings` WRITE;
 /*!40000 ALTER TABLE `email_settings` DISABLE KEYS */;
-INSERT INTO `email_settings` VALUES (3,'The FlightsHub New Zealand LTD','admin@vcarenetwork.in','^2PrR:OQCsv','smtp.hostinger.com',465,1,'2025-06-13 08:27:04','2025-07-22 12:48:48','public/upload/emailSetting/images/img_687f86443eb377.83424494.svg','support@theflightshub.co.nz','+64 22 422 6077','Stokes Valley, Lower Hutt 5019,Wellington,New Zealand','https://www.instagram.com/theflightshub_nz/','https://www.facebook.com/TheflightsHub.nz','https://www.linkedin.com/company/the-flightshub-new-zealand/');
+INSERT INTO `email_settings` VALUES (3,'The FlightsHub New Zealand LTD','info@theflightshub.co.nz','abwxslhwllinhmxd','smtp.gmail.com',465,1,'2025-06-13 08:27:04','2025-08-20 06:23:14','public/upload/emailSetting/images/img_687f86443eb377.83424494.svg','support@theflightshub.co.nz','+64 22 422 6077','Stokes Valley, Lower Hutt 5019,Wellington,New Zealand','https://www.instagram.com/theflightshub_nz/','https://www.facebook.com/TheflightsHub.nz','https://www.linkedin.com/company/the-flightshub-new-zealand/','https://share.google/TV95iiaQa4aniAgHV','https://api.whatsapp.com/send?phone=64224226675');
 /*!40000 ALTER TABLE `email_settings` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -324,7 +326,7 @@ CREATE TABLE `invoice` (
 
 LOCK TABLES `invoice` WRITE;
 /*!40000 ALTER TABLE `invoice` DISABLE KEYS */;
-INSERT INTO `invoice` VALUES (224,'INV-20250723-00012','Air-ticket invoice','CASH','TX-20250723-85454-R3JR','PAID','Air India','2025-07-24','','Alex','[15]','Goa','Cotonou','Phase-8, D-185,Mohali ','THIS IS TESTING',0,3,'The Flights Hub PVT LTD.','[{\"type\": \"ADULT\", \"amount\": \"1132\", \"quantity\": \"2\"}, {\"type\": \"CHILDREN\", \"amount\": \"500\", \"quantity\": \"2\"}]',1632.00,'2025-07-23 11:55:07','2025-07-25 11:13:28',1,1,'yashdeep@vibrantick.in'),(225,'INV-20250724-00002','Air-ticket invoice','CASH_DEPOSIT','TX-20250724-35394-GP6E','PENDING','China Southern','2025-07-23','2025-07-18','Alex','[15]','Luxor','Cotonou','Phase-8, D-185,Mohali ','This is testing',0,1,'VIS PVT LTD','[{\"type\": \"ADULT\", \"amount\": \"1200\", \"quantity\": \"2\"}]',2000.00,'2025-07-24 08:04:07','2025-07-25 11:13:28',1,1,'yashdeep@vibrantick.in'),(226,'INV-20250725100647-00003','Air-ticket invoice','CASH','TX-20250725-31080-IJHW','CANCELLED','Fiji Airways','2025-07-26','2025-07-25','Yashdeep','[15]','Luanda - 4 de Fevereiro','Cotonou','45 Direction, Drive Tarneit, 3029 Victoria Australia','services.php',0,0,'VIS PVT LTD','[{\"type\": \"ADULT\", \"amount\": \"12312\", \"quantity\": \"12\"}]',10300.00,'2025-07-25 10:07:31','2025-07-25 11:13:28',1,1,'yashdeep@vibrantick.in'),(227,'INV-20250725102646-00005','Air-ticket invoice','CASH_DEPOSIT','TX-20250725-29739-6SSI','REFUNDED','IndiGo Airlines','2025-07-30','2025-07-26','Alex','[15]','Cabinda','Cotonou','Phase-8, D-185,Mohali ','serviceIds',0,0,'VIS PVT LTD','[{\"type\": \"ADULT\", \"amount\": \"1233\", \"quantity\": \"12123\"}]',10300.00,'2025-07-25 10:27:18','2025-07-25 10:50:54',1,1,'yashdeep@vibrantick.in'),(228,'INV-20250725110600-00007','Air-ticket invoice','CASH_DEPOSIT','TX-20250725-71397-258Q','PENDING','IndiGo Airlines','2025-07-26','2025-07-25','Yashdeep','[15]','Luanda - 4 de Fevereiro','Cotonou','ST-122','Enter Remark Here..',0,1,'VIS PVT LTD','[{\"type\": \"ADULT\", \"amount\": \"3333\", \"quantity\": \"12\"}]',10300.00,'2025-07-25 11:06:55','2025-07-25 11:11:09',1,1,'yashdeep@vibrantick.org');
+INSERT INTO `invoice` VALUES (224,'INV-20250723-00012','Air-ticket invoice','CASH_DEPOSIT','TX-20250723-85454-R3JR','PENDING','Hainan Airlines','2025-07-24','2025-08-28','Alex','[15]','Goa','Calcutta (Kolkata) - Netaji Subhas Chandra','Phase-8, D-185,Mohali ','THIS IS TESTING',0,6,'The Flights Hub PVT LTD.','[{\"type\": \"ADULT\", \"amount\": \"1132\", \"quantity\": \"6\"}, {\"type\": \"CHILDREN\", \"amount\": \"500\", \"quantity\": \"2\"}]',1633.00,'2025-07-23 11:55:07','2025-08-20 06:29:16',1,1,'ydeep9073@gmail.com'),(225,'INV-20250724-00002','Air-ticket invoice','CASH_DEPOSIT','TX-20250724-35394-GP6E','PENDING','China Southern','2025-07-23','2025-07-18','Alex','[15]','Luxor','Cotonou','Phase-8, D-185,Mohali ','This is testing',0,2,'VIS PVT LTD','[{\"type\": \"ADULT\", \"amount\": \"1200\", \"quantity\": \"2\"}]',2000.00,'2025-07-24 08:04:07','2025-08-13 11:43:23',1,1,'yashdeep@vibrantick.in'),(226,'INV-20250725100647-00003','Air-ticket invoice','CASH_DEPOSIT','TX-20250725-31080-IJHW','CANCELLED','Fiji Airways','2025-07-26','2025-07-25','Yashdeep','[15]','Luanda - 4 de Fevereiro','Cotonou','45 Direction, Drive Tarneit, 3029 Victoria Australia','services.php',0,0,'VIS PVT LTD','[{\"type\": \"ADULT\", \"amount\": \"12312\", \"quantity\": \"12\"}]',10300.00,'2025-07-25 10:07:31','2025-08-08 08:10:05',1,1,'yashdeep@vibrantick.in'),(227,'INV-20250725102646-00005','Air-ticket invoice','CASH_DEPOSIT','TX-20250725-29739-6SSI','REFUNDED','IndiGo Airlines','2025-07-30','2025-07-26','Alex','[15]','Cabinda','Cotonou','Phase-8, D-185,Mohali ','serviceIds',0,0,'VIS PVT LTD','[{\"type\": \"ADULT\", \"amount\": \"1233\", \"quantity\": \"12123\"}]',10300.00,'2025-07-25 10:27:18','2025-07-25 10:50:54',1,1,'yashdeep@vibrantick.in'),(228,'INV-20250725110600-00007','Air-ticket invoice','CASH_DEPOSIT','TX-20250725-71397-258Q','PENDING','IndiGo Airlines','2025-07-26','2025-07-25','Yashdeep','[15]','Luanda - 4 de Fevereiro','Cotonou','ST-122','Enter Remark Here..',0,1,'VIS PVT LTD','[{\"type\": \"ADULT\", \"amount\": \"3333\", \"quantity\": \"12\"}]',10300.00,'2025-07-25 11:06:55','2025-07-25 11:11:09',1,1,'yashdeep@vibrantick.org');
 /*!40000 ALTER TABLE `invoice` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -350,7 +352,7 @@ CREATE TABLE `invoice_sequence` (
 
 LOCK TABLES `invoice_sequence` WRITE;
 /*!40000 ALTER TABLE `invoice_sequence` DISABLE KEYS */;
-INSERT INTO `invoice_sequence` VALUES (1,7,'2025-07-25 09:54:10','2025-07-25 11:06:00');
+INSERT INTO `invoice_sequence` VALUES (1,12,'2025-07-25 09:54:10','2025-08-08 08:47:49');
 /*!40000 ALTER TABLE `invoice_sequence` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -382,7 +384,7 @@ CREATE TABLE `invoice_settings` (
 
 LOCK TABLES `invoice_settings` WRITE;
 /*!40000 ALTER TABLE `invoice_settings` DISABLE KEYS */;
-INSERT INTO `invoice_settings` VALUES (1,'INV','public/upload/invoice/images/img_687753ba8d88d4.95365622.svg','INVOICE NOTE:\r\n•	ALL THE PAYMENTS MUST BE PAID IN NZD BY THE DUE DATE UNLESS MENTIONED OR CREDIT LIMIT OFFERED.\r\n•	ANY PAYMENTS MADE BY BANK CREDIT CARD WILL ATTRACT 2.5% CC FEE.\r\nALL ACCOUNT TRANSFERS SHALL BE MADE INTO BELOW ACCOUNT DETAILS\r\nACCOUNT NAME: THE FLIGHTSHUB PVT LTD\r\nANZ :: 01-1842-0636659-00\r\nASB :: 12-3142-0494687-00\r\nBNZ :: 02-0528-0567582-000\r\n','INVOICE NOTE:\r\n•	ALL THE PAYMENTS MUST BE PAID IN NZD BY THE DUE DATE UNLESS MENTIONED OR CREDIT LIMIT OFFERED.\r\n•	ANY PAYMENTS MADE BY BANK CREDIT CARD WILL ATTRACT 2.5% CC FEE.\r\nALL ACCOUNT TRANSFERS SHALL BE MADE INTO BELOW ACCOUNT DETAILS\r\nACCOUNT NAME: THE FLIGHTSHUB PVT LTD\r\nANZ :: 01-1842-0636659-00\r\nASB :: 12-3142-0494687-00\r\nBNZ :: 02-0528-0567582-000\r\n','public/upload/invoice/images/img_688211b47f9263.29287253.pdf','2025-06-16 07:36:32','2025-07-24 10:57:56',1,1);
+INSERT INTO `invoice_settings` VALUES (1,'INV','public/upload/invoice/images/img_687753ba8d88d4.95365622.svg','INVOICE NOTE:\r\n•	ALL THE PAYMENTS MUST BE PAID IN NZD BY THE DUE DATE UNLESS MENTIONED OR CREDIT LIMIT OFFERED.\r\n•	ANY PAYMENTS MADE BY BANK CREDIT CARD WILL ATTRACT 2.5% CC FEE.\r\nALL ACCOUNT TRANSFERS SHALL BE MADE INTO BELOW ACCOUNT DETAILS\r\nACCOUNT NAME: THE FLIGHTSHUB PVT LTD\r\nANZ :: 01-1842-0636659-00\r\nASB :: 12-3142-0494687-00\r\nBNZ :: 02-0528-0567582-000\r\n','INVOICE NOTE:\r\n•	ALL THE PAYMENTS MUST BE PAID IN NZD BY THE DUE DATE UNLESS MENTIONED OR CREDIT LIMIT OFFERED.\r\n•	ANY PAYMENTS MADE BY BANK CREDIT CARD WILL ATTRACT 2.5% CC FEE.\r\nALL ACCOUNT TRANSFERS SHALL BE MADE INTO BELOW ACCOUNT DETAILS\r\nACCOUNT NAME: THE FLIGHTSHUB PVT LTD\r\nANZ :: 01-1842-0636659-00\r\nASB :: 12-3142-0494687-00\r\nBNZ :: 02-0528-0567582-000\r\n','public/upload/invoice/images/img_689c6d30cfe7d0.09289342.pdf','2025-06-16 07:36:32','2025-08-13 10:47:12',1,1);
 /*!40000 ALTER TABLE `invoice_settings` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -617,4 +619,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-07-28 10:49:52
+-- Dump completed on 2025-08-20 12:01:22

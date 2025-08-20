@@ -250,6 +250,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['addAddress'])) {
             $linkedinUrl = $_POST['linkedinUrl'];
             $instagramUrl = $_POST['instagramUrl'];
             $facebookUrl = $_POST['facebookUrl'];
+            $googleUrl = $_POST['googleUrl'];
+            $whatsappUrl = $_POST['whatsappUrl'];
             $mailLogo = $_FILES['mailLogo'];
 
             if ($mailLogo['name'] != "") {
@@ -272,11 +274,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['addAddress'])) {
              address_line1 = ?,
              ig_url = ?,
              fb_url = ?,
-             linkedin_url = ?
+             linkedin_url = ? ,
+             google_url = ? ,
+             whatsapp_url =? 
              WHERE email_settings_id = ?");
 
             $stmtAddAddress->bind_param(
-                "sssssssi",
+                "sssssssssi",
                 $logoUrl,
                 $emailAddress,
                 $phone,
@@ -284,6 +288,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['addAddress'])) {
                 $instagramUrl,
                 $facebookUrl,
                 $linkedinUrl,
+                $googleUrl,
+                $whatsappUrl,
                 $addressEmailSettingId
             );
             $stmtAddAddress->execute();
@@ -299,6 +305,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['addAddress'])) {
             $linkedinUrl = $_POST['linkedinUrl'];
             $instagramUrl = $_POST['instagramUrl'];
             $facebookUrl = $_POST['facebookUrl'];
+            $googleUrl = $_POST['googleUrl'];
+            $whatsappUrl = $_POST['whatsappUrl'];
             $mailLogo = $_FILES['mailLogo'];
 
             // exiting 
@@ -324,11 +332,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['addAddress'])) {
              address_line1 = ?,
              ig_url = ?,
              fb_url = ?,
-             linkedin_url = ?
+             linkedin_url = ? ,
+             google_url = ? ,
+             whatsapp_url =? 
              WHERE email_settings_id = ?");
 
             $stmtAddAddress->bind_param(
-                "sssssssi",
+                "sssssssssi",
                 $logoUrl,
                 $emailAddress,
                 $phone,
@@ -336,6 +346,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['addAddress'])) {
                 $instagramUrl,
                 $facebookUrl,
                 $linkedinUrl,
+                $googleUrl,
+                $whatsappUrl,
                 $addressEmailSettingId
             );
             $stmtAddAddress->execute();
@@ -575,12 +587,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['addAddress'])) {
                                                                                 <img src="<?= !empty($emailSettingData[0]["logo_url"]) ? $emailSettingData[0]["logo_url"] : "assets/img/products/stock-img-01.png" ?>"
                                                                                     alt="product">
                                                                             </a>
-
                                                                         </div>
                                                                     </td>
-                                                                    <td>
-                                                                        <?php echo $data['email_from_title'] ?>
-                                                                    </td>
+                                                                    <td><?php echo $data['email_from_title'] ?></td>
                                                                     <td class="ref-number">
                                                                         <?php echo $data['email_address'] ?>
                                                                     </td>
@@ -906,6 +915,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['addAddress'])) {
                                             <label class="form-label"> Facebook Url <span> *</span></label>
                                             <input type="url" class="form-control" name="facebookUrl"
                                                 value="<?= !empty($emailSettingData[0]['fb_url']) ? $emailSettingData[0]['fb_url'] : "" ?>"
+                                                required>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="mb-0">
+                                            <label class="form-label"> Google Url <span> *</span></label>
+                                            <input type="url" class="form-control" name="googleUrl"
+                                                value="<?= !empty($emailSettingData[0]['google_url']) ? $emailSettingData[0]['google_url'] : "" ?>"
+                                                required>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div class="mb-0">
+                                            <label class="form-label"> Whatsapp Url <span> *</span></label>
+                                            <input type="url" class="form-control" name="whatsappUrl"
+                                                value="<?= !empty($emailSettingData[0]['whatsapp_url']) ? $emailSettingData[0]['whatsapp_url'] : "" ?>"
                                                 required>
                                         </div>
                                     </div>
