@@ -317,10 +317,10 @@ ob_end_clean();
                                         </div>
                                         <div class="search-path">
                                             <div class="d-flex align-items-center">
-                                                <a class="btn btn-filter" id="filter_search">
+                                                <!-- <a class="btn btn-filter" id="filter_search">
                                                     <i data-feather="filter" class="filter-icon"></i>
                                                     <span><img src="assets/img/icons/closes.svg" alt="img" /></span>
-                                                </a>
+                                                </a> -->
                                             </div>
                                         </div>
 
@@ -461,10 +461,10 @@ ob_end_clean();
                                         </div>
                                         <div class="search-path">
                                             <div class="d-flex align-items-center">
-                                                <a class="btn btn-filter" id="filter_search1">
+                                                <!-- <a class="btn btn-filter" id="filter_search1">
                                                     <i data-feather="filter" class="filter-icon"></i>
                                                     <span><img src="assets/img/icons/closes.svg" alt="img" /></span>
-                                                </a>
+                                                </a> -->
                                             </div>
                                         </div>
 
@@ -601,10 +601,10 @@ ob_end_clean();
                                         </div>
                                         <div class="search-path">
                                             <div class="d-flex align-items-center">
-                                                <a class="btn btn-filter" id="filter_search2">
+                                                <!-- <a class="btn btn-filter" id="filter_search2">
                                                     <i data-feather="filter" class="filter-icon"></i>
                                                     <span><img src="assets/img/icons/closes.svg" alt="img" /></span>
-                                                </a>
+                                                </a> -->
                                             </div>
                                         </div>
 
@@ -736,10 +736,10 @@ ob_end_clean();
                                         </div>
                                         <div class="search-path">
                                             <div class="d-flex align-items-center">
-                                                <a class="btn btn-filter" id="filter_search3">
+                                                <!-- <a class="btn btn-filter" id="filter_search3">
                                                     <i data-feather="filter" class="filter-icon"></i>
                                                     <span><img src="assets/img/icons/closes.svg" alt="img" /></span>
-                                                </a>
+                                                </a> -->
                                             </div>
                                         </div>
 

@@ -988,10 +988,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['invoiceIds'])) {
                             </div>
                             <div class="search-path">
                                 <div class="d-flex align-items-center">
-                                    <a class="btn btn-filter" id="filter_search">
+                                    <!-- <a class="btn btn-filter" id="filter_search">
                                         <i data-feather="filter" class="filter-icon"></i>
                                         <span><img src="assets/img/icons/closes.svg" alt="img" /></span>
-                                    </a>
+                                    </a> -->
                                 </div>
                             </div>
                         </div>
