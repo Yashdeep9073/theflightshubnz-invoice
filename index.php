@@ -287,7 +287,7 @@ ob_end_flush();
                                                 href="<?php echo isset($companySettings['company_website']) ? $companySettings['company_website'] : "https://vibrantick.in/" ?>"
                                                 target="_blank"><?php echo isset($companySettings['company_name']) ? $companySettings['company_name'] : "Vibrantick
                                                 Infotech Solutions Pvt Ltd." ?>
-                                            </a>. Developed by <a href="https://vibrantick.in">Vibrantick
+                                            </a>| Developed by <a href="https://vibrantick.in">Vibrantick
                                                 Infotech Solutions.</a></p>
                                     </div>
                                 </div>
