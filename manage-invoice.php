@@ -138,6 +138,7 @@ try {
                 LEFT JOIN admin
                 ON admin.admin_id = invoice.created_by 
                 WHERE invoice.is_active = 1
+                ORDER BY invoice.invoice_id ASC
                 ");
             if ($stmtFetchInvoices->execute()) {
                 $invoices = $stmtFetchInvoices->get_result();
