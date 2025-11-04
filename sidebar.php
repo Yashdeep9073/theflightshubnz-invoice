@@ -140,6 +140,19 @@ $isAdmin = strtolower($roleData['0']['role_name']) === 'admin';
                 </li>
             <?php endif; ?>
 
+             <?php if ($isAdmin || hasPermission('Smartsheet', $privileges, $roleData['0']['role_name'])): ?>
+                <li class="submenu-open">
+                    <h6 class="submenu-hdr">Smartsheet</h6>
+                    <ul>
+                        <li >
+                            <a href="spreadsheet.php"><i class="fa fa-file-excel me-2"></i><span>Smartsheet</span></a>
+                           
+                        </li>
+
+                    </ul>
+                </li>
+            <?php endif; ?>
+
             <?php if ($isAdmin || hasPermission('Utility', $privileges, $roleData['0']['role_name'])): ?>
                 <li class="submenu-open">
                     <h6 class="submenu-hdr">Utility</h6>
