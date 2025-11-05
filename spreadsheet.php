@@ -8,11 +8,13 @@ if (!isset($_SESSION["admin_id"])) {
 $admin_id = base64_decode($_SESSION["admin_id"]);
 
 // Function to encode/decode file IDs for security
-function encodeFileId($id) {
+function encodeFileId($id)
+{
     return base64_encode($id . '_' . time());
 }
 
-function decodeFileId($encoded) {
+function decodeFileId($encoded)
+{
     $decoded = base64_decode($encoded);
     $parts = explode('_', $decoded);
     return $parts[0] ?? 0;
@@ -25,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // ADD FOLDER
     if ($action === 'add_folder') {
         $name = trim($_POST['name'] ?? '');
-        $parent = !empty($_POST['parent_id']) ? (int)$_POST['parent_id'] : null;
+        $parent = !empty($_POST['parent_id']) ? (int) $_POST['parent_id'] : null;
 
         if ($name) {
             try {
@@ -40,14 +42,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } else {
             $_SESSION['error'] = "Folder name is required";
         }
-         header("Location: spreadsheet.php");
+        header("Location: spreadsheet.php");
         exit;
     }
 
     // ADD FILE
     if ($action === 'add_file') {
         $name = trim($_POST['name'] ?? '');
-        $parent = !empty($_POST['parent_id']) ? (int)$_POST['parent_id'] : null;
+        $parent = !empty($_POST['parent_id']) ? (int) $_POST['parent_id'] : null;
 
         if ($name) {
             try {
@@ -72,7 +74,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 $filename = preg_replace('/[^a-zA-Z0-9_-]/', '_', $name) . '_' . time() . '.json';
                 $filepath = "uploads/spreadsheets/" . $filename;
-                if (!is_dir('uploads/spreadsheets')) mkdir('uploads/spreadsheets', 0755, true);
+                if (!is_dir('uploads/spreadsheets'))
+                    mkdir('uploads/spreadsheets', 0755, true);
 
                 file_put_contents($filepath, json_encode($luckysheetData));
 
@@ -87,14 +90,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         } else {
             $_SESSION['error'] = "File name is required";
-        } 
-         header("Location: spreadsheet.php");
+        }
+        header("Location: spreadsheet.php");
         exit;
     }
 
     // SHARE
     if ($action === 'share') {
-        $fileId = (int)($_POST['file_id'] ?? 0);
+        $fileId = (int) ($_POST['file_id'] ?? 0);
         $users = $_POST['users'] ?? [];
         $perm = $_POST['permission'] ?? 'view';
 
@@ -161,78 +164,78 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } catch (Exception $e) {
             $_SESSION['error'] = "Share failed: " . $e->getMessage();
         }
-         header("Location: spreadsheet.php");
+        header("Location: spreadsheet.php");
         exit;
     }
 
     // DELETE
-   if ($action === 'delete') {
-    $itemId = (int)($_POST['item_id'] ?? 0);
+    if ($action === 'delete') {
+        $itemId = (int) ($_POST['item_id'] ?? 0);
 
-    try {
-        // Fetch item info and check if it's shared or owned by current admin
-        $stmt = $db->prepare("
+        try {
+            // Fetch item info and check if it's shared or owned by current admin
+            $stmt = $db->prepare("
             SELECT ff.*, COUNT(fp.id) as shared_count
             FROM file_folders ff
             LEFT JOIN file_permissions fp ON ff.id = fp.file_folder_id
             WHERE ff.id = ?
             GROUP BY ff.id
         ");
-        $stmt->bind_param("i", $itemId);
-        $stmt->execute();
-        $item = $stmt->get_result()->fetch_assoc();
-
-        if (!$item) {
-            $_SESSION['error'] = "Item not found.";
-        } else if ($item['created_by'] != $admin_id) {
-            $_SESSION['error'] = "You can only delete your own items.";
-        } else if ($item['shared_count'] > 0) {
-            $_SESSION['error'] = "Cannot delete shared item. Unshare first.";
-        } else {
-            // Delete all related files if it's a folder
-            if ($item['type'] === 'folder') {
-                // Fetch all files in this folder
-                $stmtFiles = $db->prepare("SELECT id, file_path FROM file_folders WHERE parent_id = ?");
-                $stmtFiles->bind_param("i", $itemId);
-                $stmtFiles->execute();
-                $files = $stmtFiles->get_result();
-
-                while ($file = $files->fetch_assoc()) {
-                    if ($file['file_path'] && file_exists($file['file_path'])) {
-                        unlink($file['file_path']); // delete physical file
-                    }
-
-                    // delete file record from database
-                    $delFileStmt = $db->prepare("DELETE FROM file_folders WHERE id = ?");
-                    $delFileStmt->bind_param("i", $file['id']);
-                    $delFileStmt->execute();
-                }
-
-                // Optionally, remove the folder directory itself (if stored on disk)
-                if ($item['file_path'] && is_dir($item['file_path'])) {
-                    rmdir($item['file_path']); // remove empty directory
-                }
-            } else {
-                // If it's a single file, remove it from filesystem
-                if ($item['file_path'] && file_exists($item['file_path'])) {
-                    unlink($item['file_path']);
-                }
-            }
-
-            // Delete the folder/file record itself
-            $stmt = $db->prepare("DELETE FROM file_folders WHERE id = ?");
             $stmt->bind_param("i", $itemId);
             $stmt->execute();
+            $item = $stmt->get_result()->fetch_assoc();
 
-            $_SESSION['success'] = ucfirst($item['type']) . " '{$item['name']}' deleted successfully.";
+            if (!$item) {
+                $_SESSION['error'] = "Item not found.";
+            } else if ($item['created_by'] != $admin_id) {
+                $_SESSION['error'] = "You can only delete your own items.";
+            } else if ($item['shared_count'] > 0) {
+                $_SESSION['error'] = "Cannot delete shared item. Unshare first.";
+            } else {
+                // Delete all related files if it's a folder
+                if ($item['type'] === 'folder') {
+                    // Fetch all files in this folder
+                    $stmtFiles = $db->prepare("SELECT id, file_path FROM file_folders WHERE parent_id = ?");
+                    $stmtFiles->bind_param("i", $itemId);
+                    $stmtFiles->execute();
+                    $files = $stmtFiles->get_result();
+
+                    while ($file = $files->fetch_assoc()) {
+                        if ($file['file_path'] && file_exists($file['file_path'])) {
+                            unlink($file['file_path']); // delete physical file
+                        }
+
+                        // delete file record from database
+                        $delFileStmt = $db->prepare("DELETE FROM file_folders WHERE id = ?");
+                        $delFileStmt->bind_param("i", $file['id']);
+                        $delFileStmt->execute();
+                    }
+
+                    // Optionally, remove the folder directory itself (if stored on disk)
+                    if ($item['file_path'] && is_dir($item['file_path'])) {
+                        rmdir($item['file_path']); // remove empty directory
+                    }
+                } else {
+                    // If it's a single file, remove it from filesystem
+                    if ($item['file_path'] && file_exists($item['file_path'])) {
+                        unlink($item['file_path']);
+                    }
+                }
+
+                // Delete the folder/file record itself
+                $stmt = $db->prepare("DELETE FROM file_folders WHERE id = ?");
+                $stmt->bind_param("i", $itemId);
+                $stmt->execute();
+
+                $_SESSION['success'] = ucfirst($item['type']) . " '{$item['name']}' deleted successfully.";
+            }
+        } catch (Exception $e) {
+            $_SESSION['error'] = "Delete failed: " . $e->getMessage();
         }
-    } catch (Exception $e) {
-        $_SESSION['error'] = "Delete failed: " . $e->getMessage();
-    }
 
-     header("Location: spreadsheet.php");
-    exit;
-}
+        header("Location: spreadsheet.php");
+        exit;
+    }
 
 }
 
@@ -271,6 +274,11 @@ function shareFolderContents($folderId, $add, $remove, $perm, $adminId, $db)
 $myTree = [];
 $fileSharedUsers = [];
 try {
+
+    $stmtFetchCompanySettings = $db->prepare("SELECT * FROM company_settings");
+    $stmtFetchCompanySettings->execute();
+    $companySettings = $stmtFetchCompanySettings->get_result()->fetch_array(MYSQLI_ASSOC);
+
     $stmt = $db->prepare("
         SELECT ff.*, 
                GROUP_CONCAT(DISTINCT fp.user_id) AS shared_with,
@@ -332,7 +340,7 @@ try {
 $sharedTree = [];
 if (!empty($sharedItems)) {
     $sharedItemMap = [];
-    
+
     // First, get all shared folders to build the hierarchy
     $sharedFolderIds = [];
     foreach ($sharedItems as $item) {
@@ -340,7 +348,7 @@ if (!empty($sharedItems)) {
             $sharedFolderIds[] = $item['id'];
         }
     }
-    
+
     if (!empty($sharedFolderIds)) {
         $placeholders = implode(',', array_fill(0, count($sharedFolderIds), '?'));
         $stmt = $db->prepare("
@@ -357,13 +365,13 @@ if (!empty($sharedItems)) {
         $childItems = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
         $sharedItems = array_merge($sharedItems, $childItems);
     }
-    
+
     // Build the tree structure
     foreach ($sharedItems as $item) {
         $sharedItemMap[$item['id']] = $item;
         $sharedItemMap[$item['id']]['children'] = [];
     }
-    
+
     foreach ($sharedItems as $item) {
         if (!$item['parent_id']) {
             $sharedTree[] = &$sharedItemMap[$item['id']];
@@ -384,14 +392,15 @@ try {
 }
 
 // Updated render functions with encoded IDs
-function renderMyTree($items, $level = 0) {
+function renderMyTree($items, $level = 0)
+{
     global $fileSharedUsers;
     foreach ($items as $item):
         $shared = $fileSharedUsers[$item['id']] ?? ['users' => [], 'permission' => 'view', 'count' => 0];
         $hasChildren = !empty($item['children']);
         $isShared = $shared['count'] > 0;
         $encodedId = base64_encode($item['id']);
-?>
+        ?>
         <?php if ($item['type'] === 'folder'): ?>
             <li class="fm-folder-item">
                 <div class="fm-item">
@@ -424,18 +433,13 @@ function renderMyTree($items, $level = 0) {
                         <button class="btn btn-sm btn-outline-primary add-in-btn" data-id="<?= $item['id'] ?>" title="Add File">
                             <i class="fas fa-plus"></i>
                         </button>
-                        <button class="btn btn-sm btn-outline-primary share-btn"
-                            data-id="<?= $item['id'] ?>"
-                            data-name="<?= htmlspecialchars($item['name']) ?>"
-                            data-type="folder"
-                            data-shared-users='<?= json_encode($shared['users']) ?>'
-                            data-permission="<?= $shared['permission'] ?>">
+                        <button class="btn btn-sm btn-outline-primary share-btn" data-id="<?= $item['id'] ?>"
+                            data-name="<?= htmlspecialchars($item['name']) ?>" data-type="folder"
+                            data-shared-users='<?= json_encode($shared['users']) ?>' data-permission="<?= $shared['permission'] ?>">
                             <i class="fas fa-share-alt"></i>
                         </button>
-                        <button class="btn btn-sm btn-outline-danger delete-btn"
-                            data-id="<?= $item['id'] ?>"
-                            data-name="<?= htmlspecialchars($item['name']) ?>"
-                            data-type="folder"
+                        <button class="btn btn-sm btn-outline-danger delete-btn" data-id="<?= $item['id'] ?>"
+                            data-name="<?= htmlspecialchars($item['name']) ?>" data-type="folder"
                             data-shared="<?= $isShared ? '1' : '0' ?>">
                             <i class="fas fa-trash"></i>
                         </button>
@@ -447,7 +451,7 @@ function renderMyTree($items, $level = 0) {
                     </ul>
                 <?php endif; ?>
             </li>
-           
+
         <?php else: ?>
             <li class="fm-file-item">
                 <div class="fm-item">
@@ -473,12 +477,9 @@ function renderMyTree($items, $level = 0) {
                         </div>
                     </div>
                     <div class="fm-item-actions">
-                        <button class="btn btn-sm btn-outline-primary share-btn"
-                            data-id="<?= $item['id'] ?>"
-                            data-name="<?= htmlspecialchars($item['name']) ?>"
-                            data-type="file"
-                            data-shared-users='<?= json_encode($shared['users']) ?>'
-                            data-permission="<?= $shared['permission'] ?>">
+                        <button class="btn btn-sm btn-outline-primary share-btn" data-id="<?= $item['id'] ?>"
+                            data-name="<?= htmlspecialchars($item['name']) ?>" data-type="file"
+                            data-shared-users='<?= json_encode($shared['users']) ?>' data-permission="<?= $shared['permission'] ?>">
                             <i class="fas fa-share-alt"></i>
                         </button>
                         <a href="editor.php?file=<?= $encodedId ?>" class="btn btn-sm btn-outline-warning" title="Edit">
@@ -487,10 +488,8 @@ function renderMyTree($items, $level = 0) {
                         <a href="download_excel.php?file=<?= $encodedId ?>" class="btn btn-sm btn-outline-info" title="Download">
                             <i class="fas fa-download"></i>
                         </a>
-                        <button class="btn btn-sm btn-outline-danger delete-btn"
-                            data-id="<?= $item['id'] ?>"
-                            data-name="<?= htmlspecialchars($item['name']) ?>"
-                            data-type="file"
+                        <button class="btn btn-sm btn-outline-danger delete-btn" data-id="<?= $item['id'] ?>"
+                            data-name="<?= htmlspecialchars($item['name']) ?>" data-type="file"
                             data-shared="<?= $isShared ? '1' : '0' ?>">
                             <i class="fas fa-trash"></i>
                         </button>
@@ -498,14 +497,15 @@ function renderMyTree($items, $level = 0) {
                 </div>
             </li>
         <?php endif; ?>
-<?php endforeach;
+    <?php endforeach;
 }
 
-function renderSharedTree($items, $level = 0) {
+function renderSharedTree($items, $level = 0)
+{
     foreach ($items as $item):
         $hasChildren = !empty($item['children']);
         $encodedId = base64_encode($item['id']);
-?>
+        ?>
         <?php if ($item['type'] === 'folder'): ?>
             <li class="fm-folder-item">
                 <div class="fm-item">
@@ -576,7 +576,7 @@ function renderSharedTree($items, $level = 0) {
                 </div>
             </li>
         <?php endif; ?>
-<?php endforeach;
+    <?php endforeach;
 }
 ?>
 <!DOCTYPE html>
@@ -588,7 +588,7 @@ function renderSharedTree($items, $level = 0) {
     <title>Spreadsheet File Manager</title>
     <link rel="shortcut icon" type="image/x-icon"
         href="<?= isset($companySettings['favicon']) ? $companySettings['favicon'] : "assets/img/fav/vis-favicon.png" ?>">
-     <!-- toast  -->
+    <!-- toast  -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css" />
 
     <!-- Select2 CSS -->
@@ -619,24 +619,24 @@ function renderSharedTree($items, $level = 0) {
             --border-color: #e0e0e0;
             --hover-bg: #f8f9fa;
         }
-        
+
         .file-manager-container {
             background: #fff;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
             overflow: hidden;
         }
-        
+
         .fm-header {
             background-color: var(--primary-light);
             border-bottom: 1px solid var(--border-color);
             padding: 15px 20px;
         }
-        
+
         .fm-tabs {
             border-bottom: 1px solid var(--border-color);
         }
-        
+
         .fm-tabs .nav-link {
             color: #6c757d;
             font-weight: 500;
@@ -644,29 +644,29 @@ function renderSharedTree($items, $level = 0) {
             border: none;
             border-bottom: 2px solid transparent;
         }
-        
+
         .fm-tabs .nav-link.active {
             color: var(--primary-color);
             border-bottom-color: var(--primary-color);
             background: transparent;
         }
-        
+
         .fm-content {
             padding: 20px;
         }
-        
+
         .fm-actions {
             padding: 15px 20px;
             border-bottom: 1px solid var(--border-color);
             background: #f8f9fa;
         }
-        
+
         .fm-list {
             list-style: none;
             padding: 0;
             margin: 0;
         }
-        
+
         .fm-item {
             padding: 12px 15px;
             border-bottom: 1px solid var(--border-color);
@@ -674,15 +674,15 @@ function renderSharedTree($items, $level = 0) {
             align-items: center;
             transition: background-color 0.2s;
         }
-        
+
         .fm-item:hover {
             background-color: var(--hover-bg);
         }
-        
+
         .fm-item:last-child {
             border-bottom: none;
         }
-        
+
         .fm-item-icon {
             width: 36px;
             height: 36px;
@@ -694,32 +694,32 @@ function renderSharedTree($items, $level = 0) {
             color: var(--primary-color);
             background-color: var(--primary-light);
         }
-        
+
         .fm-item-content {
             flex: 1;
         }
-        
+
         .fm-item-name {
             font-weight: 500;
             color: #333;
             margin-bottom: 2px;
         }
-        
+
         .fm-item-meta {
             font-size: 12px;
             color: #6c757d;
         }
-        
+
         .fm-item-actions {
             display: flex;
             gap: 5px;
         }
-        
+
         .fm-item-actions .btn {
             padding: 5px 8px;
             font-size: 12px;
         }
-        
+
         .fm-folder-toggle {
             cursor: pointer;
             margin-right: 8px;
@@ -728,59 +728,59 @@ function renderSharedTree($items, $level = 0) {
             text-align: center;
             transition: transform 0.2s;
         }
-        
+
         .fm-folder-toggle.collapsed i {
             transform: rotate(-90deg);
         }
-        
+
         .fm-folder-children {
             margin-left: 30px;
             border-left: 1px dashed var(--border-color);
             padding-left: 15px;
         }
-        
+
         .fm-empty-state {
             text-align: center;
             padding: 40px 20px;
             color: #6c757d;
         }
-        
+
         .fm-empty-state i {
             font-size: 48px;
             margin-bottom: 15px;
             color: #dee2e6;
         }
-        
+
         .btn-primary {
             background-color: var(--primary-color);
             border-color: var(--primary-color);
         }
-        
+
         .btn-primary:hover {
             background-color: #0759c0;
             border-color: #0759c0;
         }
-        
+
         .btn-outline-primary {
             color: var(--primary-color);
             border-color: var(--primary-color);
         }
-        
+
         .btn-outline-primary:hover {
             background-color: var(--primary-color);
             border-color: var(--primary-color);
         }
-        
+
         .badge.bg-primary {
             background-color: var(--primary-color) !important;
         }
-        
+
         .modal-dialog-centered {
             display: flex;
             align-items: center;
             min-height: calc(100% - 1rem);
         }
-        
+
         /* Shared item styling */
         .shared-badge {
             font-size: 11px;
@@ -790,7 +790,7 @@ function renderSharedTree($items, $level = 0) {
 </head>
 
 <body>
-   
+
     <div class="main-wrapper">
         <!-- Header Start -->
         <div class="header">
@@ -811,7 +811,7 @@ function renderSharedTree($items, $level = 0) {
             <?php require_once("sidebar-horizontal.php"); ?>
         </div>
         <!-- Sidebar End -->
-        
+
         <div class="page-wrapper">
             <div class="content">
                 <div class="page-header">
@@ -827,7 +827,7 @@ function renderSharedTree($items, $level = 0) {
                     <div class="fm-header">
                         <h5 class="mb-0">Spreadsheet Files</h5>
                     </div>
-                    
+
                     <ul class="nav fm-tabs" id="folderTab">
                         <li class="nav-item">
                             <a class="nav-link active" data-bs-toggle="tab" href="#my-folder">My Folder</a>
@@ -841,8 +841,10 @@ function renderSharedTree($items, $level = 0) {
                         <!-- MY FOLDER -->
                         <div class="tab-pane fade show active" id="my-folder">
                             <div class="fm-actions d-flex gap-2">
-                                <button id="btnAddFile" class="btn btn-primary btn-sm"><i class="fas fa-plus me-1"></i> New File</button>
-                                <button id="btnAddFolder" class="btn btn-primary btn-sm"><i class="fas fa-folder-plus me-1"></i> New Folder</button>
+                                <button id="btnAddFile" class="btn btn-primary btn-sm"><i class="fas fa-plus me-1"></i>
+                                    New File</button>
+                                <button id="btnAddFolder" class="btn btn-primary btn-sm"><i
+                                        class="fas fa-folder-plus me-1"></i> New Folder</button>
                             </div>
                             <div class="fm-content">
                                 <?php if (empty($myTree)): ?>
@@ -892,11 +894,13 @@ function renderSharedTree($items, $level = 0) {
                 <div class="modal-body">
                     <div class="mb-3">
                         <label for="folderName" class="form-label">Folder Name</label>
-                        <input type="text" name="name" class="form-control" id="folderName" placeholder="Enter folder name" required>
+                        <input type="text" name="name" class="form-control" id="folderName"
+                            placeholder="Enter folder name" required>
                     </div>
                 </div>
                 <div class="modal-footer justify-content-center">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fa fa-close me-2"></i>Cancel</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i
+                            class="fa fa-close me-2"></i>Cancel</button>
                     <button type="submit" class="btn btn-primary"><i class="fas fa-plus me-2"></i>Create</button>
                 </div>
             </form>
@@ -915,7 +919,8 @@ function renderSharedTree($items, $level = 0) {
                 <div class="modal-body">
                     <div class="mb-3">
                         <label for="fileName" class="form-label">File Name</label>
-                        <input type="text" name="name" class="form-control" id="fileName" placeholder="Enter file name" required>
+                        <input type="text" name="name" class="form-control" id="fileName" placeholder="Enter file name"
+                            required>
                     </div>
                     <div class="alert alert-info">
                         <i class="fas fa-info-circle me-2"></i>
@@ -923,7 +928,8 @@ function renderSharedTree($items, $level = 0) {
                     </div>
                 </div>
                 <div class="modal-footer justify-content-center">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fa fa-close me-2"></i>Cancel</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i
+                            class="fa fa-close me-2"></i>Cancel</button>
                     <button type="submit" class="btn btn-primary"><i class="fas fa-plus me-2"></i>Create</button>
                 </div>
             </form>
@@ -955,14 +961,15 @@ function renderSharedTree($items, $level = 0) {
                             <option value="edit">Can Edit</option>
                         </select>
                     </div>
-                    
+
                     <div class="alert alert-info mb-0">
-                            <i class="fas fa-lightbulb me-2"></i>
-                            <strong>Tip:</strong> To remove all sharing, deselect all users and click Share.
-                        </div>
+                        <i class="fas fa-lightbulb me-2"></i>
+                        <strong>Tip:</strong> To remove all sharing, deselect all users and click Share.
+                    </div>
                 </div>
                 <div class="modal-footer justify-content-center">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fa fa-close me-2"></i>Cancel</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i
+                            class="fa fa-close me-2"></i>Cancel</button>
                     <button type="submit" class="btn btn-primary"><i class="fas fa-share me-2"></i>Update</button>
                 </div>
             </form>
@@ -987,28 +994,29 @@ function renderSharedTree($items, $level = 0) {
                 </div>
                 <div class="modal-footer justify-content-center">
                     <button type="submit" class="btn btn-danger"><i class="fas fa-trash me-2"></i>Delete</button>
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fa fa-close me-2"></i>Cancel</button>
-                    
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i
+                            class="fa fa-close me-2"></i>Cancel</button>
+
                 </div>
             </form>
         </div>
     </div>
 
-       <!-- IMPORTANT: Load jQuery FIRST -->
+    <!-- IMPORTANT: Load jQuery FIRST -->
     <script src="assets/js/jquery-3.7.1.min.js"></script>
-    
+
     <!-- Load Mousewheel plugin BEFORE Luckysheet -->
     <script src="https://cdn.jsdelivr.net/npm/jquery-mousewheel@3.1.13/jquery.mousewheel.min.js"></script>
-    
+
     <!-- Then load Luckysheet -->
     <script src="https://cdn.jsdelivr.net/npm/luckysheet/dist/plugins/js/plugin.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/luckysheet/dist/luckysheet.umd.js"></script>
-    
+
     <!-- Then load other scripts -->
     <script src="assets/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-  
+
     <script src="assets/js/feather.min.js"></script>
     <script src="assets/js/jquery.slimscroll.min.js"></script>
     <script src="assets/plugins/select2/js/select2.min.js"></script>
@@ -1037,7 +1045,7 @@ function renderSharedTree($items, $level = 0) {
                     }
                 },
                 {
-                    type: 'error', 
+                    type: 'error',
                     background: '#ff1916',
                     icon: {
                         className: 'fas fa-times',
@@ -1049,12 +1057,12 @@ function renderSharedTree($items, $level = 0) {
         });
 
         // Show notifications when DOM is ready
-        $(document).ready(function() {
+        $(document).ready(function () {
             <?php if (isset($_SESSION['success'])): ?>
                 notyf.success("<?= addslashes($_SESSION['success']) ?>");
                 <?php unset($_SESSION['success']); ?>
             <?php endif; ?>
-            
+
             <?php if (isset($_SESSION['error'])): ?>
                 notyf.error("<?= addslashes($_SESSION['error']) ?>");
                 <?php unset($_SESSION['error']); ?>
@@ -1069,10 +1077,10 @@ function renderSharedTree($items, $level = 0) {
             }
 
             // Fixed folder toggle functionality
-            $(document).on('click', '.fm-folder-toggle', function() {
+            $(document).on('click', '.fm-folder-toggle', function () {
                 const $toggle = $(this);
                 const $children = $toggle.closest('.fm-folder-item').find('> .fm-folder-children');
-                
+
                 $toggle.toggleClass('collapsed');
                 $children.slideToggle(200);
             });
@@ -1081,18 +1089,18 @@ function renderSharedTree($items, $level = 0) {
                 $('#folderParent').val('');
                 $('#modalFolder').modal('show');
             });
-            
+
             $('#btnAddFile').click(() => {
                 $('#fileParent').val('');
                 $('#modalFile').modal('show');
             });
-            
-            $(document).on('click', '.add-in-btn', function() {
+
+            $(document).on('click', '.add-in-btn', function () {
                 $('#fileParent').val($(this).data('id'));
                 $('#modalFile').modal('show');
             });
 
-            $(document).on('click', '.share-btn', function() {
+            $(document).on('click', '.share-btn', function () {
                 const data = $(this).data();
                 $('#shareId').val(data.id);
                 $('#shareModalTitle').text('Share ' + (data.type === 'folder' ? 'Folder' : 'File') + ': ' + data.name);
@@ -1109,7 +1117,7 @@ function renderSharedTree($items, $level = 0) {
                 $('.select2-multiple').select2('destroy');
             });
 
-            $(document).on('click', '.delete-btn', function() {
+            $(document).on('click', '.delete-btn', function () {
                 const d = $(this).data();
                 $('#deleteId').val(d.id);
                 $('#deleteItemName').text(d.type + ': ' + d.name);
@@ -1120,4 +1128,5 @@ function renderSharedTree($items, $level = 0) {
         });
     </script>
 </body>
+
 </html>

@@ -1,13 +1,13 @@
 <div class="header">
     <div class="header-left active">
         <a href="admin-dashboard.php" class="logo logo-normal">
-            <img src="<?= isset($companySettings['company_logo']) ? $companySettings['company_logo'] : "assets/img/logo/vis-logo.png" ?>" alt="" />
+            <img src="<?= isset($companySettings['company_logo']) ? $companySettings['company_logo'] : "public/upload/company/images/img_68774d6155fb40.33862285.png" ?>" alt="" />
         </a>
         <a href="admin-dashboard.php" class="logo logo-white">
-            <img src="<?= isset($companySettings['company_logo']) ? $companySettings['company_logo'] : "assets/img/logo/vis-logo.png" ?>" alt="" />
+            <img src="<?= isset($companySettings['company_logo']) ? $companySettings['company_logo'] : "public/upload/company/images/img_68774d6155fb40.33862285.png" ?>" alt="" />
         </a>
         <a href="admin-dashboard.php" class="logo-small">
-            <img src="<?= isset($companySettings['company_logo']) ? $companySettings['company_logo'] : "assets/img/logo/vis-logo.png" ?>" alt="" />
+            <img src="<?= isset($companySettings['company_logo']) ? $companySettings['company_logo'] : "public/upload/company/images/img_68774d6155fb40.33862285.png" ?>" alt="" />
         </a>
         <a id="toggle_btn" href="javascript:void(0);">
             <i data-feather="chevrons-left" class="feather-16"></i>
