@@ -91,7 +91,6 @@ try {
     } else {
         $_SESSION['error'] = 'Error for fetching customers';
     }
-
 } catch (Exception $e) {
     $_SESSION['error'] = $e->getMessage();
     header("Location: admin-dashboard.php");
@@ -177,6 +176,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['invoiceCount'])) {
     ]);
     exit;
 }
+// File Folder count
+$fileFolderCount = $db->query("SELECT COUNT(*) AS total FROM file_folders")->fetch_assoc();
+
+// Admin count
+$adminCount = $db->query("SELECT COUNT(*) AS total FROM admin")->fetch_assoc();
+
+// Roles count
+$rolesCount = $db->query("SELECT COUNT(*) AS total FROM roles")->fetch_assoc();
 
 ob_end_flush();
 ?>
@@ -225,14 +232,12 @@ ob_end_flush();
                         x: 'center',
                         y: 'top'
                     },
-                    types: [
-                        {
-                            type: 'success',
-                            background: '#4dc76f', // Change background color
-                            textColor: '#FFFFFF',  // Change text color
-                            dismissible: false
-                        }
-                    ]
+                    types: [{
+                        type: 'success',
+                        background: '#4dc76f', // Change background color
+                        textColor: '#FFFFFF', // Change text color
+                        dismissible: false
+                    }]
                 });
                 notyf.success("<?php echo $_SESSION['success']; ?>");
             </script>
@@ -248,14 +253,12 @@ ob_end_flush();
                         x: 'center',
                         y: 'top'
                     },
-                    types: [
-                        {
-                            type: 'error',
-                            background: '#ff1916',
-                            textColor: '#FFFFFF',
-                            dismissible: false
-                        }
-                    ]
+                    types: [{
+                        type: 'error',
+                        background: '#ff1916',
+                        textColor: '#FFFFFF',
+                        dismissible: false
+                    }]
                 });
                 notyf.error("<?php echo $_SESSION['error']; ?>");
             </script>
@@ -285,92 +288,246 @@ ob_end_flush();
         <!-- Sidebar End -->
         <div class="page-wrapper">
             <div class="content">
-                <div class="row">
+                <?php
+                if (isset($_SESSION['admin_role']) && $_SESSION['admin_role'] === "Admin") {
+                ?>
+                    <div class="row">
 
-                    <div class="col-xl-3 col-sm-6 col-12 d-flex">
-                        <div class="dash-count">
-                            <div class="dash-counts">
-                                <h4><?php echo $totalNumberInvoice['0']['total_invoices'] ?></h4>
-                                <h5><a class="text-white" href="manage-invoice.php">Invoices</a></h5>
+                        <div class="col-xl-3 col-sm-6 col-12 d-flex">
+                            <div class="dash-count">
+                                <div class="dash-counts">
+                                    <h4><?php echo $totalNumberInvoice['0']['total_invoices'] ?></h4>
+                                    <h5><a class="text-white" href="manage-invoice.php">Invoices</a></h5>
+                                </div>
+                                <div class="dash-imgs">
+                                    <i data-feather="file"></i>
+                                </div>
                             </div>
-                            <div class="dash-imgs">
-                                <i data-feather="file"></i>
+                        </div>
+                        <div class="col-xl-3 col-sm-6 col-12 d-flex">
+                            <div class="dash-count das1">
+                                <div class="dash-counts">
+                                    <h4>
+                                        <?php echo (isset($localizationSettings["currency_symbol"]) ? $localizationSettings["currency_symbol"] : "$") . " " . $totalAmount[0]['total_payment'];
+                                        ?>
+                                    </h4>
+                                    <h5><a class="text-white" href="reports.php">Total Payment</a></h5>
+                                </div>
+                                <div class="dash-imgs">
+                                    <i data-feather="credit-card"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-sm-6 col-12 d-flex">
+                            <div class="dash-count das2">
+                                <div class="dash-counts">
+                                    <h4> <?php echo (isset($localizationSettings["currency_symbol"]) ? $localizationSettings["currency_symbol"] : "$") . " " . $totalPaidAmount['0']['total_paid_payment']; ?>
+                                    </h4>
+                                    <h5><a class="text-white" href="reports.php">Received</a></h5>
+                                </div>
+                                <div class="dash-imgs">
+                                    <img src="assets/img/icons/file-text-icon-01.svg" class="img-fluid" alt="icon">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-sm-6 col-12 d-flex">
+                            <div class="dash-count das3">
+                                <div class="dash-counts">
+                                    <h4> <?php echo (isset($localizationSettings["currency_symbol"]) ? $localizationSettings["currency_symbol"] : "$") . " " . $totalDueAmount['0']['total_due_payment']; ?>
+                                    </h4>
+                                    <h5><a class="text-white" href="reports.php">Due Payment</a></h5>
+                                </div>
+                                <div class="dash-imgs">
+                                    <i data-feather="file"></i>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-xl-3 col-sm-6 col-12 d-flex">
-                        <div class="dash-count das1">
-                            <div class="dash-counts">
-                                <h4>
-                                    <?php echo (isset($localizationSettings["currency_symbol"]) ? $localizationSettings["currency_symbol"] : "$") . " " . $totalAmount[0]['total_payment'];
-                                    ?>
-                                </h4>
-                                <h5><a class="text-white" href="reports.php">Total Payment</a></h5>
-                            </div>
-                            <div class="dash-imgs">
-                                <i data-feather="credit-card"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-xl-3 col-sm-6 col-12 d-flex">
-                        <div class="dash-count das2">
-                            <div class="dash-counts">
-                                <h4> <?php echo (isset($localizationSettings["currency_symbol"]) ? $localizationSettings["currency_symbol"] : "$") . " " . $totalPaidAmount['0']['total_paid_payment']; ?>
-                                </h4>
-                                <h5><a class="text-white" href="reports.php">Received</a></h5>
-                            </div>
-                            <div class="dash-imgs">
-                                <img src="assets/img/icons/file-text-icon-01.svg" class="img-fluid" alt="icon">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-xl-3 col-sm-6 col-12 d-flex">
-                        <div class="dash-count das3">
-                            <div class="dash-counts">
-                                <h4> <?php echo (isset($localizationSettings["currency_symbol"]) ? $localizationSettings["currency_symbol"] : "$") . " " . $totalDueAmount['0']['total_due_payment']; ?>
-                                </h4>
-                                <h5><a class="text-white" href="reports.php">Due Payment</a></h5>
-                            </div>
-                            <div class="dash-imgs">
-                                <i data-feather="file"></i>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <?php } ?>
 
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="card-title">Income Chart</h5>
+
+
+
+                <?php
+                if (isset($_SESSION['admin_role']) && $_SESSION['admin_role'] === "Admin") {
+                ?>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="card-title">Income Chart</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div id="s-line-area" class="chart-set"></div>
+                                </div>
                             </div>
-                            <div class="card-body">
-                                <div id="s-line-area" class="chart-set"></div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="card-title">Invoice Chart</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div id="donut-chart" class="chart-set"></div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-6">
-                        <div class="card">
-                            <div class="card-header">
-                                <h5 class="card-title">Invoice Chart</h5>
+
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h4 class="card-title">Recent Invoice</h4>
+                            <div class="view-all-link">
+                                <a href="manage-invoice.php" class="view-all d-flex align-items-center">
+                                    View All<span class="ps-2 d-flex align-items-center"><i data-feather="arrow-right"
+                                            class="feather-16"></i></span>
+                                </a>
                             </div>
-                            <div class="card-body">
-                                <div id="donut-chart" class="chart-set"></div>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive dataview">
+                                <table class="table dashboard-expired-products">
+                                    <thead>
+                                        <tr>
+                                            <th class="no-sort">
+                                                <label class="checkboxs">
+                                                    <input type="checkbox" id="select-all" />
+                                                    <span class="checkmarks"></span>
+                                                </label>
+                                            </th>
+                                            <th>Invoice Number</th>
+                                            <th>Due Date</th>
+                                            <th>Created Date</th>
+                                            <th class="no-sort">Amount</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php foreach ($invoices->fetch_all(MYSQLI_ASSOC) as $invoice) { ?>
+                                            <tr>
+                                                <td>
+                                                    <label class="checkboxs">
+                                                        <input type="checkbox" />
+                                                        <span class="checkmarks"></span>
+                                                    </label>
+                                                </td>
+                                                <td class="ref-number"><?php echo $invoice['invoice_number'] ?></td>
+
+                                                <td><?php $date = new DateTime($invoice['due_date']);
+                                                    echo $date->format(isset($localizationSettings["date_format"]) ? $localizationSettings["date_format"] : "d M Y") ?>
+                                                </td>
+                                                <td><?php $date = new DateTime($invoice['created_at']);
+                                                    echo $date->format(isset($localizationSettings["date_format"]) ? $localizationSettings["date_format"] : "d M Y") ?>
+                                                </td>
+                                                <td class="text-primary">
+                                                    <?php echo (isset($localizationSettings["currency_symbol"]) ? $localizationSettings["currency_symbol"] : "$") . " " . $invoice['total_amount'] ?>
+                                                </td>
+                                                <td>
+                                                    <?php if ($invoice['status'] == 'PAID') { ?>
+                                                        <span class="badge badge-lg bg-success">Paid</span>
+                                                    <?php } elseif ($invoice['status'] == 'CANCELLED') { ?>
+                                                        <span class="badge badge-lg bg-danger">Cancelled</span>
+                                                    <?php } elseif ($invoice['status'] == 'PENDING') { ?>
+                                                        <span class="badge badge-lg bg-warning">Pending</span>
+                                                    <?php } elseif ($invoice['status'] == 'REFUNDED') { ?>
+                                                        <span class="badge badge-lg bg-primary">Refunded</span>
+                                                    <?php } ?>
+                                                </td>
+                                            </tr>
+                                        <?php } ?>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
-                </div>
+                <?php
+                }
+                ?>
+
+
+
+                  <!-- SHOW ONLY IF USER IS NOT ADMIN -->
+    <?php if ($_SESSION['admin_role'] !== "Admin") { ?>
+<div class="row">
+
+    <!-- File Folder Count -->
+    <div class="col-xl-3 col-sm-6 col-12 d-flex">
+        <div class="dash-count bg-warning">
+            <div class="dash-counts">
+                <h4><?php echo $fileFolderCount['total']; ?></h4>
+                <h5><a class="text-white" href="spreadsheet.php">Files of Spreadsheet</a></h5>
+            </div>
+            <div class="dash-imgs">
+                <i data-feather="folder"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Link (only works if role = admin) -->
+    <div class="col-xl-3 col-sm-6 col-12 d-flex">
+        <div class="dash-count das1 bg-info">
+            <div class="dash-counts">
+                <h4><?php echo $adminCount['total']; ?></h4>
+
+                <h5>
+                    <?php if ($_SESSION['admin_role'] === "Admin") { ?>
+                        <!-- ROLE is admin → Redirect allowed -->
+                        <a class="text-white" href="manage-admin.php">Admins</a>
+                    <?php } else { ?>
+                        <!-- Not admin → No redirect -->
+                        <a class="text-white"
+                           href="#"
+                           onclick="return false;"
+                           style=" cursor:not-allowed;">
+                            Admins
+                        </a>
+                    <?php } ?>
+                </h5>
+
+            </div>
+            <div class="dash-imgs">
+                <i data-feather="users"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Roles Count -->
+    <div class="col-xl-3 col-sm-6 col-12 d-flex">
+        <div class="dash-count das2 bg-dark">
+            <div class="dash-counts">
+                <h4><?php echo $rolesCount['total']; ?></h4>
+                <h5> <?php if ($_SESSION['admin_role'] === "Admin") { ?>
+                        <!-- ROLE is admin → Redirect allowed -->
+                        <a class="text-white" href="roles.php">Roles</a>
+                    <?php } else { ?>
+                        <!-- Not admin → No redirect -->
+                        <a class="text-white"
+                           href="#"
+                           onclick="return false;"
+                           style=" cursor:not-allowed;">
+                            Roles
+                        </a>
+                    <?php } ?></h5>
+            </div>
+            <div class="dash-imgs">
+                <i data-feather="user-check"></i>
+            </div>
+        </div>
+    </div>
+
+</div>
+
 
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
-                        <h4 class="card-title">Recent Invoice</h4>
+                        <h4 class="card-title">SmartSheet Access</h4>
                         <div class="view-all-link">
-                            <a href="manage-invoice.php" class="view-all d-flex align-items-center">
-                                View All<span class="ps-2 d-flex align-items-center"><i data-feather="arrow-right"
-                                        class="feather-16"></i></span>
+                            <a href="#" class="view-all d-flex align-items-center">
+                                View All<span class="ps-2 d-flex align-items-center"><i data-feather="arrow-right" class="feather-16"></i></span>
                             </a>
                         </div>
                     </div>
+
                     <div class="card-body">
                         <div class="table-responsive dataview">
                             <table class="table dashboard-expired-products">
@@ -382,52 +539,53 @@ ob_end_flush();
                                                 <span class="checkmarks"></span>
                                             </label>
                                         </th>
-                                        <th>Invoice Number</th>
-                                        <th>Due Date</th>
-                                        <th>Created Date</th>
-                                        <th class="no-sort">Amount</th>
-                                        <th>Status</th>
+                                        <th>Name</th>
+                                        <th>Type</th>
+                                        <th>Owner</th>
+                                        <th>Permission</th>
+                                        <th>Created On</th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                    <?php foreach ($invoices->fetch_all(MYSQLI_ASSOC) as $invoice) { ?>
-                                        <tr>
-                                            <td>
-                                                <label class="checkboxs">
-                                                    <input type="checkbox" />
-                                                    <span class="checkmarks"></span>
-                                                </label>
-                                            </td>
-                                            <td class="ref-number"><?php echo $invoice['invoice_number'] ?></td>
 
-                                            <td><?php $date = new DateTime($invoice['due_date']);
-                                            echo $date->format(isset($localizationSettings["date_format"]) ? $localizationSettings["date_format"] : "d M Y") ?>
-                                            </td>
-                                            <td><?php $date = new DateTime($invoice['created_at']);
-                                            echo $date->format(isset($localizationSettings["date_format"]) ? $localizationSettings["date_format"] : "d M Y") ?>
-                                            </td>
-                                            <td class="text-primary">
-                                                <?php echo (isset($localizationSettings["currency_symbol"]) ? $localizationSettings["currency_symbol"] : "$") . " " . $invoice['total_amount'] ?>
-                                            </td>
-                                            <td>
-                                                <?php if ($invoice['status'] == 'PAID') { ?>
-                                                    <span class="badge badge-lg bg-success">Paid</span>
-                                                <?php } elseif ($invoice['status'] == 'CANCELLED') { ?>
-                                                    <span class="badge badge-lg bg-danger">Cancelled</span>
-                                                <?php } elseif ($invoice['status'] == 'PENDING') { ?>
-                                                    <span class="badge badge-lg bg-warning">Pending</span>
-                                                <?php } elseif ($invoice['status'] == 'REFUNDED') { ?>
-                                                    <span class="badge badge-lg bg-primary">Refunded</span>
-                                                <?php } ?>
-                                            </td>
-                                        </tr>
-                                    <?php } ?>
+                                <tbody>
+                                    <?php
+                                    // Fetch all folders/files without WHERE clause
+                                    $stmt = $db->prepare("
+                        SELECT ff.*, a.admin_username AS owner_name, fp.permission
+                        FROM file_folders ff
+                        LEFT JOIN file_permissions fp ON ff.id = fp.file_folder_id
+                        JOIN admin a ON ff.created_by = a.admin_id
+                        ORDER BY ff.created_at DESC
+                    ");
+                                    $stmt->execute();
+                                    $result = $stmt->get_result();
+
+                                    if ($result->num_rows > 0) {
+                                        while ($row = $result->fetch_assoc()) {
+                                            echo "<tr>
+                                <td>
+                                    <label class='checkboxs'>
+                                        <input type='checkbox' />
+                                        <span class='checkmarks'></span>
+                                    </label>
+                                </td>
+                                <td>" . (!empty($row['folder_name']) ? htmlspecialchars($row['folder_name']) : htmlspecialchars($row['name'])) . "</td>
+                                <td>" . ucfirst($row['type']) . "</td>
+                                <td>" . htmlspecialchars($row['owner_name']) . "</td>
+                                <td><span class='badge bg-info'>" . htmlspecialchars($row['permission']) . "</span></td>
+                                <td>" . date("d M Y", strtotime($row['created_at'])) . "</td>
+                            </tr>";
+                                        }
+                                    } else {
+                                        echo "<tr><td colspan='6' class='text-center text-muted'>No folders/files available</td></tr>";
+                                    }
+                                    ?>
                                 </tbody>
                             </table>
                         </div>
                     </div>
                 </div>
-
+                <?php }?>
             </div>
         </div>
     </div>
@@ -454,7 +612,7 @@ ob_end_flush();
 
     <script>
         // Donut Chart Configuration using jQuery
-        $(document).ready(function () {
+        $(document).ready(function() {
 
 
             let options = {
@@ -465,22 +623,20 @@ ob_end_flush();
                 },
                 colors: ['#00E396', '#FFB020', '#FF4560', '#008FFB'], // Custom colors for each status
 
-                responsive: [
-                    {
-                        breakpoint: 480,
-                        options: {
-                            chart: {
-                                width: 200,
-                            },
-                            legend: {
-                                position: 'bottom',
-                            },
+                responsive: [{
+                    breakpoint: 480,
+                    options: {
+                        chart: {
+                            width: 200,
+                        },
+                        legend: {
+                            position: 'bottom',
                         },
                     },
-                ],
+                }, ],
                 tooltip: {
                     y: {
-                        formatter: function (value) {
+                        formatter: function(value) {
                             return value + ' Invoices'; // Tooltip shows the number of invoices
                         }
                     }
@@ -494,8 +650,10 @@ ob_end_flush();
             $.ajax({
                 url: 'admin-dashboard.php',
                 type: 'POST',
-                data: { invoiceCount: 1 },
-                success: function (response) {
+                data: {
+                    invoiceCount: 1
+                },
+                success: function(response) {
                     let result = JSON.parse(response).data;
 
                     // Extract data
@@ -504,8 +662,7 @@ ob_end_flush();
                     let invoiceAmounts = result.invoiceAmounts;
 
                     let optionBar = {
-                        series: [
-                            {
+                        series: [{
                                 name: 'Paid',
                                 data: invoiceAmounts.Paid
                             },
@@ -521,7 +678,9 @@ ob_end_flush();
                         chart: {
                             type: 'bar',
                             height: 350,
-                            toolbar: { show: true }
+                            toolbar: {
+                                show: true
+                            }
                         },
                         colors: ['#00E396', '#FFB020', '#FF4560'], // Paid, Pending, Cancelled
                         plotOptions: {
@@ -550,7 +709,7 @@ ob_end_flush();
                         },
                         tooltip: {
                             y: {
-                                formatter: function (val) {
+                                formatter: function(val) {
                                     return '<?= (isset($localizationSettings["currency_symbol"]) ? $localizationSettings["currency_symbol"] : "$") ?>' + val.toFixed(2);
                                 }
                             }
@@ -561,7 +720,7 @@ ob_end_flush();
                     var chartBar = new ApexCharts(document.querySelector("#s-line-area"), optionBar);
                     chartBar.render();
                 },
-                error: function (xhr, status, error) {
+                error: function(xhr, status, error) {
                     console.error('AJAX Error:', error);
                 }
             });
