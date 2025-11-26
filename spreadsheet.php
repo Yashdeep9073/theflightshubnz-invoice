@@ -321,63 +321,97 @@ try {
 }
 
 // Shared With Me
+// Shared With Me - Now includes inherited permissions via parent folders
 $sharedItems = [];
+$accessibleItemIds = []; // Will hold all IDs user can access
+
 try {
+    // Step 1: Find all items the user has DIRECT permission on
     $stmt = $db->prepare("
-        SELECT ff.*, a.admin_username AS owner_name, fp.permission
-        FROM file_folders ff
-        JOIN file_permissions fp ON ff.id = fp.file_folder_id
-        JOIN admin a ON ff.created_by = a.admin_id
-        WHERE fp.user_id = ? AND ff.created_by != ?
+        SELECT file_folder_id, permission 
+        FROM file_permissions 
+        WHERE user_id = ? AND granted_by != ?
     ");
     $stmt->bind_param("ii", $admin_id, $admin_id);
     $stmt->execute();
-    $sharedItems = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $result = $stmt->get_result();
+    
+    $directAccess = [];
+    while ($row = $result->fetch_assoc()) {
+        $directAccess[$row['file_folder_id']] = $row['permission'];
+        $accessibleItemIds[] = $row['file_folder_id'];
+    }
+
+    // Step 2: Find all ancestors of directly shared items (so user can navigate up)
+    // And all descendants (so user sees everything inside shared folders)
+    if (!empty($accessibleItemIds)) {
+        $placeholders = implode(',', array_fill(0, count($accessibleItemIds), '?'));
+        
+        // Get all descendants (children, grandchildren, etc.)
+        $descendantsQuery = "
+            WITH RECURSIVE descendants AS (
+                SELECT id, parent_id 
+                FROM file_folders 
+                WHERE id IN ($placeholders)
+                
+                UNION ALL
+                
+                SELECT ff.id, ff.parent_id 
+                FROM file_folders ff
+                INNER JOIN descendants d ON ff.parent_id = d.id
+            )
+            SELECT id FROM descendants
+        ";
+        $stmt = $db->prepare($descendantsQuery);
+        $stmt->bind_param(str_repeat('i', count($accessibleItemIds)), ...$accessibleItemIds);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        while ($row = $result->fetch_assoc()) {
+            if (!in_array($row['id'], $accessibleItemIds)) {
+                $accessibleItemIds[] = $row['id'];
+            }
+        }
+    }
+
+    // Step 3: Now fetch ALL items (folders + files) that are in accessible scope
+    if (!empty($accessibleItemIds)) {
+        $placeholders = implode(',', array_fill(0, count($accessibleItemIds), '?'));
+        
+        $stmt = $db->prepare("
+            SELECT ff.*, a.admin_username AS owner_name,
+                   COALESCE(fp.permission, 'view') AS permission
+            FROM file_folders ff
+            JOIN admin a ON ff.created_by = a.admin_id
+            LEFT JOIN file_permissions fp ON ff.id = fp.file_folder_id AND fp.user_id = ?
+            WHERE ff.id IN ($placeholders)
+              AND ff.created_by != ?
+            ORDER BY ff.parent_id, ff.name
+        ");
+        $params = array_merge([$admin_id], $accessibleItemIds, [$admin_id]);
+        $types = 'i' . str_repeat('i', count($accessibleItemIds)) . 'i';
+        $stmt->bind_param($types, ...$params);
+        $stmt->execute();
+        $sharedItems = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    }
 } catch (Exception $e) {
+    error_log("Shared items error: " . $e->getMessage());
 }
 
 // Build shared items tree structure
 $sharedTree = [];
-if (!empty($sharedItems)) {
-    $sharedItemMap = [];
+$sharedItemMap = [];
 
-    // First, get all shared folders to build the hierarchy
-    $sharedFolderIds = [];
-    foreach ($sharedItems as $item) {
-        if ($item['type'] === 'folder') {
-            $sharedFolderIds[] = $item['id'];
-        }
-    }
+foreach ($sharedItems as $item) {
+    $itemId = $item['id'];
+    $sharedItemMap[$itemId] = $item;
+    $sharedItemMap[$itemId]['children'] = [];
+}
 
-    if (!empty($sharedFolderIds)) {
-        $placeholders = implode(',', array_fill(0, count($sharedFolderIds), '?'));
-        $stmt = $db->prepare("
-            SELECT ff.*, a.admin_username AS owner_name, fp.permission
-            FROM file_folders ff
-            JOIN file_permissions fp ON ff.id = fp.file_folder_id
-            JOIN admin a ON ff.created_by = a.admin_id
-            WHERE ff.parent_id IN ($placeholders) AND fp.user_id = ? AND ff.created_by != ?
-        ");
-        $params = array_merge($sharedFolderIds, [$admin_id, $admin_id]);
-        $types = str_repeat('i', count($sharedFolderIds)) . 'ii';
-        $stmt->bind_param($types, ...$params);
-        $stmt->execute();
-        $childItems = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-        $sharedItems = array_merge($sharedItems, $childItems);
-    }
-
-    // Build the tree structure
-    foreach ($sharedItems as $item) {
-        $sharedItemMap[$item['id']] = $item;
-        $sharedItemMap[$item['id']]['children'] = [];
-    }
-
-    foreach ($sharedItems as $item) {
-        if (!$item['parent_id']) {
-            $sharedTree[] = &$sharedItemMap[$item['id']];
-        } else if (isset($sharedItemMap[$item['parent_id']])) {
-            $sharedItemMap[$item['parent_id']]['children'][] = &$sharedItemMap[$item['id']];
-        }
+foreach ($sharedItems as $item) {
+    if (!$item['parent_id'] || !isset($sharedItemMap[$item['parent_id']])) {
+        $sharedTree[] = &$sharedItemMap[$item['id']];
+    } else {
+        $sharedItemMap[$item['parent_id']]['children'][] = &$sharedItemMap[$item['id']];
     }
 }
 
