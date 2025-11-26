@@ -455,7 +455,7 @@ ob_end_flush();
                             <div class="dash-count bg-warning">
                                 <div class="dash-counts">
                                     <h4><?php echo $fileFolderCount['total']; ?></h4>
-                                    <h5><a class="text-white" href="spreadsheet.php">Files of Spreadsheet</a></h5>
+                                    <h5><a class="text-white" href="spreadsheet.php">Files of Smartsheet</a></h5>
                                 </div>
                                 <div class="dash-imgs">
                                     <i data-feather="folder"></i>
