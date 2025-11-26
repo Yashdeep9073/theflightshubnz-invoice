@@ -446,146 +446,161 @@ ob_end_flush();
 
 
 
-                  <!-- SHOW ONLY IF USER IS NOT ADMIN -->
-    <?php if ($_SESSION['admin_role'] !== "Admin") { ?>
-<div class="row">
+                <!-- SHOW ONLY IF USER IS NOT ADMIN -->
+                <?php if ($_SESSION['admin_role'] !== "Admin") { ?>
+                    <div class="row">
 
-    <!-- File Folder Count -->
-    <div class="col-xl-3 col-sm-6 col-12 d-flex">
-        <div class="dash-count bg-warning">
-            <div class="dash-counts">
-                <h4><?php echo $fileFolderCount['total']; ?></h4>
-                <h5><a class="text-white" href="spreadsheet.php">Files of Spreadsheet</a></h5>
-            </div>
-            <div class="dash-imgs">
-                <i data-feather="folder"></i>
-            </div>
-        </div>
-    </div>
-
-    <!-- Admin Link (only works if role = admin) -->
-    <div class="col-xl-3 col-sm-6 col-12 d-flex">
-        <div class="dash-count das1 bg-info">
-            <div class="dash-counts">
-                <h4><?php echo $adminCount['total']; ?></h4>
-
-                <h5>
-                    <?php if ($_SESSION['admin_role'] === "Admin") { ?>
-                        <!-- ROLE is admin → Redirect allowed -->
-                        <a class="text-white" href="manage-admin.php">Admins</a>
-                    <?php } else { ?>
-                        <!-- Not admin → No redirect -->
-                        <a class="text-white"
-                           href="#"
-                           onclick="return false;"
-                           style=" cursor:not-allowed;">
-                            Admins
-                        </a>
-                    <?php } ?>
-                </h5>
-
-            </div>
-            <div class="dash-imgs">
-                <i data-feather="users"></i>
-            </div>
-        </div>
-    </div>
-
-    <!-- Roles Count -->
-    <div class="col-xl-3 col-sm-6 col-12 d-flex">
-        <div class="dash-count das2 bg-dark">
-            <div class="dash-counts">
-                <h4><?php echo $rolesCount['total']; ?></h4>
-                <h5> <?php if ($_SESSION['admin_role'] === "Admin") { ?>
-                        <!-- ROLE is admin → Redirect allowed -->
-                        <a class="text-white" href="roles.php">Roles</a>
-                    <?php } else { ?>
-                        <!-- Not admin → No redirect -->
-                        <a class="text-white"
-                           href="#"
-                           onclick="return false;"
-                           style=" cursor:not-allowed;">
-                            Roles
-                        </a>
-                    <?php } ?></h5>
-            </div>
-            <div class="dash-imgs">
-                <i data-feather="user-check"></i>
-            </div>
-        </div>
-    </div>
-
-</div>
-
-
-                <div class="card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h4 class="card-title">SmartSheet Access</h4>
-                        <div class="view-all-link">
-                            <a href="#" class="view-all d-flex align-items-center">
-                                View All<span class="ps-2 d-flex align-items-center"><i data-feather="arrow-right" class="feather-16"></i></span>
-                            </a>
+                        <!-- File Folder Count -->
+                        <div class="col-xl-3 col-sm-6 col-12 d-flex">
+                            <div class="dash-count bg-warning">
+                                <div class="dash-counts">
+                                    <h4><?php echo $fileFolderCount['total']; ?></h4>
+                                    <h5><a class="text-white" href="spreadsheet.php">Files of Spreadsheet</a></h5>
+                                </div>
+                                <div class="dash-imgs">
+                                    <i data-feather="folder"></i>
+                                </div>
+                            </div>
                         </div>
+
+                        <!-- Admin Link (only works if role = admin) -->
+                        <div class="col-xl-3 col-sm-6 col-12 d-flex">
+                            <div class="dash-count das1 bg-info">
+                                <div class="dash-counts">
+                                    <h4><?php echo $adminCount['total']; ?></h4>
+
+                                    <h5>
+                                        <?php if ($_SESSION['admin_role'] === "Admin") { ?>
+                                            <!-- ROLE is admin → Redirect allowed -->
+                                            <a class="text-white" href="manage-admin.php">Admins</a>
+                                        <?php } else { ?>
+                                            <!-- Not admin → No redirect -->
+                                            <a class="text-white"
+                                                href="#"
+                                                onclick="return false;"
+                                                style=" cursor:not-allowed;">
+                                                Admins
+                                            </a>
+                                        <?php } ?>
+                                    </h5>
+
+                                </div>
+                                <div class="dash-imgs">
+                                    <i data-feather="users"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Roles Count -->
+                        <div class="col-xl-3 col-sm-6 col-12 d-flex">
+                            <div class="dash-count das2 bg-dark">
+                                <div class="dash-counts">
+                                    <h4><?php echo $rolesCount['total']; ?></h4>
+                                    <h5> <?php if ($_SESSION['admin_role'] === "Admin") { ?>
+                                            <!-- ROLE is admin → Redirect allowed -->
+                                            <a class="text-white" href="roles.php">Roles</a>
+                                        <?php } else { ?>
+                                            <!-- Not admin → No redirect -->
+                                            <a class="text-white"
+                                                href="#"
+                                                onclick="return false;"
+                                                style=" cursor:not-allowed;">
+                                                Roles
+                                            </a>
+                                        <?php } ?>
+                                    </h5>
+                                </div>
+                                <div class="dash-imgs">
+                                    <i data-feather="user-check"></i>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
 
-                    <div class="card-body">
-                        <div class="table-responsive dataview">
-                            <table class="table dashboard-expired-products">
-                                <thead>
-                                    <tr>
-                                        <th class="no-sort">
-                                            <label class="checkboxs">
-                                                <input type="checkbox" id="select-all" />
-                                                <span class="checkmarks"></span>
-                                            </label>
-                                        </th>
-                                        <th>Name</th>
-                                        <th>Type</th>
-                                        <th>Owner</th>
-                                        <th>Permission</th>
-                                        <th>Created On</th>
-                                    </tr>
-                                </thead>
 
-                                <tbody>
-                                    <?php
-                                    // Fetch all folders/files without WHERE clause
-                                    $stmt = $db->prepare("
-                        SELECT ff.*, a.admin_username AS owner_name, fp.permission
-                        FROM file_folders ff
-                        LEFT JOIN file_permissions fp ON ff.id = fp.file_folder_id
-                        JOIN admin a ON ff.created_by = a.admin_id
-                        ORDER BY ff.created_at DESC
-                    ");
-                                    $stmt->execute();
-                                    $result = $stmt->get_result();
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h4 class="card-title">SmartSheet Access</h4>
+                            <div class="view-all-link">
+                                <a href="#" class="view-all d-flex align-items-center">
+                                    View All<span class="ps-2 d-flex align-items-center"><i data-feather="arrow-right" class="feather-16"></i></span>
+                                </a>
+                            </div>
+                        </div>
 
-                                    if ($result->num_rows > 0) {
-                                        while ($row = $result->fetch_assoc()) {
-                                            echo "<tr>
-                                <td>
-                                    <label class='checkboxs'>
-                                        <input type='checkbox' />
-                                        <span class='checkmarks'></span>
-                                    </label>
-                                </td>
-                                <td>" . (!empty($row['folder_name']) ? htmlspecialchars($row['folder_name']) : htmlspecialchars($row['name'])) . "</td>
-                                <td>" . ucfirst($row['type']) . "</td>
-                                <td>" . htmlspecialchars($row['owner_name']) . "</td>
-                                <td><span class='badge bg-info'>" . htmlspecialchars($row['permission']) . "</span></td>
-                                <td>" . date("d M Y", strtotime($row['created_at'])) . "</td>
-                            </tr>";
+                        <div class="card-body">
+                            <div class="table-responsive dataview">
+                                <table class="table dashboard-expired-products">
+                                    <thead>
+                                        <tr>
+                                            <th class="no-sort">
+                                                <label class="checkboxs">
+                                                    <input type="checkbox" id="select-all" />
+                                                    <span class="checkmarks"></span>
+                                                </label>
+                                            </th>
+                                            <th>Name</th>
+                                            <th>Type</th>
+                                            <th>Owner</th>
+                                            <th>Permission</th>
+                                            <th>Created On</th>
+                                        </tr>
+                                    </thead>
+
+                                    <tbody>
+                                        <?php
+                                        $admin = base64_decode($_SESSION['admin_id']);
+
+                                        $stmt = $db->prepare("
+    SELECT ff.*, a.admin_username AS owner_name, fp.permission
+    FROM file_folders ff
+    LEFT JOIN file_permissions fp 
+        ON ff.id = fp.file_folder_id
+    JOIN admin a 
+        ON ff.created_by = a.admin_id
+    WHERE ff.created_by = ? 
+       OR fp.user_id = ?
+    ORDER BY ff.created_at DESC
+");
+
+                                        $stmt->bind_param("ii", $admin, $admin);
+                                        $stmt->execute();
+                                        $result = $stmt->get_result();
+
+                                        if ($result->num_rows > 0) {
+                                            while ($row = $result->fetch_assoc()) {
+
+                                                // Define status
+                                                $status = ($row['created_by'] == $admin)
+                                                    ? "<span class='badge bg-success'>Owned by You</span>"
+                                                    : "<span class='badge bg-warning'>Shared with You</span>";
+
+                                                echo "<tr>
+            <td>
+                <label class='checkboxs'>
+                    <input type='checkbox' />
+                    <span class='checkmarks'></span>
+                </label>
+            </td>
+            <td>" . (!empty($row['folder_name']) ? htmlspecialchars($row['folder_name']) : htmlspecialchars($row['name'])) . "</td>
+            <td>" . ucfirst($row['type']) . "</td>
+            <td>" . $status . "</td>
+            <td><span class='badge bg-info'>" . htmlspecialchars($row['permission']) . "</span></td>
+            <td>" . date('d M Y', strtotime($row['created_at'])) . "</td>
+        </tr>";
+                                            }
+                                        } else {
+                                            echo "<tr><td colspan='6' class='text-center text-muted'>No folders/files available</td></tr>";
                                         }
-                                    } else {
-                                        echo "<tr><td colspan='6' class='text-center text-muted'>No folders/files available</td></tr>";
-                                    }
-                                    ?>
-                                </tbody>
-                            </table>
+                                        ?>
+                                    </tbody>
+
+                                </table>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <?php }?>
+                <?php } ?>
             </div>
         </div>
     </div>
