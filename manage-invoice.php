@@ -970,7 +970,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['invoiceIdForSendReceip
             <!-- TOTAL -->
             <tr>
             <td colspan='2' align='right' style='padding-top:15px;'>
-                <strong style='font-size:16px;'>Total: ₹ {$totalAmount}</strong>
+                <strong style='font-size:16px;'>Total: $ {$totalAmount}</strong>
             </td>
             </tr>
 
