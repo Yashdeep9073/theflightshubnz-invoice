@@ -158,6 +158,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['edit'])) {
 
         $invoiceTitle = htmlspecialchars($_POST["invoice_title"], ENT_QUOTES, 'UTF-8');
         $invoiceNumber = htmlspecialchars($_POST['invoice_number'] ?? '', ENT_QUOTES, 'UTF-8');
+        $ticketNumber = htmlspecialchars($_POST['ticket_number'] ?? '', ENT_QUOTES, 'UTF-8');
         $paymentMethod = htmlspecialchars($_POST['payment_method'] ?? '', ENT_QUOTES, 'UTF-8');
         $transactionId = htmlspecialchars($_POST['transaction_id'] ?? '', ENT_QUOTES, 'UTF-8');
         $status = htmlspecialchars($_POST['status'] ?? '', ENT_QUOTES, 'UTF-8');
@@ -231,7 +232,8 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['edit'])) {
             `passenger_details` = ?,
             `customer_address` = ?,
             `organization` = ?,
-            `customer_email` = ?
+            `customer_email` = ?,
+            `ticket_number` = ?
         WHERE `invoice_id` = ?";
 
         $stmt = $db->prepare($sql);
@@ -240,7 +242,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['edit'])) {
         }
 
         $stmt->bind_param(
-            'sssssssssssssdissssi',
+            'sssssssssssssdisssssi',
             $invoiceNumber,
             $invoiceTitle,
             $paymentMethod,
@@ -260,6 +262,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['edit'])) {
             $customerAddress,
             $organizationName,
             $customerEmail,
+            $ticketNumber,
             $invoiceId
         );
 
@@ -466,6 +469,15 @@ ob_end_flush();
                                                             class="btn-2 btn-primaryadd invoiceNumber">
                                                             Generate
                                                         </button>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-4 col-sm-6 col-12">
+                                                    <div class="input-blocks add-product list">
+                                                        <label class="form-label">Ticket Number</label>
+                                                        <input type="text" id="ticket_number"
+                                                            value="<?php echo $invoices['0']['ticket_number'] ?>"
+                                                            name="ticket_number" placeholder="Enter Ticket Number"
+                                                            class="form-control" required>
                                                     </div>
                                                 </div>
 

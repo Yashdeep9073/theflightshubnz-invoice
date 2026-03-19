@@ -408,7 +408,7 @@ try {
 
         $pdf->SetFont('FuturaBT-Medium', '', 8);
         $pdf->SetXY(90, 135);
-        $pdf->Cell(0, $lineHeight, $result, 0, 0);
+        $pdf->MultiCell(30, $lineHeight, $result, 0);
 
         $pdf->SetXY(130, $y);
         $pdf->Cell(0, $lineHeight, $currencySymbol . "." . $invoice['total_amount'], 0, 0);

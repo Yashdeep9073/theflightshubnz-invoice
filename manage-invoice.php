@@ -59,6 +59,7 @@ try {
         // Check if at least one parameter is present (non-empty)
         $hasParams = false;
         foreach ($params as $value) {
+
             if ($value !== '') {
                 $hasParams = true;
                 break;
@@ -763,7 +764,299 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['invoiceIdForSend'])) {
     }
 }
 
+// Send Receipt
+// Send Receipt
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['invoiceIdForSendReceipt'])) {
 
+    try {
+
+        $invoiceId = intval($_POST['invoiceIdForSendReceipt']);
+
+        // =========================
+        // FETCH INVOICE + CUSTOMER
+        // =========================
+        $stmt = $db->prepare("
+        SELECT i.*, c.gst_number, c.customer_address 
+        FROM invoice i
+        LEFT JOIN customer c ON c.customer_email = i.customer_email
+        WHERE i.is_active = 1 AND i.invoice_id = ? AND i.status = 'PAID'
+    ");
+
+        if (!$stmt) {
+            throw new Exception("Prepare failed: " . $db->error);
+        }
+
+        $stmt->bind_param('i', $invoiceId);
+
+        if (!$stmt->execute()) {
+            throw new Exception("Execute failed: " . $stmt->error);
+        }
+
+        $invoice = $stmt->get_result()->fetch_assoc();
+
+        if (empty($invoice)) {
+            echo json_encode([
+                'status' => 404,
+                'message' => "Invoice not found or not PAID"
+            ]);
+            exit;
+        }
+
+        // =========================
+        // FETCH COMPANY SETTINGS
+        // =========================
+        $companyQuery = $db->prepare("SELECT * FROM company_settings LIMIT 1");
+
+        if (!$companyQuery) {
+            throw new Exception("Company prepare failed: " . $db->error);
+        }
+
+        if (!$companyQuery->execute()) {
+            throw new Exception("Company execute failed: " . $companyQuery->error);
+        }
+
+        $company = $companyQuery->get_result()->fetch_assoc();
+
+        // =========================
+        // FORMAT DATA
+        // =========================
+        $customerName = htmlspecialchars($invoice['customer_name'] ?? '');
+        $customerEmail = htmlspecialchars($invoice['customer_email'] ?? '');
+        $invoiceNumber = htmlspecialchars($invoice['invoice_number'] ?? '');
+        $travelDate = htmlspecialchars($invoice['travel_date'] ?? '');
+        $invoiceDate = date('d-m-Y', strtotime($invoice['created_at']));
+        $totalAmount = number_format((float) $invoice['total_amount'], 2);
+        $organization = htmlspecialchars($invoice['organization'] ?? '');
+        $address = nl2br(htmlspecialchars($invoice['customer_address'] ?? ''));
+
+        // Company
+        $companyName = htmlspecialchars($company['company_name'] ?? '');
+        $companyEmail = htmlspecialchars($company['company_email'] ?? '');
+        $companyPhone = htmlspecialchars($company['company_phone'] ?? '');
+        $companyWeb = htmlspecialchars($company['company_website'] ?? '');
+        $companyGST = htmlspecialchars($company['gst_number'] ?? '-');
+        $companyBZ = htmlspecialchars($company['bz_number'] ?? '-');
+        $companyAddr = nl2br(htmlspecialchars($company['address'] ?? ''));
+
+        // =========================
+        // PASSENGER + TICKET LOGIC
+        // =========================
+        $passengers = json_decode($invoice['passenger_details'], true);
+
+        $ticketNumbersRaw = $invoice['ticket_number'] ?? '';
+        $decodedTickets = json_decode($ticketNumbersRaw, true);
+
+        if (is_array($decodedTickets)) {
+            $ticketNumbers = $decodedTickets;
+        } else {
+            $ticketNumbers = array_map('trim', explode(',', $ticketNumbersRaw));
+        }
+
+        $passengerRows = '';
+
+        if (!empty($passengers) && is_array($passengers)) {
+            foreach ($passengers as $index => $p) {
+
+                $ticketNo = htmlspecialchars($ticketNumbers[$index] ?? '');
+                $type = htmlspecialchars($p['type'] ?? '');
+                $qty = htmlspecialchars($p['quantity'] ?? '0');
+
+                $passengerRows .= "
+                <tr>
+                    <td>{$ticketNo}</td>
+                    <td>{$type} ({$qty})</td>
+                    <td>{$invoice['from_location']} - {$invoice['to_location']}</td>
+                    <td>{$invoice['airline_name']}</td>
+                    <td>{$travelDate}</td>
+                </tr>
+            ";
+            }
+        } else {
+            $passengerRows = "
+            <tr>
+                <td colspan='5' align='center'>No passenger data</td>
+            </tr>
+        ";
+        }
+
+        // =========================
+        // EMAIL TEMPLATE
+        // =========================
+        $emailBody = "
+            <html>
+            <body style='margin:0;padding:0;background:#f4f4f4;font-family:Arial,sans-serif;'>
+
+            <table width='100%' cellpadding='0' cellspacing='0'>
+            <tr>
+            <td align='center'>
+
+            <!-- MAIN CONTAINER -->
+            <table width='800' cellpadding='10' cellspacing='0' style='background:#ffffff;border:1px solid #000;'>
+
+            <!-- HEADER -->
+            <tr>
+            <td colspan='2' style='border-bottom:2px solid #000;'>
+                <table width='100%'>
+                    <tr>
+
+                        <!-- COMPANY -->
+                        <td style='vertical-align:top;'>
+                            <strong style='font-size:18px;'>{$companyName}</strong><br>
+                            {$companyAddr}<br>
+                            Email: {$companyEmail}<br>
+                            Phone: {$companyPhone}<br>
+                            Website: {$companyWeb}
+                        </td>
+
+                        <!-- INVOICE INFO -->
+                        <td align='right' style='vertical-align:top;'>
+                            <strong style='font-size:16px;'>TAX INVOICE</strong><br><br>
+                            Invoice No: {$invoiceNumber}<br>
+                            Invoice Date: {$invoiceDate}<br>
+                            Travel Date: {$travelDate}<br>
+                            GST No: {$companyGST}<br>
+                            BZ No: {$companyBZ}
+                        </td>
+
+                    </tr>
+                </table>
+            </td>
+            </tr>
+
+            <!-- CUSTOMER -->
+            <tr>
+            <td colspan='2'>
+                <table width='100%'>
+                    <tr>
+
+                        <td style='vertical-align:top;'>
+                            <strong>Customer Name:</strong> {$customerName}<br>
+                            <strong>Business:</strong> {$organization}<br>
+                            <strong>Address:</strong><br>
+                            {$address}
+                        </td>
+
+                        <td style='text-align:right;vertical-align:top;'>
+                            <strong>From:</strong> {$invoice['from_location']}<br>
+                            <strong>To:</strong> {$invoice['to_location']}
+                        </td>
+
+                    </tr>
+                </table>
+            </td>
+            </tr>
+
+            <!-- PASSENGER TABLE -->
+            <tr>
+            <td colspan='2'>
+
+            <table width='100%' border='1' cellpadding='6' cellspacing='0' style='border-collapse:collapse;'>
+
+            <tr style='background:#000;color:#fff;text-align:center;'>
+                <th>Ticket No</th>
+                <th>Name</th>
+                <th>Sector</th>
+                <th>Carrier</th>
+                <th>Travel Date</th>
+            </tr>
+
+            {$passengerRows}
+
+            </table>
+
+            </td>
+            </tr>
+
+            <!-- TOTAL -->
+            <tr>
+            <td colspan='2' align='right' style='padding-top:15px;'>
+                <strong style='font-size:16px;'>Total: ₹ {$totalAmount}</strong>
+            </td>
+            </tr>
+
+            <!-- FOOTER -->
+            <tr>
+            <td colspan='2' style='border-top:1px solid #000;padding-top:10px;font-size:12px;color:#555;'>
+
+            <table width='100%' cellpadding='5' cellspacing='0'>
+            <tr>
+
+            <!-- TERMS -->
+            <td width='70%' style='vertical-align:top;'>
+            <b>Terms & Conditions:</b><br>
+            • This is a computer generated invoice and does not require signature.<br>
+            • All disputes are subject to jurisdiction.<br>
+            • Interest may be charged on overdue payments.<br>
+            • Please contact support for any discrepancies within 7 days.<br>
+            </td>
+
+            <!-- SIGNATURE -->
+            <td width='30%' style='text-align:right;vertical-align:top;'>
+            <b>For {$companyName}</b><br><br><br>
+            Authorised Signatory
+            </td>
+
+            </tr>
+            </table>
+
+            </td>
+            </tr>
+
+            </table>
+            <!-- END MAIN CONTAINER -->
+
+            </td>
+            </tr>
+            </table>
+
+            </body>
+            </html>
+            ";
+
+        // =========================
+        // MAIL
+        // =========================
+        $mail = new PHPMailer(true);
+
+        $mail->isSMTP();
+        $mail->Host = $host;
+        $mail->SMTPAuth = true;
+        $mail->Username = $userName;
+        $mail->Password = $password;
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+        $mail->Port = $port;
+
+        $mail->setFrom($userName, $companyName);
+        $mail->addAddress($customerEmail, $customerName);
+        $mail->isHTML(true);
+
+        $mail->Subject = "Payment Receipt - {$invoiceNumber}";
+        $mail->Body = $emailBody;
+
+        if (!$mail->send()) {
+            throw new Exception("Mail sending failed");
+        }
+
+        echo json_encode([
+            'status' => 200,
+            'message' => "Receipt sent successfully to {$customerName}"
+        ]);
+        exit;
+
+    } catch (Exception $e) {
+
+        echo json_encode([
+            'status' => 500,
+            'message' => $e->getMessage()
+        ]);
+        exit;
+    } catch (Exception $e) {
+        echo json_encode([
+            'status' => 500,
+            'message' => $e->getMessage()
+        ]);
+    }
+}
 
 // delete multiple invoice
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['invoiceIds'])) {
@@ -1147,6 +1440,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['invoiceIds'])) {
                                                                     class="info-img"></i>Send Invoice </a>
                                                         </li>
                                                     <?php endif; ?>
+                                                    <?php if ($isAdmin || hasPermission('Send Receipt', $privileges, $roleData['0']['role_name'])): ?>
+
+                                                        <li>
+                                                            <a href="javascript:void(0);"
+                                                                data-invoice-id="<?php echo $invoice['invoice_id'] ?>"
+                                                                class="dropdown-item sendReceipt mb-0"><i data-feather="mail"
+                                                                    class="info-img"></i>Send Receipt </a>
+                                                        </li>
+                                                    <?php endif; ?>
                                                 </ul>
                                             </td>
                                         </tr>
@@ -1207,6 +1509,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['invoiceIds'])) {
     <script>
         $(document).ready(function () {
 
+            function showLoader() {
+                $('#global-loader').fadeIn(200); // smooth show
+            }
+
+            function hideLoader() {
+                $('#global-loader').fadeOut(200); // smooth hide
+            }
+
             // Initialize Notyf
             const notyf = new Notyf({
                 duration: 3000,
@@ -1241,6 +1551,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['invoiceIds'])) {
                     confirmButtonText: "Yes, delete it!"
                 }).then((result) => {
                     if (result.isConfirmed) {
+                        showLoader(); // ✅ START LOADER
                         // Send AJAX request to delete the record from the database
                         $.ajax({
                             url: 'manage-invoice.php',
@@ -1248,6 +1559,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['invoiceIds'])) {
                             data: { invoiceId: invoiceId },
                             success: function (response) {
                                 let result;
+                                hideLoader(); // ✅ STOP LOADER
 
                                 try {
                                     result = JSON.parse(response);
@@ -1269,6 +1581,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['invoiceIds'])) {
                                 }
                             },
                             error: function () {
+                                hideLoader(); // ✅ STOP LOADER
                                 Swal.fire(
                                     'Error!',
                                     'There was an error contacting the server.',
@@ -1293,6 +1606,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['invoiceIds'])) {
                     confirmButtonText: "Yes, Send Mail!"
                 }).then((result) => {
                     if (result.isConfirmed) {
+                        showLoader(); // ✅ START LOADER
+
                         // Send AJAX request to delete the record from the database
                         $.ajax({
                             url: 'manage-invoice.php', // The PHP file that will handle the deletion
@@ -1301,6 +1616,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['invoiceIds'])) {
                             success: function (response) {
                                 let result = JSON.parse(response);
                                 console.log(result);
+                                hideLoader(); // ✅ STOP LOADER
 
                                 if (result.status == 200) {
                                     // Show success message and reload the page
@@ -1376,12 +1692,104 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['invoiceIds'])) {
                     confirmButtonText: "Yes, Send Mail!"
                 }).then((result) => {
                     if (result.isConfirmed) {
+                        showLoader(); // ✅ START LOADER
                         // Send AJAX request to delete the record from the database
                         $.ajax({
                             url: 'manage-invoice.php', // The PHP file that will handle the deletion
                             type: 'POST',
                             data: { invoiceIdForSend: invoiceId },
                             success: function (response) {
+                                console.log(response);
+                                let result = JSON.parse(response);
+                                console.log(result);
+                                hideLoader(); // ✅ STOP LOADER
+
+                                if (result.status == 200) {
+                                    // Show success message and reload the page
+                                    Swal.fire(
+                                        'Send!',
+                                        result.message,
+                                        'success' // Added 'success' to show the success icon
+                                    ).then(() => {
+                                        // Reload the page
+                                        location.reload();
+                                    });
+                                }
+                                if (result.status == 403) {
+                                    // Show success message and reload the page
+                                    Swal.fire(
+                                        'Error!',
+                                        result.message,
+                                        'error' // Added 'success' to show the success icon
+                                    ).then(() => {
+                                        // Reload the page
+                                        location.reload();
+                                    });
+                                }
+                                if (result.status == 404) {
+                                    // Show success message and reload the page
+                                    Swal.fire(
+                                        'Error!',
+                                        result.message,
+                                        'error' // Added 'success' to show the success icon
+                                    ).then(() => {
+                                        // Reload the page
+                                        location.reload();
+                                    });
+                                }
+                                if (result.status == 500) {
+                                    // Show success message and reload the page
+                                    Swal.fire(
+                                        'Error!',
+                                        result.error,
+                                        'error' // Added 'success' to show the success icon
+                                    ).then(() => {
+                                        // Reload the page
+                                        location.reload();
+                                    });
+                                }
+
+                            },
+                            error: function (xhr, status, error) {
+                                hideLoader(); // ✅ STOP LOADER
+                                // Show error message if the AJAX request fails
+                                Swal.fire(
+                                    'Error!',
+                                    'There was an error sending the mail.',
+                                    'error'
+                                );
+                            }
+                        });
+                    }
+                });
+            });
+
+
+            $(document).on('click', '.sendReceipt', function (e) {
+                e.preventDefault();
+
+                let invoiceId = $(this).data('invoice-id');
+
+
+                Swal.fire({
+                    title: "Are you sure?",
+                    text: "You won't be able to revert this!",
+                    showCancelButton: true,
+                    confirmButtonColor: "#ff9f43",
+                    cancelButtonColor: "#d33",
+                    confirmButtonText: "Yes, Send Mail!"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        showLoader(); // ✅ START LOADER
+
+                        // Send AJAX request to send the receipt
+                        $.ajax({
+                            url: 'manage-invoice.php', // The PHP file that will handle the request
+                            type: 'POST',
+                            data: { invoiceIdForSendReceipt: invoiceId },
+                            success: function (response) {
+
+                                hideLoader(); // ✅ STOP LOADER
                                 console.log(response);
                                 let result = JSON.parse(response);
                                 console.log(result);
@@ -1433,6 +1841,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['invoiceIds'])) {
 
                             },
                             error: function (xhr, status, error) {
+
+                                hideLoader(); // ✅ STOP LOADER
+
                                 // Show error message if the AJAX request fails
                                 Swal.fire(
                                     'Error!',
@@ -1476,7 +1887,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['invoiceIds'])) {
                             url: "manage-invoice.php",
                             type: "post",
                             data: { invoiceIds: invoiceIds },
+                            beforeSend: function () {
+                                showLoader(); // ✅ START LOADER
+                            },
                             success: function (response) {
+                                hideLoader(); // ✅ STOP LOADER
 
                                 Swal.fire(
                                     'Deleted!',
@@ -1490,6 +1905,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['invoiceIds'])) {
                             },
                             error: function (error) {
                                 console.log(error);
+                                hideLoader(); // ✅ STOP LOADER
                             },
                         });
 
