@@ -1431,15 +1431,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['invoiceIds'])) {
                                                         </li>
                                                     <?php endif; ?>
 
-                                                    <?php if ($isAdmin || hasPermission('Send Invoice', $privileges, $roleData['0']['role_name'])): ?>
-
-                                                        <li>
-                                                            <a href="javascript:void(0);"
-                                                                data-invoice-id="<?php echo $invoice['invoice_id'] ?>"
-                                                                class="dropdown-item sendInvoice mb-0"><i data-feather="send"
-                                                                    class="info-img"></i>Send Invoice </a>
-                                                        </li>
-                                                    <?php endif; ?>
                                                     <?php if ($isAdmin || hasPermission('Send Receipt', $privileges, $roleData['0']['role_name'])): ?>
 
                                                         <li>
@@ -1449,6 +1440,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['invoiceIds'])) {
                                                                     class="info-img"></i>Send Receipt </a>
                                                         </li>
                                                     <?php endif; ?>
+
+                                                    <?php if ($isAdmin || hasPermission('Send Invoice', $privileges, $roleData['0']['role_name'])): ?>
+
+                                                        <li>
+                                                            <a href="javascript:void(0);"
+                                                                data-invoice-id="<?php echo $invoice['invoice_id'] ?>"
+                                                                class="dropdown-item sendInvoice mb-0"><i data-feather="send"
+                                                                    class="info-img"></i>Send Invoice </a>
+                                                        </li>
+                                                    <?php endif; ?>
+
                                                 </ul>
                                             </td>
                                         </tr>
