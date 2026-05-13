@@ -522,7 +522,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['submit'])) {
                                                             <option value="">Select</option>
                                                             <?php foreach ($airports['data'] as $airport) { ?>
                                                                 <option value="<?php echo $airport['airport']; ?>">
-                                                                    <?php echo $airport['airport']; ?>
+                                                                    <?php echo  $airport['airport'] . " - " . $airport['airport_code']; ?>
                                                                 </option>
                                                             <?php } ?>
                                                         </select>
@@ -537,7 +537,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['submit'])) {
                                                             <option value="">Select</option>
                                                             <?php foreach ($airports['data'] as $airport) { ?>
                                                                 <option value="<?php echo $airport['airport']; ?>">
-                                                                    <?php echo $airport['airport']; ?>
+                                                                    <?php echo $airport['airport'] . " - " . $airport['airport_code']  ; ?>
                                                                 </option>
                                                             <?php } ?>
                                                         </select>
