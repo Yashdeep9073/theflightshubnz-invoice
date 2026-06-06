@@ -1,9 +1,9 @@
 <?php
 session_start();
 
-require './vendor/autoload.php';
-require './database/config.php';
-require './utility/env.php';
+require "./vendor/autoload.php";
+require "./database/config.php";
+require "./utility/env.php";
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
@@ -14,78 +14,99 @@ if (!isset($_SESSION["admin_id"])) {
     exit();
 }
 
-
 try {
-
-    $stmtFetchLocalizationSettings = $db->prepare("SELECT * FROM localization_settings INNER JOIN currency ON localization_settings.currency_id = currency.currency_id;");
+    $stmtFetchLocalizationSettings = $db->prepare(
+        "SELECT * FROM localization_settings INNER JOIN currency ON localization_settings.currency_id = currency.currency_id;",
+    );
     $stmtFetchLocalizationSettings->execute();
-    $localizationSettings = $stmtFetchLocalizationSettings->get_result()->fetch_array(MYSQLI_ASSOC);
+    $localizationSettings = $stmtFetchLocalizationSettings
+        ->get_result()
+        ->fetch_array(MYSQLI_ASSOC);
 
     $stmtFetchCompanySettings = $db->prepare("SELECT * FROM company_settings");
     $stmtFetchCompanySettings->execute();
-    $companySettings = $stmtFetchCompanySettings->get_result()->fetch_array(MYSQLI_ASSOC);
+    $companySettings = $stmtFetchCompanySettings
+        ->get_result()
+        ->fetch_array(MYSQLI_ASSOC);
 
-    $stmtFetch = $db->prepare("SELECT * FROM email_settings WHERE is_active = 1 LIMIT 1");
+    $stmtFetch = $db->prepare(
+        "SELECT * FROM email_settings WHERE is_active = 1 LIMIT 1",
+    );
     $stmtFetch->execute();
     $emailSettingData = $stmtFetch->get_result()->fetch_assoc();
 
     // === Email Settings Fallbacks ===
-    $host = $emailSettingData['email_host'] ?? getenv("SMTP_HOST");
-    $userName = $emailSettingData['email_address'] ?? getenv('SMTP_USER_NAME');
-    $password = $emailSettingData['email_password'] ?? getenv('SMTP_PASSCODE');
-    $port = $emailSettingData['email_port'] ?? getenv('SMTP_PORT');
-    $fromTitle = $emailSettingData['email_from_title'] ?? "Vibrantick InfoTech Solution";
-    $logoUrl = getenv("BASE_URL") . $emailSettingData['logo_url'] ?? 'https://vibrantick.in/assets/images/logo/footer.png ';
+    $host = $emailSettingData["email_host"] ?? getenv("SMTP_HOST");
+    $userName = $emailSettingData["email_address"] ?? getenv("SMTP_USER_NAME");
+    $password = $emailSettingData["email_password"] ?? getenv("SMTP_PASSCODE");
+    $port = $emailSettingData["email_port"] ?? getenv("SMTP_PORT");
+    $fromTitle =
+        $emailSettingData["email_from_title"] ?? "Vibrantick InfoTech Solution";
+    $logoUrl =
+        getenv("BASE_URL") . $emailSettingData["logo_url"] ??
+        "https://vibrantick.in/assets/images/logo/footer.png ";
 
-    $supportEmail = $emailSettingData['support_email'] ?? 'support@vibrantick.org';
-    $phone = $emailSettingData['phone'] ?? '+919870443528';
-    $address1 = $emailSettingData['address_line1'] ?? 'Vibrantick InfoTech Solution | D-185, Phase 8B, Sector 74, SAS Nagar';
-    $linkedin = $emailSettingData['linkedin_url'] ?? 'https://www.linkedin.com/company/vibrantick-infotech-solutions/posts/?feedView=all';
-    $instagram = $emailSettingData['ig_url'] ?? ' https://www.instagram.com/vibrantickinfotech/ ';
-    $facebook = $emailSettingData['fb_url'] ?? 'https://www.facebook.com/vibranticksolutions/ ';
-    $googleUrl = $emailSettingData['google_url'] ?? 'https://share.google/TV95iiaQa4aniAgHV';
-    $whatsappUrl = $emailSettingData['whatsapp_url'] ?? 'https://api.whatsapp.com/send?phone=64224226675';
+    $supportEmail =
+        $emailSettingData["support_email"] ?? "support@vibrantick.org";
+    $phone = $emailSettingData["phone"] ?? "+919870443528";
+    $address1 =
+        $emailSettingData["address_line1"] ??
+        "Vibrantick InfoTech Solution | D-185, Phase 8B, Sector 74, SAS Nagar";
+    $linkedin =
+        $emailSettingData["linkedin_url"] ??
+        "https://www.linkedin.com/company/vibrantick-infotech-solutions/posts/?feedView=all";
+    $instagram =
+        $emailSettingData["ig_url"] ??
+        " https://www.instagram.com/vibrantickinfotech/ ";
+    $facebook =
+        $emailSettingData["fb_url"] ??
+        "https://www.facebook.com/vibranticksolutions/ ";
+    $googleUrl =
+        $emailSettingData["google_url"] ??
+        "https://share.google/TV95iiaQa4aniAgHV";
+    $whatsappUrl =
+        $emailSettingData["whatsapp_url"] ??
+        "https://api.whatsapp.com/send?phone=64224226675";
     $currentYear = date("Y");
 
-
-    if ($_SERVER['REQUEST_METHOD'] == 'GET') {
+    if ($_SERVER["REQUEST_METHOD"] == "GET") {
         // Define the expected query parameters
         $params = [
-            'customer' => isset($_GET['customer']) ? $_GET['customer'] : '',
-            'from' => isset($_GET['from']) ? $_GET['from'] : '',
-            'to' => isset($_GET['to']) ? $_GET['to'] : '',
+            "customer" => isset($_GET["customer"]) ? $_GET["customer"] : "",
+            "from" => isset($_GET["from"]) ? $_GET["from"] : "",
+            "to" => isset($_GET["to"]) ? $_GET["to"] : "",
         ];
 
         // Check if at least one parameter is present (non-empty)
         $hasParams = false;
         foreach ($params as $value) {
-
-            if ($value !== '') {
+            if ($value !== "") {
                 $hasParams = true;
                 break;
             }
         }
 
         if ($hasParams) {
-
-            $customerId = $params['customer'] ?? null;
-            $startDate = $params['from'] ?? null;
-            $endDate = $params['to'] ?? null;
+            $customerId = $params["customer"] ?? null;
+            $startDate = $params["from"] ?? null;
+            $endDate = $params["to"] ?? null;
 
             // Clean and format dates
-            $startDate = $startDate ? date('Y-m-d', strtotime($startDate)) : null;
-            $endDate = $endDate ? date('Y-m-d', strtotime($endDate)) : null;
+            $startDate = $startDate
+                ? date("Y-m-d", strtotime($startDate))
+                : null;
+            $endDate = $endDate ? date("Y-m-d", strtotime($endDate)) : null;
 
             // Prepare SQL with conditions
-            $query = "SELECT 
+            $query = "SELECT
             invoice.*,
             invoice.status as invoiceStatus,
             customer.customer_id,
             customer.customer_name,
             admin.admin_username
-            FROM invoice 
+            FROM invoice
             INNER JOIN customer ON customer.customer_id = invoice.customer_id
-            LEFT JOIN admin ON admin.admin_id = invoice.created_by 
+            LEFT JOIN admin ON admin.admin_id = invoice.created_by
             WHERE invoice.is_active = 1";
 
             $conditions = [];
@@ -113,7 +134,7 @@ try {
             $stmtFetchInvoices = $db->prepare($query);
 
             if ($stmtFetchInvoices === false) {
-                $_SESSION['error'] = 'Query preparation failed';
+                $_SESSION["error"] = "Query preparation failed";
             } else {
                 // Bind parameters dynamically
                 if (!empty($paramsToBind)) {
@@ -124,92 +145,92 @@ try {
                 if ($stmtFetchInvoices->execute()) {
                     $invoices = $stmtFetchInvoices->get_result();
                 } else {
-                    $_SESSION['error'] = 'Error fetching filtered invoices';
+                    $_SESSION["error"] = "Error fetching filtered invoices";
                 }
 
                 $stmtFetchInvoices->close();
             }
-
         } else {
-            $stmtFetchInvoices = $db->prepare("SELECT 
+            $stmtFetchInvoices = $db->prepare("SELECT
                 invoice.*,
                 invoice.status as invoiceStatus,
                 admin.admin_username
-                FROM invoice 
+                FROM invoice
                 LEFT JOIN admin
-                ON admin.admin_id = invoice.created_by 
+                ON admin.admin_id = invoice.created_by
                 WHERE invoice.is_active = 1
                 ORDER BY invoice.invoice_id ASC
                 ");
             if ($stmtFetchInvoices->execute()) {
                 $invoices = $stmtFetchInvoices->get_result();
             } else {
-                $_SESSION['error'] = 'Error for fetching customers';
+                $_SESSION["error"] = "Error for fetching customers";
             }
 
             // Fetch customers
-            $stmtFetchCustomers = $db->prepare("SELECT * FROM customer WHERE isActive = 1");
+            $stmtFetchCustomers = $db->prepare(
+                "SELECT * FROM customer WHERE isActive = 1",
+            );
             $stmtFetchCustomers->execute();
-            $customers = $stmtFetchCustomers->get_result()->fetch_all(MYSQLI_ASSOC);
+            $customers = $stmtFetchCustomers
+                ->get_result()
+                ->fetch_all(MYSQLI_ASSOC);
             $stmtFetchCustomers->close();
         }
     }
-
-
 } catch (Exception $e) {
-    $_SESSION['error'] = $e->getMessage();
+    $_SESSION["error"] = $e->getMessage();
 }
 
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['invoiceId'])) {
-
-    $invoiceId = intval($_POST['invoiceId']);
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["invoiceId"])) {
+    $invoiceId = intval($_POST["invoiceId"]);
 
     if ($invoiceId <= 0) {
         echo json_encode([
-            'status' => 400,
-            'message' => 'Invalid invoice ID.'
+            "status" => 400,
+            "message" => "Invalid invoice ID.",
         ]);
-        exit;
+        exit();
     }
 
     try {
-        $stmt = $db->prepare("UPDATE invoice SET is_active = 0 WHERE invoice_id = ?");
+        $stmt = $db->prepare(
+            "UPDATE invoice SET is_active = 0 WHERE invoice_id = ?",
+        );
         $stmt->bind_param("i", $invoiceId);
 
         if ($stmt->execute()) {
             echo json_encode([
-                'status' => 200,
-                'message' => 'Selected invoice deleted successfully.'
+                "status" => 200,
+                "message" => "Selected invoice deleted successfully.",
             ]);
         } else {
             echo json_encode([
-                'status' => 400,
-                'message' => $stmt->error
+                "status" => 400,
+                "message" => $stmt->error,
             ]);
         }
-
     } catch (Exception $e) {
         echo json_encode([
-            'status' => 500,
-            'message' => 'Server error: ' . $e->getMessage()
+            "status" => 500,
+            "message" => "Server error: " . $e->getMessage(),
         ]);
     }
 
-    exit;
+    exit();
 }
 
-
 // send reminder
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['invoiceIdForReminder'])) {
-
+if (
+    $_SERVER["REQUEST_METHOD"] == "POST" &&
+    isset($_POST["invoiceIdForReminder"])
+) {
     try {
-
-        $invoiceId = intval($_POST['invoiceIdForReminder']);
-        $stmtFetchCustomer = $db->prepare("SELECT * FROM invoice 
+        $invoiceId = intval($_POST["invoiceIdForReminder"]);
+        $stmtFetchCustomer = $db->prepare("SELECT * FROM invoice
         WHERE is_active = 1 AND invoice_id = ? AND status IN ('PENDING')");
 
-        $stmtFetchCustomer->bind_param('i', $invoiceId);
+        $stmtFetchCustomer->bind_param("i", $invoiceId);
 
         if ($stmtFetchCustomer->execute()) {
             $invoices = $stmtFetchCustomer->get_result()->fetch_assoc();
@@ -217,47 +238,50 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['invoiceIdForReminder']
             // Check if the invoice exists
             if (empty($invoices)) {
                 echo json_encode([
-                    'status' => 404,
-                    'message' => "Invoice Status is Not Pending"
+                    "status" => 404,
+                    "message" => "Invoice Status is Not Pending",
                 ]);
-                exit; // Stop further execution
+                exit(); // Stop further execution
             }
-
         } else {
             echo json_encode([
-                'status' => 500,
-                'message' => "Database Query Execution Failed"
+                "status" => 500,
+                "message" => "Database Query Execution Failed",
             ]);
-            exit;
+            exit();
         }
 
-        $stmtFetchEmailTemplates = $db->prepare("SELECT * FROM email_template WHERE is_active = 1 AND type = 'REMINDER' ");
+        $stmtFetchEmailTemplates = $db->prepare(
+            "SELECT * FROM email_template WHERE is_active = 1 AND type = 'REMINDER' ",
+        );
         $stmtFetchEmailTemplates->execute();
-        $emailTemplate = $stmtFetchEmailTemplates->get_result()->fetch_array(MYSQLI_ASSOC);
+        $emailTemplate = $stmtFetchEmailTemplates
+            ->get_result()
+            ->fetch_array(MYSQLI_ASSOC);
 
         // === Email Template Fallbacks ===
-        $templateTitle = $emailTemplate['email_template_title'] ?? 'Payment Reminder';
-        $emailSubject = $emailTemplate['email_template_subject'] ?? 'Payment Reminder: Overdue Invoices';
+        $templateTitle =
+            $emailTemplate["email_template_title"] ?? "Payment Reminder";
+        $emailSubject =
+            $emailTemplate["email_template_subject"] ??
+            "Payment Reminder: Overdue Invoices";
 
-        $content1 = !empty($emailTemplate['content_1'])
-            ? nl2br(trim($emailTemplate['content_1']))
-            : '<p>We hope this message finds you well. The following invoice(s) are overdue. Kindly make the payment at your earliest convenience to avoid any service interruptions.</p>';
+        $content1 = !empty($emailTemplate["content_1"])
+            ? nl2br(trim($emailTemplate["content_1"]))
+            : "<p>We hope this message finds you well. The following invoice(s) are overdue. Kindly make the payment at your earliest convenience to avoid any service interruptions.</p>";
 
-        $content2 = !empty($emailTemplate['content_2'])
-            ? nl2br(trim($emailTemplate['content_2']))
+        $content2 = !empty($emailTemplate["content_2"])
+            ? nl2br(trim($emailTemplate["content_2"]))
             : '
         <p>Please settle the outstanding amount at your earliest convenience. For any questions or assistance, contact our support team at <a href="mailto:support@vibrantick.org">support@vibrantick.org</a> or call <a href="tel:+919870443528">+91-9870443528</a>.</p>
         <p>Thank you for your prompt attention to this matter.</p>
         <p>Best regards,<br>Vibrantick InfoTech Solution Team</p>';
 
-
-
-
-        $customerName = htmlspecialchars($invoices['customer_name']);
-        $customerEmail = htmlspecialchars($invoices['customer_email']);
-        $invoiceNumber = htmlspecialchars($invoices['invoice_number']);
-        $dueDate = htmlspecialchars($invoices['due_date']);
-        $totalAmount = number_format((float) $invoices['total_amount'], 2);
+        $customerName = htmlspecialchars($invoices["customer_name"]);
+        $customerEmail = htmlspecialchars($invoices["customer_email"]);
+        $invoiceNumber = htmlspecialchars($invoices["invoice_number"]);
+        $dueDate = htmlspecialchars($invoices["due_date"]);
+        $totalAmount = number_format((float) $invoices["total_amount"], 2);
 
         // Initialize PHPMailer
         $mail = new PHPMailer(true);
@@ -274,171 +298,173 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['invoiceIdForReminder']
         $mail->isHTML(true);
 
         // Prepare statement for updating reminder_count
-        $stmtUpdate = $db->prepare('UPDATE invoice SET reminder_count = reminder_count + 1 WHERE invoice_id = ?');
+        $stmtUpdate = $db->prepare(
+            "UPDATE invoice SET reminder_count = reminder_count + 1 WHERE invoice_id = ?",
+        );
 
         $emailBody = <<<HTML
-            <!DOCTYPE html>
-            <html lang="en">
-            <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>{$templateTitle}</title>
-                <style>
-                    body {
-                        font-family: Arial, sans-serif;
-                        margin: 0;
-                        padding: 0;
-                        background-color: #f4f4f4;
-                    }
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>{$templateTitle}</title>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    margin: 0;
+                    padding: 0;
+                    background-color: #f4f4f4;
+                }
+                .container {
+                    max-width: 600px;
+                    margin: 20px auto;
+                    background-color: #ffffff;
+                    border-radius: 8px;
+                    overflow: hidden;
+                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                }
+                .header {
+                    background-color: #f4f4f4;
+                    padding: 20px;
+                    text-align: center;
+                    color: #333333;
+                }
+                .header img {
+                    max-width: 150px;
+                    height: auto;
+                    /* background-color: #fff; */
+                    border-radius: 4px;
+                }
+                .header h1 {
+                    margin: 10px 0;
+                    font-size: 24px;
+                    font-weight: bolder;
+                }
+                .content {
+                    padding: 20px;
+                }
+                .content p {
+                    line-height: 1.6;
+                    color: #333333;
+                }
+                .invoice-table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin: 20px 0;
+                }
+                .invoice-table th,
+                .invoice-table td {
+                    border: 1px solid #dddddd;
+                    padding: 12px;
+                    text-align: left;
+                }
+                .invoice-table th {
+                    background-color: #f9522b;
+                    color: #ffffff;
+                    font-weight: bold;
+                }
+                .invoice-table tr:nth-child(even) {
+                    background-color: #f9f9f9;
+                }
+                .invoice-table tr:hover {
+                    background-color: #f1f1f1;
+                }
+                .footer {
+                    background-color: #f4f4f4;
+                    padding: 15px;
+                    text-align: center;
+                    font-size: 12px;
+                    color: #666666;
+                }
+                .footer a {
+                    color: #f9522b;
+                    text-decoration: none;
+                    margin: 0 10px;
+                }
+                .footer img {
+                    width: 24px;
+                    height: 24px;
+                    vertical-align: middle;
+                }
+                .button {
+                    display: inline-block;
+                    padding: 10px 20px;
+                    background-color: #f9522b;
+                    color: #ffffff;
+                    text-decoration: none;
+                    border-radius: 5px;
+                    margin-top: 20px;
+                }
+                @media only screen and (max-width: 600px) {
                     .container {
-                        max-width: 600px;
-                        margin: 20px auto;
-                        background-color: #ffffff;
-                        border-radius: 8px;
-                        overflow: hidden;
-                        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-                    }
-                    .header {
-                        background-color: #f4f4f4;
-                        padding: 20px;
-                        text-align: center;
-                        color: #333333;
+                        width: 100%;
+                        margin: 10px;
                     }
                     .header img {
-                        max-width: 150px;
-                        height: auto;
-                        /* background-color: #fff; */
-                        border-radius: 4px;
+                        max-width: 120px;
                     }
                     .header h1 {
-                        margin: 10px 0;
-                        font-size: 24px;
-                        font-weight: bolder;
-                    }
-                    .content {
-                        padding: 20px;
-                    }
-                    .content p {
-                        line-height: 1.6;
-                        color: #333333;
-                    }
-                    .invoice-table {
-                        width: 100%;
-                        border-collapse: collapse;
-                        margin: 20px 0;
+                        font-size: 20px;
                     }
                     .invoice-table th,
                     .invoice-table td {
-                        border: 1px solid #dddddd;
-                        padding: 12px;
-                        text-align: left;
+                        font-size: 14px;
+                        padding: 8px;
                     }
-                    .invoice-table th {
-                        background-color: #f9522b;
-                        color: #ffffff;
-                        font-weight: bold;
-                    }
-                    .invoice-table tr:nth-child(even) {
-                        background-color: #f9f9f9;
-                    }
-                    .invoice-table tr:hover {
-                        background-color: #f1f1f1;
-                    }
-                    .footer {
-                        background-color: #f4f4f4;
-                        padding: 15px;
-                        text-align: center;
-                        font-size: 12px;
-                        color: #666666;
-                    }
-                    .footer a {
-                        color: #f9522b;
-                        text-decoration: none;
-                        margin: 0 10px;
-                    }
-                    .footer img {
-                        width: 24px;
-                        height: 24px;
-                        vertical-align: middle;
-                    }
-                    .button {
-                        display: inline-block;
-                        padding: 10px 20px;
-                        background-color: #f9522b;
-                        color: #ffffff;
-                        text-decoration: none;
-                        border-radius: 5px;
-                        margin-top: 20px;
-                    }
-                    @media only screen and (max-width: 600px) {
-                        .container {
-                            width: 100%;
-                            margin: 10px;
-                        }
-                        .header img {
-                            max-width: 120px;
-                        }
-                        .header h1 {
-                            font-size: 20px;
-                        }
-                        .invoice-table th,
-                        .invoice-table td {
-                            font-size: 14px;
-                            padding: 8px;
-                        }
-                    }
-                </style>
-            </head>
-            <body>
-                <div class="container">
-                    <!-- Header -->
-                    <div class="header">
-                        <img src="{$logoUrl}" alt="Logo" />
-                        <h1>{$templateTitle}</h1>
-                    </div>
-
-                    <!-- Content -->
-                    <div class="content">
-                        <p>Dear {$customerName},</p>
-                        {$content1}
-
-                        <!-- Invoice Table -->
-                        <table class="invoice-table">
-                            <thead>
-                                <tr>
-                                    <th>Invoice Number</th>
-                                    <th>Due Date</th>
-                                    <th>Total Amount</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>{$invoiceNumber}</td>
-                                    <td>{$dueDate}</td>
-                                    <td><strong>{$localizationSettings["currency_code"]} {$totalAmount}</strong></td>
-                                </tr>
-                            </tbody>
-                        </table>
-
-                        {$content2}
-                    </div>
-
-                    <!-- Footer -->
-                    <div class="footer">
-                        <p>&copy; {$currentYear} {$fromTitle}. All rights reserved.</p>
-                        <p>{$address1} <a href='mailto:{$supportEmail}'>{$supportEmail}</a></p>
-                        <p>NZBN No: {$companySettings['bz_number']}</p>
-                        <p>
-                            <a href='{$googleUrl}' target='_blank'><img src='https://vault.theflightshub.co.nz/assets/img/icons/google.png ' alt='Google'></a>
-                            <a href='{$facebook}' target='_blank'><img src='https://vault.theflightshub.co.nz/assets/img/icons/facebook.png ' alt='Facebook'></a>
-                            <a href='{$instagram}' target='_blank'><img src='https://vault.theflightshub.co.nz/assets/img/icons/instagram.png ' alt='Instagram'></a>
-                            <a href='{$whatsappUrl}' target='_blank'><img src='https://vault.theflightshub.co.nz/assets/img/icons/whatsapp.png ' alt='Whatsapp'></a>
-                        </p>
-                    </div>
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <!-- Header -->
+                <div class="header">
+                    <img src="{$logoUrl}" alt="Logo" />
+                    <h1>{$templateTitle}</h1>
                 </div>
-            </body>
-            </html>
-            HTML;
+
+                <!-- Content -->
+                <div class="content">
+                    <p>Dear {$customerName},</p>
+                    {$content1}
+
+                    <!-- Invoice Table -->
+                    <table class="invoice-table">
+                        <thead>
+                            <tr>
+                                <th>Invoice Number</th>
+                                <th>Due Date</th>
+                                <th>Total Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>{$invoiceNumber}</td>
+                                <td>{$dueDate}</td>
+                                <td><strong>{$localizationSettings["currency_code"]} {$totalAmount}</strong></td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    {$content2}
+                </div>
+
+                <!-- Footer -->
+                <div class="footer">
+                    <p>&copy; {$currentYear} {$fromTitle}. All rights reserved.</p>
+                    <p>{$address1} <a href='mailto:{$supportEmail}'>{$supportEmail}</a></p>
+                    <p>NZBN No: {$companySettings["bz_number"]}</p>
+                    <p>
+                        <a href='{$googleUrl}' target='_blank'><img src='https://vault.theflightshub.co.nz/assets/img/icons/google.png ' alt='Google'></a>
+                        <a href='{$facebook}' target='_blank'><img src='https://vault.theflightshub.co.nz/assets/img/icons/facebook.png ' alt='Facebook'></a>
+                        <a href='{$instagram}' target='_blank'><img src='https://vault.theflightshub.co.nz/assets/img/icons/instagram.png ' alt='Instagram'></a>
+                        <a href='{$whatsappUrl}' target='_blank'><img src='https://vault.theflightshub.co.nz/assets/img/icons/whatsapp.png ' alt='Whatsapp'></a>
+                    </p>
+                </div>
+            </div>
+        </body>
+        </html>
+        HTML;
 
         $mail->clearAddresses();
         $mail->addAddress($customerEmail, $customerName);
@@ -446,43 +472,40 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['invoiceIdForReminder']
         $mail->Body = $emailBody;
 
         if ($mail->send()) {
-
-            $stmtUpdate->bind_param('i', $invoiceId);
+            $stmtUpdate->bind_param("i", $invoiceId);
             if (!$stmtUpdate->execute()) {
                 echo "Failed to update reminder_count for invoice {$invoiceId}\n";
             }
             echo json_encode([
-                'status' => 200,
-                'message' => 'The Mail has been send to ' . $customerName,
-                'data' => $logoUrl
+                "status" => 200,
+                "message" => "The Mail has been send to " . $customerName,
+                "data" => $logoUrl,
             ]);
-            exit;
+            exit();
         } else {
             echo json_encode([
-                'status' => 403,
-                'message' => 'Unable to Send Mail to ' . $customerName,
+                "status" => 403,
+                "message" => "Unable to Send Mail to " . $customerName,
             ]);
-            exit;
+            exit();
         }
     } catch (Exception $e) {
         echo json_encode([
-            'status' => 500,
-            'error' => $e->getMessage(),
+            "status" => 500,
+            "error" => $e->getMessage(),
         ]);
-        exit;
+        exit();
     }
 }
 
 // send invoice
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['invoiceIdForSend'])) {
-
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["invoiceIdForSend"])) {
     try {
-
-        $invoiceId = intval($_POST['invoiceIdForSend']);
-        $stmtFetchCustomer = $db->prepare("SELECT * FROM invoice 
+        $invoiceId = intval($_POST["invoiceIdForSend"]);
+        $stmtFetchCustomer = $db->prepare("SELECT * FROM invoice
         WHERE invoice.is_active = 1 AND invoice.invoice_id = ? AND status IN ('PAID')");
 
-        $stmtFetchCustomer->bind_param('i', $invoiceId);
+        $stmtFetchCustomer->bind_param("i", $invoiceId);
 
         if ($stmtFetchCustomer->execute()) {
             $invoices = $stmtFetchCustomer->get_result()->fetch_assoc();
@@ -490,61 +513,69 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['invoiceIdForSend'])) {
             // Check if the invoice exists
             if (empty($invoices)) {
                 echo json_encode([
-                    'status' => 404,
-                    'message' => "Invoice Status is Not Paid"
+                    "status" => 404,
+                    "message" => "Invoice Status is Not Paid",
                 ]);
-                exit; // Stop further execution
+                exit(); // Stop further execution
             }
-
         } else {
             echo json_encode([
-                'status' => 500,
-                'message' => "Database Query Execution Failed"
+                "status" => 500,
+                "message" => "Database Query Execution Failed",
             ]);
-            exit;
+            exit();
         }
 
         //GENERATE PDF CONTENT FROM download-invoice.php
         ob_start(); // Capture any output
 
         // Simulate GET request to download-invoice.php
-        $_GET['id'] = base64_encode($invoiceId); // Match how download-invoice.php expects it
+        $_GET["id"] = base64_encode($invoiceId); // Match how download-invoice.php expects it
 
         // Include the file – it will generate PDF in memory
-        require './download-invoice.php'; // This calls $pdf->Output() internally
+        require "./download-invoice.php"; // This calls $pdf->Output() internally
 
         $pdfContent = ob_get_clean(); // Capture raw PDF output
 
         if (empty($pdfContent)) {
-            echo json_encode(['status' => 500, 'message' => 'Failed to generate PDF']);
-            exit;
+            echo json_encode([
+                "status" => 500,
+                "message" => "Failed to generate PDF",
+            ]);
+            exit();
         }
 
-        $stmtFetchEmailTemplates = $db->prepare("SELECT * FROM email_template WHERE is_active = 1 AND type = 'ISSUED' ");
+        $stmtFetchEmailTemplates = $db->prepare(
+            "SELECT * FROM email_template WHERE is_active = 1 AND type = 'ISSUED' ",
+        );
         $stmtFetchEmailTemplates->execute();
-        $emailTemplate = $stmtFetchEmailTemplates->get_result()->fetch_array(MYSQLI_ASSOC);
+        $emailTemplate = $stmtFetchEmailTemplates
+            ->get_result()
+            ->fetch_array(MYSQLI_ASSOC);
 
         // === Email Template Fallbacks ===
-        $templateTitle = $emailTemplate['email_template_title'] ?? 'Invoice Issued';
-        $emailSubject = $emailTemplate['email_template_subject'] ?? 'Payment Request: Invoice from Vibrantick InfoTech';
+        $templateTitle =
+            $emailTemplate["email_template_title"] ?? "Invoice Issued";
+        $emailSubject =
+            $emailTemplate["email_template_subject"] ??
+            "Payment Request: Invoice from Vibrantick InfoTech";
 
-        $content1 = !empty($emailTemplate['content_1'])
-            ? nl2br(trim($emailTemplate['content_1']))
-            : '<p>We are pleased to inform you that your invoice has been successfully generated. Please review the details below and make the payment before the due date to ensure uninterrupted service.</p>';
+        $content1 = !empty($emailTemplate["content_1"])
+            ? nl2br(trim($emailTemplate["content_1"]))
+            : "<p>We are pleased to inform you that your invoice has been successfully generated. Please review the details below and make the payment before the due date to ensure uninterrupted service.</p>";
 
-        $content2 = !empty($emailTemplate['content_2'])
-            ? nl2br(trim($emailTemplate['content_2']))
+        $content2 = !empty($emailTemplate["content_2"])
+            ? nl2br(trim($emailTemplate["content_2"]))
             : '
             <p>If you have already made this payment, thank you! Please disregard this email or contact us if you need a receipt. For any questions or assistance, contact our support team at <a href="mailto:support@vibrantick.org">support@vibrantick.org</a> or call <a href="tel:+919870443528">+91-9870443528</a>.</p>
             <p>Thank you for your prompt attention to this matter.</p>
             <p>Best regards,<br>Vibrantick InfoTech Solution Team</p>';
 
-
-        $customerName = htmlspecialchars($invoices['customer_name']);
-        $customerEmail = htmlspecialchars($invoices['customer_email']);
-        $invoiceNumber = htmlspecialchars($invoices['invoice_number']);
-        $travel_date = htmlspecialchars($invoices['travel_date']);
-        $totalAmount = number_format((float) $invoices['total_amount'], 2);
+        $customerName = htmlspecialchars($invoices["customer_name"]);
+        $customerEmail = htmlspecialchars($invoices["customer_email"]);
+        $invoiceNumber = htmlspecialchars($invoices["invoice_number"]);
+        $travel_date = htmlspecialchars($invoices["travel_date"]);
+        $totalAmount = number_format((float) $invoices["total_amount"], 2);
 
         // Initialize PHPMailer
         $mail = new PHPMailer(true);
@@ -561,171 +592,173 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['invoiceIdForSend'])) {
         $mail->isHTML(true);
 
         // Prepare statement for updating reminder_count
-        $stmtUpdate = $db->prepare('UPDATE invoice SET reminder_count = reminder_count + 1 WHERE invoice_id = ?');
+        $stmtUpdate = $db->prepare(
+            "UPDATE invoice SET reminder_count = reminder_count + 1 WHERE invoice_id = ?",
+        );
 
         $emailBody = <<<HTML
-            <!DOCTYPE html>
-            <html lang="en">
-            <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>{$templateTitle}</title>
-                <style>
-                    body {
-                        font-family: Arial, sans-serif;
-                        margin: 0;
-                        padding: 0;
-                        background-color: #f4f4f4;
-                    }
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>{$templateTitle}</title>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    margin: 0;
+                    padding: 0;
+                    background-color: #f4f4f4;
+                }
+                .container {
+                    max-width: 600px;
+                    margin: 20px auto;
+                    background-color: #ffffff;
+                    border-radius: 8px;
+                    overflow: hidden;
+                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+                }
+                .header {
+                    background-color: #f4f4f4;
+                    padding: 20px;
+                    text-align: center;
+                    color: #333333;
+                }
+                .header img {
+                    max-width: 150px;
+                    height: auto;
+                    /* background-color: #fff; */
+                    border-radius: 4px;
+                }
+                .header h1 {
+                    margin: 10px 0;
+                    font-size: 24px;
+                    font-weight: bolder;
+                }
+                .content {
+                    padding: 20px;
+                }
+                .content p {
+                    line-height: 1.6;
+                    color: #333333;
+                }
+                .invoice-table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    margin: 20px 0;
+                }
+                .invoice-table th,
+                .invoice-table td {
+                    border: 1px solid #dddddd;
+                    padding: 12px;
+                    text-align: left;
+                }
+                .invoice-table th {
+                    background-color: #f9522b;
+                    color: #ffffff;
+                    font-weight: bold;
+                }
+                .invoice-table tr:nth-child(even) {
+                    background-color: #f9f9f9;
+                }
+                .invoice-table tr:hover {
+                    background-color: #f1f1f1;
+                }
+                .footer {
+                    background-color: #f4f4f4;
+                    padding: 15px;
+                    text-align: center;
+                    font-size: 12px;
+                    color: #666666;
+                }
+                .footer a {
+                    color: #f9522b;
+                    text-decoration: none;
+                    margin: 0 10px;
+                }
+                .footer img {
+                    width: 24px;
+                    height: 24px;
+                    vertical-align: middle;
+                }
+                .button {
+                    display: inline-block;
+                    padding: 10px 20px;
+                    background-color: #f9522b;
+                    color: #ffffff;
+                    text-decoration: none;
+                    border-radius: 5px;
+                    margin-top: 20px;
+                }
+                @media only screen and (max-width: 600px) {
                     .container {
-                        max-width: 600px;
-                        margin: 20px auto;
-                        background-color: #ffffff;
-                        border-radius: 8px;
-                        overflow: hidden;
-                        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-                    }
-                    .header {
-                        background-color: #f4f4f4;
-                        padding: 20px;
-                        text-align: center;
-                        color: #333333;
+                        width: 100%;
+                        margin: 10px;
                     }
                     .header img {
-                        max-width: 150px;
-                        height: auto;
-                        /* background-color: #fff; */
-                        border-radius: 4px;
+                        max-width: 120px;
                     }
                     .header h1 {
-                        margin: 10px 0;
-                        font-size: 24px;                        
-                        font-weight: bolder;
-                    }
-                    .content {
-                        padding: 20px;
-                    }
-                    .content p {
-                        line-height: 1.6;
-                        color: #333333;
-                    }
-                    .invoice-table {
-                        width: 100%;
-                        border-collapse: collapse;
-                        margin: 20px 0;
+                        font-size: 20px;
                     }
                     .invoice-table th,
                     .invoice-table td {
-                        border: 1px solid #dddddd;
-                        padding: 12px;
-                        text-align: left;
+                        font-size: 14px;
+                        padding: 8px;
                     }
-                    .invoice-table th {
-                        background-color: #f9522b;
-                        color: #ffffff;
-                        font-weight: bold;
-                    }
-                    .invoice-table tr:nth-child(even) {
-                        background-color: #f9f9f9;
-                    }
-                    .invoice-table tr:hover {
-                        background-color: #f1f1f1;
-                    }
-                    .footer {
-                        background-color: #f4f4f4;
-                        padding: 15px;
-                        text-align: center;
-                        font-size: 12px;
-                        color: #666666;
-                    }
-                    .footer a {
-                        color: #f9522b;
-                        text-decoration: none;
-                        margin: 0 10px;
-                    }
-                    .footer img {
-                        width: 24px;
-                        height: 24px;
-                        vertical-align: middle;
-                    }
-                    .button {
-                        display: inline-block;
-                        padding: 10px 20px;
-                        background-color: #f9522b;
-                        color: #ffffff;
-                        text-decoration: none;
-                        border-radius: 5px;
-                        margin-top: 20px;
-                    }
-                    @media only screen and (max-width: 600px) {
-                        .container {
-                            width: 100%;
-                            margin: 10px;
-                        }
-                        .header img {
-                            max-width: 120px;
-                        }
-                        .header h1 {
-                            font-size: 20px;
-                        }
-                        .invoice-table th,
-                        .invoice-table td {
-                            font-size: 14px;
-                            padding: 8px;
-                        }
-                    }
-                </style>
-            </head>
-            <body>
-                <div class="container">
-                    <!-- Header -->
-                    <div class="header">
-                        <img src="{$logoUrl}" alt="Logo" />
-                        <h1>{$templateTitle}</h1>
-                    </div>
-
-                    <!-- Content -->
-                    <div class="content">
-                        <p>Dear {$customerName},</p>
-                        {$content1}
-
-                        <!-- Invoice Table -->
-                        <table class="invoice-table">
-                            <thead>
-                                <tr>
-                                    <th>Invoice Number</th>
-                                    <th>Travel Date</th>
-                                    <th>Total Amount</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>{$invoiceNumber}</td>
-                                    <td>{$travel_date}</td>
-                                    <td><strong>{$localizationSettings["currency_code"]} {$totalAmount}</strong></td>
-                                </tr>
-                            </tbody>
-                        </table>
-
-                        {$content2}
-                    </div>
-
-                    <!-- Footer -->
-                    <div class="footer">
-                        <p>&copy; {$currentYear} {$fromTitle}. All rights reserved.</p>
-                        <p>{$address1} <a href='mailto:{$supportEmail}'>{$supportEmail}</a></p>
-                        <p>NZBN No: {$companySettings['bz_number']}</p>
-                        <p>
-                            <a href='{$googleUrl}' target='_blank'><img src='https://vault.theflightshub.co.nz/assets/img/icons/google.png ' alt='Google'></a>
-                            <a href='{$facebook}' target='_blank'><img src='https://vault.theflightshub.co.nz/assets/img/icons/facebook.png ' alt='Facebook'></a>
-                            <a href='{$instagram}' target='_blank'><img src='https://vault.theflightshub.co.nz/assets/img/icons/instagram.png ' alt='Instagram'></a>
-                            <a href='{$whatsappUrl}' target='_blank'><img src='https://vault.theflightshub.co.nz/assets/img/icons/whatsapp.png ' alt='Whatsapp'></a>
-                        </p>
-                    </div>
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <!-- Header -->
+                <div class="header">
+                    <img src="{$logoUrl}" alt="Logo" />
+                    <h1>{$templateTitle}</h1>
                 </div>
-            </body>
-            </html>
-            HTML;
+
+                <!-- Content -->
+                <div class="content">
+                    <p>Dear {$customerName},</p>
+                    {$content1}
+
+                    <!-- Invoice Table -->
+                    <table class="invoice-table">
+                        <thead>
+                            <tr>
+                                <th>Invoice Number</th>
+                                <th>Travel Date</th>
+                                <th>Total Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>{$invoiceNumber}</td>
+                                <td>{$travel_date}</td>
+                                <td><strong>{$localizationSettings["currency_code"]} {$totalAmount}</strong></td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    {$content2}
+                </div>
+
+                <!-- Footer -->
+                <div class="footer">
+                    <p>&copy; {$currentYear} {$fromTitle}. All rights reserved.</p>
+                    <p>{$address1} <a href='mailto:{$supportEmail}'>{$supportEmail}</a></p>
+                    <p>NZBN No: {$companySettings["bz_number"]}</p>
+                    <p>
+                        <a href='{$googleUrl}' target='_blank'><img src='https://vault.theflightshub.co.nz/assets/img/icons/google.png ' alt='Google'></a>
+                        <a href='{$facebook}' target='_blank'><img src='https://vault.theflightshub.co.nz/assets/img/icons/facebook.png ' alt='Facebook'></a>
+                        <a href='{$instagram}' target='_blank'><img src='https://vault.theflightshub.co.nz/assets/img/icons/instagram.png ' alt='Instagram'></a>
+                        <a href='{$whatsappUrl}' target='_blank'><img src='https://vault.theflightshub.co.nz/assets/img/icons/whatsapp.png ' alt='Whatsapp'></a>
+                    </p>
+                </div>
+            </div>
+        </body>
+        </html>
+        HTML;
 
         $mail->clearAddresses();
         $mail->addAddress($customerEmail, $customerName);
@@ -733,50 +766,55 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['invoiceIdForSend'])) {
         $mail->Body = $emailBody;
 
         // ✅ Attach the generated PDF as file
-        $mail->addStringAttachment($pdfContent, "Invoice-$invoiceNumber.pdf", 'base64', 'application/pdf');
+        $mail->addStringAttachment(
+            $pdfContent,
+            "Invoice-$invoiceNumber.pdf",
+            "base64",
+            "application/pdf",
+        );
 
         if ($mail->send()) {
-
-            $stmtUpdate->bind_param('i', $invoiceId);
+            $stmtUpdate->bind_param("i", $invoiceId);
             if (!$stmtUpdate->execute()) {
                 echo "Failed to update reminder_count for invoice {$invoiceId}\n";
             }
             echo json_encode([
-                'status' => 200,
-                'message' => 'The Mail has been send to ' . $customerName,
-                'data' => $logoUrl
+                "status" => 200,
+                "message" => "The Mail has been send to " . $customerName,
+                "data" => $logoUrl,
             ]);
-            exit;
+            exit();
         } else {
             echo json_encode([
-                'status' => 403,
-                'message' => 'Unable to Send Mail to ' . $customerName,
+                "status" => 403,
+                "message" => "Unable to Send Mail to " . $customerName,
             ]);
-            exit;
+            exit();
         }
     } catch (Exception $e) {
         echo json_encode([
-            'status' => 500,
-            'error' => $e->getMessage(),
-            'message' => $e->getMessage(),
+            "status" => 500,
+            "error" => $e->getMessage(),
+            "message" => $e->getMessage(),
         ]);
-        exit;
+        exit();
     }
 }
 
 // Send Receipt
 // Send Receipt
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['invoiceIdForSendReceipt'])) {
-
+if (
+    $_SERVER["REQUEST_METHOD"] == "POST" &&
+    isset($_POST["invoiceIdForSendReceipt"])
+) {
     try {
-
-        $invoiceId = intval($_POST['invoiceIdForSendReceipt']);
+        $invoiceId = intval($_POST["invoiceIdForSendReceipt"]);
 
         // =========================
         // FETCH INVOICE + CUSTOMER
         // =========================
         $stmt = $db->prepare("
-        SELECT i.*, c.gst_number, c.customer_address 
+        SELECT i.*, c.gst_number, c.customer_address
         FROM invoice i
         LEFT JOIN customer c ON c.customer_email = i.customer_email
         WHERE i.is_active = 1 AND i.invoice_id = ? AND i.status = 'PAID'
@@ -786,7 +824,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['invoiceIdForSendReceip
             throw new Exception("Prepare failed: " . $db->error);
         }
 
-        $stmt->bind_param('i', $invoiceId);
+        $stmt->bind_param("i", $invoiceId);
 
         if (!$stmt->execute()) {
             throw new Exception("Execute failed: " . $stmt->error);
@@ -796,10 +834,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['invoiceIdForSendReceip
 
         if (empty($invoice)) {
             echo json_encode([
-                'status' => 404,
-                'message' => "Invoice not found or not PAID"
+                "status" => 404,
+                "message" => "Invoice not found or not PAID",
             ]);
-            exit;
+            exit();
         }
 
         // =========================
@@ -812,7 +850,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['invoiceIdForSendReceip
         }
 
         if (!$companyQuery->execute()) {
-            throw new Exception("Company execute failed: " . $companyQuery->error);
+            throw new Exception(
+                "Company execute failed: " . $companyQuery->error,
+            );
         }
 
         $company = $companyQuery->get_result()->fetch_assoc();
@@ -820,53 +860,52 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['invoiceIdForSendReceip
         // =========================
         // FORMAT DATA
         // =========================
-        $customerName = htmlspecialchars($invoice['customer_name'] ?? '');
-        $customerEmail = htmlspecialchars($invoice['customer_email'] ?? '');
-        $invoiceNumber = htmlspecialchars($invoice['invoice_number'] ?? '');
-        $travelDate = htmlspecialchars($invoice['travel_date'] ?? '');
-        $invoiceDate = date('d-m-Y', strtotime($invoice['created_at']));
-        $totalAmount = number_format((float) $invoice['total_amount'], 2);
-        $organization = htmlspecialchars($invoice['organization'] ?? '');
-        $address = nl2br(htmlspecialchars($invoice['customer_address'] ?? ''));
+        $customerName = htmlspecialchars($invoice["customer_name"] ?? "");
+        $customerEmail = htmlspecialchars($invoice["customer_email"] ?? "");
+        $invoiceNumber = htmlspecialchars($invoice["invoice_number"] ?? "");
+        $travelDate = htmlspecialchars($invoice["travel_date"] ?? "");
+        $invoiceDate = date("d-m-Y", strtotime($invoice["created_at"]));
+        $totalAmount = number_format((float) $invoice["total_amount"], 2);
+        $organization = htmlspecialchars($invoice["organization"] ?? "");
+        $address = nl2br(htmlspecialchars($invoice["customer_address"] ?? ""));
 
         // Company
-        $companyName = htmlspecialchars($company['company_name'] ?? '');
-        $companyEmail = htmlspecialchars($company['company_email'] ?? '');
-        $companyPhone = htmlspecialchars($company['company_phone'] ?? '');
-        $companyWeb = htmlspecialchars($company['company_website'] ?? '');
-        $companyGST = htmlspecialchars($company['gst_number'] ?? '-');
-        $companyBZ = htmlspecialchars($company['bz_number'] ?? '-');
-        $companyAddr = nl2br(htmlspecialchars($company['address'] ?? ''));
+        $companyName = htmlspecialchars($company["company_name"] ?? "");
+        $companyEmail = htmlspecialchars($company["company_email"] ?? "");
+        $companyPhone = htmlspecialchars($company["company_phone"] ?? "");
+        $companyWeb = htmlspecialchars($company["company_website"] ?? "");
+        $companyGST = htmlspecialchars($company["gst_number"] ?? "-");
+        $companyBZ = htmlspecialchars($company["bz_number"] ?? "-");
+        $companyAddr = nl2br(htmlspecialchars($company["address"] ?? ""));
 
         // =========================
         // PASSENGER + TICKET LOGIC
         // =========================
-        $passengers = json_decode($invoice['passenger_details'], true);
+        $passengers = json_decode($invoice["passenger_details"], true);
 
-        $ticketNumbersRaw = $invoice['ticket_number'] ?? '';
+        $ticketNumbersRaw = $invoice["ticket_number"] ?? "";
         $decodedTickets = json_decode($ticketNumbersRaw, true);
 
         if (is_array($decodedTickets)) {
             $ticketNumbers = $decodedTickets;
         } else {
-            $ticketNumbers = array_map('trim', explode(',', $ticketNumbersRaw));
+            $ticketNumbers = array_map("trim", explode(",", $ticketNumbersRaw));
         }
 
-        $passengerRows = '';
+        $passengerRows = "";
 
         if (!empty($passengers) && is_array($passengers)) {
             foreach ($passengers as $index => $p) {
-
-                $ticketNo = htmlspecialchars($ticketNumbers[$index] ?? '');
-                $type = htmlspecialchars($p['type'] ?? '');
-                $qty = htmlspecialchars($p['quantity'] ?? '0');
+                $ticketNo = htmlspecialchars($ticketNumbers[$index] ?? "");
+                $type = htmlspecialchars($p["type"] ?? "");
+                $qty = htmlspecialchars($p["quantity"] ?? "0");
 
                 $passengerRows .= "
                 <tr>
                     <td>{$ticketNo}</td>
                     <td>{$type} ({$qty})</td>
-                    <td>{$invoice['from_location']} - {$invoice['to_location']}</td>
-                    <td>{$invoice['airline_name']}</td>
+                    <td>{$invoice["from_location"]} - {$invoice["to_location"]}</td>
+                    <td>{$invoice["airline_name"]}</td>
                     <td>{$travelDate}</td>
                 </tr>
             ";
@@ -937,8 +976,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['invoiceIdForSendReceip
                         </td>
 
                         <td style='text-align:right;vertical-align:top;'>
-                            <strong>From:</strong> {$invoice['from_location']}<br>
-                            <strong>To:</strong> {$invoice['to_location']}
+                            <strong>From:</strong> {$invoice["from_location"]}<br>
+                            <strong>To:</strong> {$invoice["to_location"]}
                         </td>
 
                     </tr>
@@ -1028,6 +1067,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['invoiceIdForSendReceip
 
         $mail->setFrom($userName, $companyName);
         $mail->addAddress($customerEmail, $customerName);
+        $mail->addCC($userName);
         $mail->isHTML(true);
 
         $mail->Subject = "Payment Receipt - {$invoiceNumber}";
@@ -1038,73 +1078,69 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['invoiceIdForSendReceip
         }
 
         echo json_encode([
-            'status' => 200,
-            'message' => "Receipt sent successfully to {$customerName}"
+            "status" => 200,
+            "message" => "Receipt sent successfully to {$customerName}",
         ]);
-        exit;
-
-    } catch (Exception $e) {
-
-        echo json_encode([
-            'status' => 500,
-            'message' => $e->getMessage()
-        ]);
-        exit;
+        exit();
     } catch (Exception $e) {
         echo json_encode([
-            'status' => 500,
-            'message' => $e->getMessage()
+            "status" => 500,
+            "message" => $e->getMessage(),
+        ]);
+        exit();
+    } catch (Exception $e) {
+        echo json_encode([
+            "status" => 500,
+            "message" => $e->getMessage(),
         ]);
     }
 }
 
 // delete multiple invoice
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['invoiceIds'])) {
-
-
-    $invoiceIds = $_POST['invoiceIds'];
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["invoiceIds"])) {
+    $invoiceIds = $_POST["invoiceIds"];
 
     // Validate: Must be an array of integers
     if (!is_array($invoiceIds)) {
         echo json_encode([
-            'status' => 400,
-            'message' => 'Invalid data format.'
+            "status" => 400,
+            "message" => "Invalid data format.",
         ]);
-        exit;
+        exit();
     }
 
     try {
         // Prepare the SQL dynamically
-        $placeholders = implode(',', array_fill(0, count($invoiceIds), '?'));
-        $types = str_repeat('i', count($invoiceIds)); // All integers
+        $placeholders = implode(",", array_fill(0, count($invoiceIds), "?"));
+        $types = str_repeat("i", count($invoiceIds)); // All integers
 
-        $stmt = $db->prepare("UPDATE invoice SET is_active = 0 WHERE invoice_id IN ($placeholders)");
+        $stmt = $db->prepare(
+            "UPDATE invoice SET is_active = 0 WHERE invoice_id IN ($placeholders)",
+        );
         $stmt->bind_param($types, ...$invoiceIds);
 
         if ($stmt->execute()) {
             echo json_encode([
-                'status' => 200,
-                'message' => 'Selected invoices deleted successfully.',
-                'deleted_ids' => $invoiceIds
+                "status" => 200,
+                "message" => "Selected invoices deleted successfully.",
+                "deleted_ids" => $invoiceIds,
             ]);
         } else {
             echo json_encode([
-                'status' => 400,
-                'message' => $stmt->error
+                "status" => 400,
+                "message" => $stmt->error,
             ]);
         }
 
-        exit;
+        exit();
     } catch (Exception $e) {
         echo json_encode([
-            'status' => 500,
-            'message' => $e->getMessage()
+            "status" => 500,
+            "message" => $e->getMessage(),
         ]);
-        exit;
+        exit();
     }
 }
-
-
 ?>
 
 <!DOCTYPE html>
@@ -1121,7 +1157,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['invoiceIds'])) {
     <title>Manage Invoice</title>
 
     <link rel="shortcut icon" type="image/x-icon"
-        href="<?= isset($companySettings['favicon']) ? $companySettings['favicon'] : "assets/img/fav/vis-favicon.png" ?>">
+        href="<?= isset($companySettings["favicon"])
+            ? $companySettings["favicon"]
+            : "assets/img/fav/vis-favicon.png" ?>">
     <link rel="stylesheet" href="assets/css/bootstrap.min.css">
 
     <link rel="stylesheet" href="assets/css/animate.css">
@@ -1159,7 +1197,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['invoiceIds'])) {
         <div class="whirly-loader"> </div>
     </div>
 
-    <?php if (isset($_SESSION['success'])) { ?>
+    <?php if (isset($_SESSION["success"])) { ?>
         <script>
             const notyf = new Notyf({
                 position: {
@@ -1175,14 +1213,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['invoiceIds'])) {
                     }
                 ]
             });
-            notyf.success("<?php echo $_SESSION['success']; ?>");
+            notyf.success("<?php echo $_SESSION["success"]; ?>");
         </script>
-        <?php
-        unset($_SESSION['success']);
-        ?>
+        <?php unset($_SESSION["success"]); ?>
     <?php } ?>
 
-    <?php if (isset($_SESSION['error'])) { ?>
+    <?php if (isset($_SESSION["error"])) { ?>
         <script>
             const notyf = new Notyf({
                 position: {
@@ -1198,32 +1234,30 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['invoiceIds'])) {
                     }
                 ]
             });
-            notyf.error("<?php echo $_SESSION['error']; ?>");
+            notyf.error("<?php echo $_SESSION["error"]; ?>");
         </script>
-        <?php
-        unset($_SESSION['error']);
-        ?>
+        <?php unset($_SESSION["error"]); ?>
     <?php } ?>
 
     <div class="main-wrapper">
         <!-- Header Start -->
         <div class="header">
-            <?php require_once("header.php"); ?>
+            <?php require_once "header.php"; ?>
         </div>
         <!-- Header End -->
 
 
         <!-- Sidebar Start -->
         <div class="sidebar" id="sidebar">
-            <?php require_once("sidebar.php"); ?>
+            <?php require_once "sidebar.php"; ?>
         </div>
 
         <div class="sidebar collapsed-sidebar" id="collapsed-sidebar">
-            <?php require_once("sidebar-collapsed.php"); ?>
+            <?php require_once "sidebar-collapsed.php"; ?>
         </div>
 
         <div class="sidebar horizontal-sidebar">
-            <?php require_once("sidebar-horizontal.php"); ?>
+            <?php require_once "sidebar-horizontal.php"; ?>
         </div>
         <!-- Sidebar End -->
 
@@ -1237,7 +1271,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['invoiceIds'])) {
                         </div>
                     </div>
                     <ul class="table-top-head">
-                        <?php if ($isAdmin || hasPermission('Delete Invoice', $privileges, $roleData['0']['role_name'])): ?>
+                        <?php if (
+                            $isAdmin ||
+                            hasPermission(
+                                "Delete Invoice",
+                                $privileges,
+                                $roleData["0"]["role_name"],
+                            )
+                        ): ?>
                             <li>
                                 <a data-bs-toggle="tooltip" class="multi-delete-button" data-bs-placement="top"
                                     title="Delete"><img src="assets/img/icons/delete.png" alt="img" /></a>
@@ -1262,7 +1303,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['invoiceIds'])) {
                         </li>
                     </ul>
                     <div class="page-btn">
-                        <?php if ($isAdmin || hasPermission('Add Invoice', $privileges, $roleData['0']['role_name'])): ?>
+                        <?php if (
+                            $isAdmin ||
+                            hasPermission(
+                                "Add Invoice",
+                                $privileges,
+                                $roleData["0"]["role_name"],
+                            )
+                        ): ?>
 
                             <a href="add-invoice.php" class="btn btn-added"><i data-feather="plus-circle"
                                     class="me-2"></i>Add Invoice
@@ -1351,35 +1399,96 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['invoiceIds'])) {
                                 <tbody>
                                     <?php
                                     $totalTaxAmount = 0;
-                                    foreach ($invoices->fetch_all(MYSQLI_ASSOC) as $invoice) { ?>
+                                    foreach (
+                                        $invoices->fetch_all(MYSQLI_ASSOC)
+                                        as $invoice
+                                    ) { ?>
                                         <tr>
                                             <td>
                                                 <label class="checkboxs">
                                                     <input type="checkbox" name="invoiceIds"
-                                                        value="<?php echo $invoice['invoice_id'] ?>">
+                                                        value="<?php echo $invoice[
+                                                            "invoice_id"
+                                                        ]; ?>">
                                                     <span class="checkmarks"></span>
                                                 </label>
                                             </td>
-                                            <td class="ref-number"><?php echo $invoice['invoice_number'] ?></td>
-                                            <td><?php echo $invoice['customer_name'] ?></td>
-                                            <td><?php $date = new DateTime($invoice['created_at']);
-                                            echo $date->format(isset($localizationSettings["date_format"]) ? $localizationSettings["date_format"] : "d M Y") ?>
+                                            <td class="ref-number"><?php echo $invoice[
+                                                "invoice_number"
+                                            ]; ?></td>
+                                            <td><?php echo $invoice[
+                                                "customer_name"
+                                            ]; ?></td>
+                                            <td><?php
+                                            $date = new DateTime(
+                                                $invoice["created_at"],
+                                            );
+                                            echo $date->format(
+                                                isset(
+                                                    $localizationSettings[
+                                                        "date_format"
+                                                    ],
+                                                )
+                                                    ? $localizationSettings[
+                                                        "date_format"
+                                                    ]
+                                                    : "d M Y",
+                                            );
+                                            ?>
                                             </td>
-                                            <td><?php $date = new DateTime($invoice['due_date']);
-                                            echo $date->format(isset($localizationSettings["date_format"]) ? $localizationSettings["date_format"] : "d M Y") ?>
+                                            <td><?php
+                                            $date = new DateTime(
+                                                $invoice["due_date"],
+                                            );
+                                            echo $date->format(
+                                                isset(
+                                                    $localizationSettings[
+                                                        "date_format"
+                                                    ],
+                                                )
+                                                    ? $localizationSettings[
+                                                        "date_format"
+                                                    ]
+                                                    : "d M Y",
+                                            );
+                                            ?>
                                             </td>
 
-                                            <td><?php echo (isset($localizationSettings["currency_symbol"]) ? $localizationSettings["currency_symbol"] : "$") . " " . $invoice['total_amount'] ?>
+                                            <td><?php echo (isset(
+                                                $localizationSettings[
+                                                    "currency_symbol"
+                                                ],
+                                            )
+                                                ? $localizationSettings[
+                                                    "currency_symbol"
+                                                ]
+                                                : "$") .
+                                                " " .
+                                                $invoice["total_amount"]; ?>
                                             </td>
-                                            <td><?php echo $invoice['admin_username'] ?></td>
+                                            <td><?php echo $invoice[
+                                                "admin_username"
+                                            ]; ?></td>
                                             <td>
-                                                <?php if ($invoice['invoiceStatus'] == 'PAID') { ?>
+                                                <?php if (
+                                                    $invoice["invoiceStatus"] ==
+                                                    "PAID"
+                                                ) { ?>
                                                     <span class="badge badge-lg bg-success">Paid</span>
-                                                <?php } elseif ($invoice['invoiceStatus'] == 'CANCELLED') { ?>
+                                                <?php } elseif (
+                                                    $invoice["invoiceStatus"] ==
+                                                    "CANCELLED"
+                                                ) { ?>
                                                     <span class="badge badge-lg bg-danger">Cancelled</span>
-                                                <?php } elseif ($invoice['invoiceStatus'] == 'PENDING') { ?>
+                                                <?php } elseif (
+                                                    $invoice["invoiceStatus"] ==
+                                                    "PENDING"
+                                                ) { ?>
                                                     <span class="badge badge-lg bg-warning">Pending</span>
-                                                <?php } elseif ($invoice['invoiceStatus'] == 'REFUNDED') { ?>
+                                                <?php } elseif (
+                                                    $invoice["invoiceStatus"] ==
+                                                    "REFUNDED"
+                                                ) { ?>
                                                     <span class="badge badge-lg bg-primary">Refunded</span>
                                                 <?php } ?>
                                             </td>
@@ -1391,15 +1500,32 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['invoiceIds'])) {
                                                 <ul class="dropdown-menu">
                                                     <li>
                                                         <a target="_blank"
-                                                            href="view-invoice.php?id=<?php echo base64_encode($invoice['invoice_id']) ?>"
+                                                            href="view-invoice.php?id=<?php echo base64_encode(
+                                                                $invoice[
+                                                                    "invoice_id"
+                                                                ],
+                                                            ); ?>"
                                                             class="editStatus dropdown-item" data-admin-id=""><i
                                                                 data-feather="eye" class="info-img"></i>Show
                                                             Detail</a>
                                                     </li>
-                                                    <?php if ($isAdmin || hasPermission('Edit Invoice', $privileges, $roleData['0']['role_name'])): ?>
+                                                    <?php if (
+                                                        $isAdmin ||
+                                                        hasPermission(
+                                                            "Edit Invoice",
+                                                            $privileges,
+                                                            $roleData["0"][
+                                                                "role_name"
+                                                            ],
+                                                        )
+                                                    ): ?>
 
                                                         <li>
-                                                            <a href="edit-invoice.php?id=<?php echo base64_encode($invoice['invoice_id']) ?>"
+                                                            <a href="edit-invoice.php?id=<?php echo base64_encode(
+                                                                $invoice[
+                                                                    "invoice_id"
+                                                                ],
+                                                            ); ?>"
                                                                 class="editButton dropdown-item"><i data-feather="edit"
                                                                     class="info-img"></i>Edit
                                                             </a>
@@ -1407,45 +1533,93 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['invoiceIds'])) {
                                                     <?php endif; ?>
                                                     <li>
                                                         <a target="_blank"
-                                                            href="download-invoice.php?id=<?php echo base64_encode($invoice['invoice_id']) ?>"
+                                                            href="download-invoice.php?id=<?php echo base64_encode(
+                                                                $invoice[
+                                                                    "invoice_id"
+                                                                ],
+                                                            ); ?>"
                                                             class="qrCode dropdown-item"><i data-feather="download"
                                                                 class="info-img"></i>Download
                                                         </a>
                                                     </li>
-                                                    <?php if ($isAdmin || hasPermission('Delete Invoice', $privileges, $roleData['0']['role_name'])): ?>
+                                                    <?php if (
+                                                        $isAdmin ||
+                                                        hasPermission(
+                                                            "Delete Invoice",
+                                                            $privileges,
+                                                            $roleData["0"][
+                                                                "role_name"
+                                                            ],
+                                                        )
+                                                    ): ?>
                                                         <li>
                                                             <a href="javascript:void(0);"
-                                                                data-invoice-id="<?php echo $invoice['invoice_id'] ?>"
+                                                                data-invoice-id="<?php echo $invoice[
+                                                                    "invoice_id"
+                                                                ]; ?>"
                                                                 class="dropdown-item deleteButton mb-0"><i
                                                                     data-feather="trash-2" class="info-img"></i>Delete </a>
                                                         </li>
                                                     <?php endif; ?>
 
-                                                    <?php if ($isAdmin || hasPermission('Send Reminder', $privileges, $roleData['0']['role_name'])): ?>
+                                                    <?php if (
+                                                        $isAdmin ||
+                                                        hasPermission(
+                                                            "Send Reminder",
+                                                            $privileges,
+                                                            $roleData["0"][
+                                                                "role_name"
+                                                            ],
+                                                        )
+                                                    ): ?>
 
                                                         <li>
                                                             <a href="javascript:void(0);"
-                                                                data-invoice-id="<?php echo $invoice['invoice_id'] ?>"
+                                                                data-invoice-id="<?php echo $invoice[
+                                                                    "invoice_id"
+                                                                ]; ?>"
                                                                 class="dropdown-item sendReminder mb-0"><i data-feather="bell"
                                                                     class="info-img"></i>Send Reminder </a>
                                                         </li>
                                                     <?php endif; ?>
 
-                                                    <?php if ($isAdmin || hasPermission('Send Receipt', $privileges, $roleData['0']['role_name'])): ?>
+                                                    <?php if (
+                                                        $isAdmin ||
+                                                        hasPermission(
+                                                            "Send Receipt",
+                                                            $privileges,
+                                                            $roleData["0"][
+                                                                "role_name"
+                                                            ],
+                                                        )
+                                                    ): ?>
 
                                                         <li>
                                                             <a href="javascript:void(0);"
-                                                                data-invoice-id="<?php echo $invoice['invoice_id'] ?>"
+                                                                data-invoice-id="<?php echo $invoice[
+                                                                    "invoice_id"
+                                                                ]; ?>"
                                                                 class="dropdown-item sendReceipt mb-0"><i data-feather="mail"
                                                                     class="info-img"></i>Send Receipt </a>
                                                         </li>
                                                     <?php endif; ?>
 
-                                                    <?php if ($isAdmin || hasPermission('Send Invoice', $privileges, $roleData['0']['role_name'])): ?>
+                                                    <?php if (
+                                                        $isAdmin ||
+                                                        hasPermission(
+                                                            "Send Invoice",
+                                                            $privileges,
+                                                            $roleData["0"][
+                                                                "role_name"
+                                                            ],
+                                                        )
+                                                    ): ?>
 
                                                         <li>
                                                             <a href="javascript:void(0);"
-                                                                data-invoice-id="<?php echo $invoice['invoice_id'] ?>"
+                                                                data-invoice-id="<?php echo $invoice[
+                                                                    "invoice_id"
+                                                                ]; ?>"
                                                                 class="dropdown-item sendInvoice mb-0"><i data-feather="send"
                                                                     class="info-img"></i>Send Invoice </a>
                                                         </li>
@@ -1454,13 +1628,27 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['invoiceIds'])) {
                                                 </ul>
                                             </td>
                                         </tr>
-                                    <?php } ?>
+                                    <?php }
+                                    ?>
                                 </tbody>
                                 <!-- <tfoot>
                                     <tr>
                                         <td colspan="6"></td>
                                         <td><strong><span class="text-danger">Total:
-                                                    <?php echo (isset($localizationSettings["currency_symbol"]) ? $localizationSettings["currency_symbol"] : "$") . " " . number_format($totalTaxAmount, 2); ?></span></strong>
+                                                    <?php echo (isset(
+                                                        $localizationSettings[
+                                                            "currency_symbol"
+                                                        ],
+                                                    )
+                                                        ? $localizationSettings[
+                                                            "currency_symbol"
+                                                        ]
+                                                        : "$") .
+                                                        " " .
+                                                        number_format(
+                                                            $totalTaxAmount,
+                                                            2,
+                                                        ); ?></span></strong>
                                         </td>
                                         <td colspan="3"></td>
                                     </tr>

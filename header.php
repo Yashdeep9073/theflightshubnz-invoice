@@ -1,13 +1,19 @@
 <div class="header">
     <div class="header-left active">
         <a href="admin-dashboard.php" class="logo logo-normal">
-            <img src="<?= isset($companySettings['company_logo']) ? $companySettings['company_logo'] : "public/upload/company/images/img_68774d6155fb40.33862285.png" ?>" alt="" />
+            <img src="<?= isset($companySettings["company_logo"])
+                ? $companySettings["company_logo"]
+                : "public/upload/company/images/img_68774d6155fb40.33862285.png" ?>" alt="" />
         </a>
         <a href="admin-dashboard.php" class="logo logo-white">
-            <img src="<?= isset($companySettings['company_logo']) ? $companySettings['company_logo'] : "public/upload/company/images/img_68774d6155fb40.33862285.png" ?>" alt="" />
+            <img src="<?= isset($companySettings["company_logo"])
+                ? $companySettings["company_logo"]
+                : "public/upload/company/images/img_68774d6155fb40.33862285.png" ?>" alt="" />
         </a>
         <a href="admin-dashboard.php" class="logo-small">
-            <img src="<?= isset($companySettings['company_logo']) ? $companySettings['company_logo'] : "public/upload/company/images/img_68774d6155fb40.33862285.png" ?>" alt="" />
+            <img src="<?= isset($companySettings["company_logo"])
+                ? $companySettings["company_logo"]
+                : "public/upload/company/images/img_68774d6155fb40.33862285.png" ?>" alt="" />
         </a>
         <a id="toggle_btn" href="javascript:void(0);">
             <i data-feather="chevrons-left" class="feather-16"></i>
@@ -24,11 +30,42 @@
 
     <ul class="nav user-menu">
         <li class="nav-item nav-searchinputs">
-            <div class="top-nav-search">
-                <a href="javascript:void(0);" class="responsive-search">
-                    <i class="fa fa-search"></i>
-                </a>
-            </div>
+          <div class="top-nav-search">
+            <a href="javascript:void(0);" class="responsive-search">
+              <i class="fa fa-search"></i>
+            </a>
+            <form action="#" class="dropdown">
+              <div
+                class="searchinputs dropdown-toggle"
+                id="dropdownMenuClickable"
+                data-bs-toggle="dropdown"
+                data-bs-auto-close="false"
+              >
+                <input type="text" placeholder="Search" />
+                <div class="search-addon">
+                  <span
+                    ><i data-feather="x-circle" class="feather-14"></i
+                  ></span>
+                </div>
+              </div>
+              <div
+                  class="dropdown-menu search-dropdown"
+                  aria-labelledby="dropdownMenuClickable"
+              >
+                  <div class="search-info quick-links-container">
+                      <h6>
+                          <span>
+                              <i data-feather="search" class="feather-16"></i>
+                          </span>
+                          Quick Links
+                      </h6>
+
+                      <ul class="customers quick-links-list">
+                      </ul>
+                  </div>
+              </div>
+            </form>
+          </div>
         </li>
 
         <li class="nav-item nav-item-box">
@@ -42,8 +79,16 @@
                 <span class="user-info">
                     <span class="user-detail">
                         <span
-                            class="user-name"><?php echo isset($_SESSION['admin_name']) ? $_SESSION['admin_name'] : "Vibrantick" ?></span>
-                        <span class="user-role"><?php echo isset($_SESSION['admin_role']) ? $_SESSION['admin_role'] : "Admin"  ?></span>
+                            class="user-name"><?php echo isset(
+                                $_SESSION["admin_name"],
+                            )
+                                ? $_SESSION["admin_name"]
+                                : "Vibrantick"; ?></span>
+                        <span class="user-role"><?php echo isset(
+                            $_SESSION["admin_role"],
+                        )
+                            ? $_SESSION["admin_role"]
+                            : "Admin"; ?></span>
                     </span>
                 </span>
             </a>

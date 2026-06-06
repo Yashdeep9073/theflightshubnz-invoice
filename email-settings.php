@@ -4,17 +4,16 @@ session_start();
 if (!isset($_SESSION["admin_id"])) {
     header("location: index.php");
 }
-require './vendor/autoload.php';
-require './database/config.php';
-require './utility/env.php';
+require "./vendor/autoload.php";
+require "./database/config.php";
+require "./utility/env.php";
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
 
-
 // Define the upload directory
-$uploadDirectory = 'public/upload/emailSetting/images/';
+$uploadDirectory = "public/upload/emailSetting/images/";
 
 try {
     $stmtFetch = $db->prepare("SELECT * FROM email_settings");
@@ -23,7 +22,9 @@ try {
 
     $stmtFetchCompanySettings = $db->prepare("SELECT * FROM company_settings");
     $stmtFetchCompanySettings->execute();
-    $companySettings = $stmtFetchCompanySettings->get_result()->fetch_array(MYSQLI_ASSOC);
+    $companySettings = $stmtFetchCompanySettings
+        ->get_result()
+        ->fetch_array(MYSQLI_ASSOC);
 
     function uploadImage($file, $uploadDirectory)
     {
@@ -33,13 +34,13 @@ try {
         }
 
         // Get file details
-        $fileName = basename($file['name']); // File name (e.g., bg.jpg)
-        $fileTmpPath = $file['tmp_name']; // Temporary file path on the server
-        $fileSize = $file['size']; // File size in bytes
+        $fileName = basename($file["name"]); // File name (e.g., bg.jpg)
+        $fileTmpPath = $file["tmp_name"]; // Temporary file path on the server
+        $fileSize = $file["size"]; // File size in bytes
         $fileType = strtolower(pathinfo($fileName, PATHINFO_EXTENSION)); // File extension (e.g., jpg)
 
         // Allowed file types
-        $allowedTypes = ['jpg', 'jpeg', 'png', 'gif', 'pdf', 'svg'];
+        $allowedTypes = ["jpg", "jpeg", "png", "gif", "pdf", "svg"];
 
         // Maximum file size (e.g., 2MB = 2 * 1024 * 1024 bytes)
         $maxFileSize = 2 * 1024 * 1024;
@@ -48,7 +49,8 @@ try {
         if (!in_array($fileType, $allowedTypes)) {
             return [
                 "status" => false,
-                "error" => "Error: Invalid file type. Only JPG, JPEG, PNG, and GIF files are allowed."
+                "error" =>
+                    "Error: Invalid file type. Only JPG, JPEG, PNG, and GIF files are allowed.",
             ];
         }
 
@@ -56,12 +58,12 @@ try {
         if ($fileSize > $maxFileSize) {
             return [
                 "status" => false,
-                "error" => "Error: File size exceeds the maximum limit of 2MB."
+                "error" => "Error: File size exceeds the maximum limit of 2MB.",
             ];
         }
 
         // Generate a unique file name to avoid overwriting
-        $newFileName = uniqid('img_', true) . '.' . $fileType; // e.g., img_123456789.jpg
+        $newFileName = uniqid("img_", true) . "." . $fileType; // e.g., img_123456789.jpg
         $destinationPath = $uploadDirectory . $newFileName;
 
         // Move the uploaded file to the destination directory
@@ -69,127 +71,142 @@ try {
             return [
                 "status" => true,
                 "data" => $newFileName,
-                "full_path" => $destinationPath // Return the full path for reference
+                "full_path" => $destinationPath, // Return the full path for reference
             ];
         } else {
             return [
                 "status" => false,
-                "error" => "Error: Failed to upload the file."
+                "error" => "Error: Failed to upload the file.",
             ];
         }
     }
-
-
 } catch (Exception $e) {
-    $_SESSION['error'] = $e->getMessage();
+    $_SESSION["error"] = $e->getMessage();
 }
 
-
 // Check if the form was submitted
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['submit'])) {
-
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["submit"])) {
     try {
         // echo "<pre>";
         // print_r($_POST);
         // exit;
 
-        $title = trim($_POST['title']);
-        $email = trim($_POST['email']);
-        $password = trim($_POST['password']);
-        $host = trim($_POST['host']);
-        $port = trim($_POST['port']);
+        $title = trim($_POST["title"]);
+        $email = trim($_POST["email"]);
+        $password = trim($_POST["password"]);
+        $host = trim($_POST["host"]);
+        $port = trim($_POST["port"]);
 
-
-
-        $stmtInsert = $db->prepare("INSERT INTO email_settings (email_from_title,email_address,email_password,email_host,email_port) 
+        $stmtInsert = $db->prepare("INSERT INTO email_settings (email_from_title,email_address,email_password,email_host,email_port)
         VALUES(?,?,?,?,?)");
-        $stmtInsert->bind_param("ssssi", $title, $email, $password, $host, $port);
+        $stmtInsert->bind_param(
+            "ssssi",
+            $title,
+            $email,
+            $password,
+            $host,
+            $port,
+        );
 
         if ($stmtInsert->execute()) {
-            $_SESSION['success'] = "Email Settings created successfully";
+            $_SESSION["success"] = "Email Settings created successfully";
             header("Location: email-settings.php");
-            exit;
+            exit();
         }
     } catch (\Throwable $th) {
-        $_SESSION['error'] = $th->getMessage();
+        $_SESSION["error"] = $th->getMessage();
         header("Location: email-settings.php");
-        exit;
+        exit();
     }
-
 }
 
 // Check if the form was submitted
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['edit'])) {
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["edit"])) {
     try {
-        $id = trim($_POST['editEmailSettingId']);
-        $title = trim($_POST['editEmailSettingTitle']);
-        $email = trim($_POST['editEmailSettingEmail']);
-        $password = trim($_POST['editEmailSettingPassword']);
-        $host = trim($_POST['editEmailSettingHost']);
-        $port = trim($_POST['editEmailSettingPort']);
-        $status = trim($_POST['editEmailSettingStatus']);
+        $id = trim($_POST["editEmailSettingId"]);
+        $title = trim($_POST["editEmailSettingTitle"]);
+        $email = trim($_POST["editEmailSettingEmail"]);
+        $password = trim($_POST["editEmailSettingPassword"]);
+        $host = trim($_POST["editEmailSettingHost"]);
+        $port = trim($_POST["editEmailSettingPort"]);
+        $status = trim($_POST["editEmailSettingStatus"]);
 
-        $stmtUpdate = $db->prepare("UPDATE email_settings SET email_from_title = ?,email_address = ?, email_password = ?, email_host = ?, email_port = ?,is_active=? WHERE email_settings_id = ?");
-        $stmtUpdate->bind_param("ssssiii", $title, $email, $password, $host, $port, $status, $id);
+        $stmtUpdate = $db->prepare(
+            "UPDATE email_settings SET email_from_title = ?,email_address = ?, email_password = ?, email_host = ?, email_port = ?,is_active=? WHERE email_settings_id = ?",
+        );
+        $stmtUpdate->bind_param(
+            "ssssiii",
+            $title,
+            $email,
+            $password,
+            $host,
+            $port,
+            $status,
+            $id,
+        );
 
         if ($stmtUpdate->execute()) {
-            $_SESSION['success'] = "Email Settings updated successfully";
+            $_SESSION["success"] = "Email Settings updated successfully";
             header("Location: email-settings.php");
-            exit;
+            exit();
         } else {
-            $_SESSION['error'] = "Failed to update settings.";
+            $_SESSION["error"] = "Failed to update settings.";
             header("Location: email-settings.php");
-            exit;
+            exit();
         }
     } catch (\Throwable $th) {
-        $_SESSION['error'] = $th->getMessage();
+        $_SESSION["error"] = $th->getMessage();
         header("Location: email-settings.php");
-        exit;
+        exit();
     }
 }
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['emailSettingId'])) {
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["emailSettingId"])) {
     try {
+        $id = trim($_POST["emailSettingId"]);
 
-        $id = trim($_POST['emailSettingId']);
-
-        $stmtDelete = $db->prepare("DELETE FROM email_settings WHERE email_settings_id = ?");
+        $stmtDelete = $db->prepare(
+            "DELETE FROM email_settings WHERE email_settings_id = ?",
+        );
         $stmtDelete->bind_param("i", $id);
 
         if ($stmtDelete->execute()) {
             echo json_encode([
-                'status' => true,
-                'message' => 'Email setting deleted successfully.'
+                "status" => true,
+                "message" => "Email setting deleted successfully.",
             ]);
         } else {
             echo json_encode([
-                'status' => false,
-                'message' => 'Failed to delete email setting.'
+                "status" => false,
+                "message" => "Failed to delete email setting.",
             ]);
         }
-        exit;
-
+        exit();
     } catch (\Throwable $th) {
         echo json_encode([
-            'status' => false,
-            'message' => $th->getMessage()
+            "status" => false,
+            "message" => $th->getMessage(),
         ]);
-        exit;
+        exit();
     }
 }
 
-
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send-mail'])) {
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["send-mail"])) {
     try {
+        $email = $_POST["email"];
 
-
-        $email = $_POST['email'];
-
-        $host = !empty($emailSettingData[0]['email_host']) ? $emailSettingData[0]['email_host'] : getenv("SMTP_HOST");
-        $userName = !empty($emailSettingData[0]['email_address']) ? $emailSettingData[0]['email_address'] : getenv('SMTP_USER_NAME');
-        $password = !empty($emailSettingData[0]['email_password']) ? $emailSettingData[0]['email_password'] : getenv('SMTP_PASSCODE');
-        $port = !empty($emailSettingData[0]['email_port']) ? $emailSettingData[0]['email_port'] : getenv('SMTP_PORT');
-
+        $host = !empty($emailSettingData[0]["email_host"])
+            ? $emailSettingData[0]["email_host"]
+            : getenv("SMTP_HOST");
+        $userName = !empty($emailSettingData[0]["email_address"])
+            ? $emailSettingData[0]["email_address"]
+            : getenv("SMTP_USER_NAME");
+        $password = !empty($emailSettingData[0]["email_password"])
+            ? $emailSettingData[0]["email_password"]
+            : getenv("SMTP_PASSCODE");
+        $port = !empty($emailSettingData[0]["email_port"])
+            ? $emailSettingData[0]["email_port"]
+            : getenv("SMTP_PORT");
 
         // echo "<pre>";
         // print_r($host);
@@ -208,66 +225,63 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['send-mail'])) {
         $mail->Password = $password;
         $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS; // SSL
         $mail->Port = $port;
-        $mail->setFrom($userName, 'Mailer Bot');
+        $mail->setFrom($userName, "Mailer Bot");
         $mail->isHTML(true);
 
         // Set recipient and subject
         $mail->clearAddresses();
-        $mail->addAddress($email, 'Test Recipient');
-        $mail->Subject = '✅ Test Email from Mail Settings';
-        $mail->Body = '<h3>This is a test email to verify your SMTP settings.</h3><p>If you received this email, your configuration is correct.</p>';
+        $mail->addAddress($email, "Test Recipient");
+        $mail->Subject = "✅ Test Email from Mail Settings";
+        $mail->Body =
+            "<h3>This is a test email to verify your SMTP settings.</h3><p>If you received this email, your configuration is correct.</p>";
 
         // Send mail
         if ($mail->send()) {
-            $_SESSION['success'] = "Test email sent successfully to {$email}.";
+            $_SESSION["success"] = "Test email sent successfully to {$email}.";
         } else {
-            $_SESSION['error'] = "Failed to send test email: " . $mail->ErrorInfo;
+            $_SESSION["error"] =
+                "Failed to send test email: " . $mail->ErrorInfo;
         }
 
-
         header("Location: email-settings.php");
-        exit;
-
-
+        exit();
     } catch (\Throwable $th) {
-        $_SESSION['error'] = $th->getMessage();
+        $_SESSION["error"] = $th->getMessage();
         header("Location: email-settings.php");
-        exit;
+        exit();
     }
 }
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['addAddress'])) {
-
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["addAddress"])) {
     try {
         //code...
 
+        if ($_POST["type"] === "insert") {
+            $addressEmailSettingId = $_POST["addressEmailSettingId"];
+            $emailAddress = $_POST["emailAddress"];
+            $phone = $_POST["phone"];
+            $addressLine = $_POST["addressLine"];
+            $linkedinUrl = $_POST["linkedinUrl"];
+            $instagramUrl = $_POST["instagramUrl"];
+            $facebookUrl = $_POST["facebookUrl"];
+            $googleUrl = $_POST["googleUrl"];
+            $whatsappUrl = $_POST["whatsappUrl"];
+            $mailLogo = $_FILES["mailLogo"];
 
-        if ($_POST['type'] === "insert") {
-            $addressEmailSettingId = $_POST['addressEmailSettingId'];
-            $emailAddress = $_POST['emailAddress'];
-            $phone = $_POST['phone'];
-            $addressLine = $_POST['addressLine'];
-            $linkedinUrl = $_POST['linkedinUrl'];
-            $instagramUrl = $_POST['instagramUrl'];
-            $facebookUrl = $_POST['facebookUrl'];
-            $googleUrl = $_POST['googleUrl'];
-            $whatsappUrl = $_POST['whatsappUrl'];
-            $mailLogo = $_FILES['mailLogo'];
-
-            if ($mailLogo['name'] != "") {
+            if ($mailLogo["name"] != "") {
                 $uploadedLogo = uploadImage($mailLogo, $uploadDirectory);
-                if ($uploadedLogo['status']) {
-                    $logoUrl = $uploadedLogo['full_path'];
+                if ($uploadedLogo["status"]) {
+                    $logoUrl = $uploadedLogo["full_path"];
                 } else {
-                    $_SESSION['error'] = $uploadedLogo['error'];
+                    $_SESSION["error"] = $uploadedLogo["error"];
                     header("Location: email-settings.php");
-                    exit;
+                    exit();
                 }
             }
 
             $db->begin_transaction();
 
-            $stmtAddAddress = $db->prepare("UPDATE email_settings SET 
+            $stmtAddAddress = $db->prepare("UPDATE email_settings SET
              logo_url = ?,
              support_email = ?,
              phone = ?,
@@ -276,7 +290,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['addAddress'])) {
              fb_url = ?,
              linkedin_url = ? ,
              google_url = ? ,
-             whatsapp_url =? 
+             whatsapp_url =?
              WHERE email_settings_id = ?");
 
             $stmtAddAddress->bind_param(
@@ -290,42 +304,42 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['addAddress'])) {
                 $linkedinUrl,
                 $googleUrl,
                 $whatsappUrl,
-                $addressEmailSettingId
+                $addressEmailSettingId,
             );
             $stmtAddAddress->execute();
             $db->commit(); // Commit transaction
 
-            $_SESSION['success'] = "Address Update Successfully";
+            $_SESSION["success"] = "Address Update Successfully";
             header("Location: email-settings.php");
-        } else if ($_POST['type'] === "update") {
-            $addressEmailSettingId = $_POST['addressEmailSettingId'];
-            $emailAddress = $_POST['emailAddress'];
-            $phone = $_POST['phone'];
-            $addressLine = $_POST['addressLine'];
-            $linkedinUrl = $_POST['linkedinUrl'];
-            $instagramUrl = $_POST['instagramUrl'];
-            $facebookUrl = $_POST['facebookUrl'];
-            $googleUrl = $_POST['googleUrl'];
-            $whatsappUrl = $_POST['whatsappUrl'];
-            $mailLogo = $_FILES['mailLogo'];
+        } elseif ($_POST["type"] === "update") {
+            $addressEmailSettingId = $_POST["addressEmailSettingId"];
+            $emailAddress = $_POST["emailAddress"];
+            $phone = $_POST["phone"];
+            $addressLine = $_POST["addressLine"];
+            $linkedinUrl = $_POST["linkedinUrl"];
+            $instagramUrl = $_POST["instagramUrl"];
+            $facebookUrl = $_POST["facebookUrl"];
+            $googleUrl = $_POST["googleUrl"];
+            $whatsappUrl = $_POST["whatsappUrl"];
+            $mailLogo = $_FILES["mailLogo"];
 
-            // exiting 
+            // exiting
             $logoUrl = $emailSettingData[0]["logo_url"];
 
-            if ($mailLogo['name'] != "") {
+            if ($mailLogo["name"] != "") {
                 $uploadedLogo = uploadImage($mailLogo, $uploadDirectory);
-                if ($uploadedLogo['status']) {
-                    $logoUrl = $uploadedLogo['full_path'];
+                if ($uploadedLogo["status"]) {
+                    $logoUrl = $uploadedLogo["full_path"];
                 } else {
-                    $_SESSION['error'] = $uploadedLogo['error'];
+                    $_SESSION["error"] = $uploadedLogo["error"];
                     header("Location: email-settings.php");
-                    exit;
+                    exit();
                 }
             }
 
             $db->begin_transaction();
 
-            $stmtAddAddress = $db->prepare("UPDATE email_settings SET 
+            $stmtAddAddress = $db->prepare("UPDATE email_settings SET
              logo_url = ?,
              support_email = ?,
              phone = ?,
@@ -334,7 +348,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['addAddress'])) {
              fb_url = ?,
              linkedin_url = ? ,
              google_url = ? ,
-             whatsapp_url =? 
+             whatsapp_url =?
              WHERE email_settings_id = ?");
 
             $stmtAddAddress->bind_param(
@@ -348,28 +362,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['addAddress'])) {
                 $linkedinUrl,
                 $googleUrl,
                 $whatsappUrl,
-                $addressEmailSettingId
+                $addressEmailSettingId,
             );
             $stmtAddAddress->execute();
             $db->commit(); // Commit transaction
 
-            $_SESSION['success'] = "Address Update Successfully";
+            $_SESSION["success"] = "Address Update Successfully";
             header("Location: email-settings.php");
-
-
-
         }
-        exit;
+        exit();
     } catch (\Throwable $th) {
-        $_SESSION['error'] = $th->getMessage();
+        $_SESSION["error"] = $th->getMessage();
         header("Location: email-settings.php");
-        exit;
+        exit();
     }
-
 }
-
-
-
 ?>
 
 <!DOCTYPE html>
@@ -385,7 +392,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['addAddress'])) {
     <title>Email Settings</title>
 
     <link rel="shortcut icon" type="image/x-icon"
-        href="<?= isset($companySettings['favicon']) ? $companySettings['favicon'] : "assets/img/fav/vis-favicon.png" ?>">
+        href="<?= isset($companySettings["favicon"])
+            ? $companySettings["favicon"]
+            : "assets/img/fav/vis-favicon.png" ?>">
 
     <link rel="stylesheet" href="assets/css/bootstrap.min.css">
 
@@ -416,7 +425,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['addAddress'])) {
     </div>
 
     <div class="main-wrapper">
-        <?php if (isset($_SESSION['success'])) { ?>
+        <?php if (isset($_SESSION["success"])) { ?>
             <script>
                 const notyf = new Notyf({
                     position: {
@@ -434,14 +443,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['addAddress'])) {
                         }
                     ]
                 });
-                notyf.success("<?php echo $_SESSION['success']; ?>");
+                notyf.success("<?php echo $_SESSION["success"]; ?>");
             </script>
-            <?php
-            unset($_SESSION['success']);
-            ?>
+            <?php unset($_SESSION["success"]); ?>
         <?php } ?>
 
-        <?php if (isset($_SESSION['error'])) { ?>
+        <?php if (isset($_SESSION["error"])) { ?>
             <script>
                 const notyf = new Notyf({
                     position: {
@@ -459,31 +466,29 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['addAddress'])) {
                         }
                     ]
                 });
-                notyf.error("<?php echo $_SESSION['error']; ?>");
+                notyf.error("<?php echo $_SESSION["error"]; ?>");
             </script>
-            <?php
-            unset($_SESSION['error']);
-            ?>
+            <?php unset($_SESSION["error"]); ?>
         <?php } ?>
 
         <!-- Header Start -->
         <div class="header">
-            <?php require_once("header.php"); ?>
+            <?php require_once "header.php"; ?>
         </div>
         <!-- Header End -->
 
 
         <!-- Sidebar Start -->
         <div class="sidebar" id="sidebar">
-            <?php require_once("sidebar.php"); ?>
+            <?php require_once "sidebar.php"; ?>
         </div>
 
         <div class="sidebar collapsed-sidebar" id="collapsed-sidebar">
-            <?php require_once("sidebar-collapsed.php"); ?>
+            <?php require_once "sidebar-collapsed.php"; ?>
         </div>
 
         <div class="sidebar horizontal-sidebar">
-            <?php require_once("sidebar-horizontal.php"); ?>
+            <?php require_once "sidebar-horizontal.php"; ?>
         </div>
         <!-- Sidebar End -->
 
@@ -515,9 +520,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['addAddress'])) {
                                     <div id="sidebar-menu5" class="sidebar-menu">
                                         <ul>
                                             <li class="submenu-open">
-                                                <?php
-                                                require("./settings-siderbar.php");
-                                                ?>
+                                                <?php require "./settings-siderbar.php"; ?>
                                             </li>
                                         </ul>
                                     </div>
@@ -570,12 +573,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['addAddress'])) {
                                                             </tr>
                                                         </thead>
                                                         <tbody>
-                                                            <?php foreach ($emailSettingData as $data): ?>
+                                                            <?php foreach (
+                                                                $emailSettingData
+                                                                as $data
+                                                            ): ?>
                                                                 <tr>
                                                                     <td>
                                                                         <label class="checkboxs">
                                                                             <input type="checkbox" name="emailSettingsIds"
-                                                                                value="<?php echo $data['email_settings_id'] ?>">
+                                                                                value="<?php echo $data[
+                                                                                    "email_settings_id"
+                                                                                ]; ?>">
                                                                             <span class="checkmarks"></span>
                                                                         </label>
                                                                     </td>
@@ -584,21 +592,44 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['addAddress'])) {
                                                                         <div class="productimgname">
                                                                             <a href="javascript:void(0);"
                                                                                 class="product-img stock-img">
-                                                                                <img src="<?= !empty($emailSettingData[0]["logo_url"]) ? $emailSettingData[0]["logo_url"] : "assets/img/products/stock-img-01.png" ?>"
+                                                                                <img src="<?= !empty(
+                                                                                    $emailSettingData[0][
+                                                                                        "logo_url"
+                                                                                    ]
+                                                                                )
+                                                                                    ? $emailSettingData[0][
+                                                                                        "logo_url"
+                                                                                    ]
+                                                                                    : "assets/img/products/stock-img-01.png" ?>"
                                                                                     alt="product">
                                                                             </a>
                                                                         </div>
                                                                     </td>
-                                                                    <td><?php echo $data['email_from_title'] ?></td>
+                                                                    <td><?php echo $data[
+                                                                        "email_from_title"
+                                                                    ]; ?></td>
                                                                     <td class="ref-number">
-                                                                        <?php echo $data['email_address'] ?>
+                                                                        <?php echo $data[
+                                                                            "email_address"
+                                                                        ]; ?>
                                                                     </td>
-                                                                    <td><?php echo $data['email_password'] ?></td>
-                                                                    <td><?php echo $data['email_host'] ?></td>
-                                                                    <td><?php echo $data['email_port'] ?>
+                                                                    <td><?php echo $data[
+                                                                        "email_password"
+                                                                    ]; ?></td>
+                                                                    <td><?php echo $data[
+                                                                        "email_host"
+                                                                    ]; ?></td>
+                                                                    <td><?php echo $data[
+                                                                        "email_port"
+                                                                    ]; ?>
                                                                     </td>
                                                                     <td>
-                                                                        <?php if ($data['is_active'] == 1) { ?>
+                                                                        <?php if (
+                                                                            $data[
+                                                                                "is_active"
+                                                                            ] ==
+                                                                            1
+                                                                        ) { ?>
                                                                             <span
                                                                                 class="badge badge-lg bg-success">Active</span>
                                                                         <?php } else { ?>
@@ -606,8 +637,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['addAddress'])) {
                                                                                 class="badge badge-lg bg-danger">Inactive</span>
                                                                         <?php } ?>
                                                                     </td>
-                                                                    <td><?php $date = new DateTime($data['created_at']);
-                                                                    echo $date->format('d M Y') ?>
+                                                                    <td><?php
+                                                                    $date = new DateTime(
+                                                                        $data[
+                                                                            "created_at"
+                                                                        ],
+                                                                    );
+                                                                    echo $date->format(
+                                                                        "d M Y",
+                                                                    );
+                                                                    ?>
                                                                     <td class="text-center">
                                                                         <a class="action-set" href="javascript:void(0);"
                                                                             data-bs-toggle="dropdown" aria-expanded="true">
@@ -620,13 +659,27 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['addAddress'])) {
                                                                                 <a href="javascript:void(0);"
                                                                                     data-bs-toggle="modal"
                                                                                     data-bs-target="#edit-smtp-mail"
-                                                                                    data-emailsetting-id="<?php echo $data['email_settings_id'] ?>"
-                                                                                    data-emailsetting-title="<?php echo $data['email_from_title'] ?>"
-                                                                                    data-emailsetting-email="<?php echo $data['email_address'] ?>"
-                                                                                    data-emailsetting-password="<?php echo $data['email_password'] ?>"
-                                                                                    data-emailsetting-host="<?php echo $data['email_host'] ?>"
-                                                                                    data-emailsetting-port="<?php echo $data['email_port'] ?>"
-                                                                                    data-emailsetting-status="<?php echo $data['is_active'] ?>"
+                                                                                    data-emailsetting-id="<?php echo $data[
+                                                                                        "email_settings_id"
+                                                                                    ]; ?>"
+                                                                                    data-emailsetting-title="<?php echo $data[
+                                                                                        "email_from_title"
+                                                                                    ]; ?>"
+                                                                                    data-emailsetting-email="<?php echo $data[
+                                                                                        "email_address"
+                                                                                    ]; ?>"
+                                                                                    data-emailsetting-password="<?php echo $data[
+                                                                                        "email_password"
+                                                                                    ]; ?>"
+                                                                                    data-emailsetting-host="<?php echo $data[
+                                                                                        "email_host"
+                                                                                    ]; ?>"
+                                                                                    data-emailsetting-port="<?php echo $data[
+                                                                                        "email_port"
+                                                                                    ]; ?>"
+                                                                                    data-emailsetting-status="<?php echo $data[
+                                                                                        "is_active"
+                                                                                    ]; ?>"
                                                                                     class="editButton dropdown-item"><i
                                                                                         data-feather="edit"
                                                                                         class="info-img"></i>Edit
@@ -637,7 +690,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['addAddress'])) {
                                                                                 <a href="javascript:void(0);"
                                                                                     data-bs-toggle="modal"
                                                                                     data-bs-target="#add-mail"
-                                                                                    data-emailSetting-id="<?php echo $data['email_settings_id'] ?>"
+                                                                                    data-emailSetting-id="<?php echo $data[
+                                                                                        "email_settings_id"
+                                                                                    ]; ?>"
                                                                                     class="dropdown-item addAddressButton mb-0"><i
                                                                                         data-feather="plus-circle"
                                                                                         class="info-img"></i>Add Address
@@ -646,7 +701,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['addAddress'])) {
 
                                                                             <li>
                                                                                 <a href="javascript:void(0);"
-                                                                                    data-emailSetting-id="<?php echo $data['email_settings_id'] ?>"
+                                                                                    data-bs-toggle="modal"
+                                                                                    data-bs-target="#add-cc"
+                                                                                    data-emailSetting-id="<?php echo $data[
+                                                                                        "email_settings_id"
+                                                                                    ]; ?>"
+                                                                                    class="dropdown-item addAddressButton mb-0"><i
+                                                                                        data-feather="plus-circle"
+                                                                                        class="info-img"></i>Add CC
+                                                                                </a>
+                                                                            </li>
+
+                                                                            <li>
+                                                                                <a href="javascript:void(0);"
+                                                                                    data-emailSetting-id="<?php echo $data[
+                                                                                        "email_settings_id"
+                                                                                    ]; ?>"
                                                                                     class="dropdown-item deleteButton mb-0"><i
                                                                                         data-feather="trash-2"
                                                                                         class="info-img"></i>Delete </a>
@@ -856,7 +926,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['addAddress'])) {
                             <form action="" method="post" enctype="multipart/form-data">
                                 <input type="hidden" id="addressEmailSettingId" name="addressEmailSettingId">
                                 <input type="hidden" name="type"
-                                    value="<?= !empty($emailSettingData[0]['logo_url']) ? "update" : "insert" ?>">
+                                    value="<?= !empty(
+                                        $emailSettingData[0]["logo_url"]
+                                    )
+                                        ? "update"
+                                        : "insert" ?>">
                                 <div class="row">
                                     <div class="col-lg-12">
                                         <div class="mb-3">
@@ -870,7 +944,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['addAddress'])) {
                                         <div class="mb-3">
                                             <label class="form-label">Email Address <span> *</span></label>
                                             <input type="email" class="form-control" name="emailAddress"
-                                                value="<?= !empty($emailSettingData[0]['support_email']) ? $emailSettingData[0]['support_email'] : "" ?>"
+                                                value="<?= !empty(
+                                                    $emailSettingData[0][
+                                                        "support_email"
+                                                    ]
+                                                )
+                                                    ? $emailSettingData[0][
+                                                        "support_email"
+                                                    ]
+                                                    : "" ?>"
                                                 required>
                                         </div>
                                     </div>
@@ -879,7 +961,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['addAddress'])) {
                                         <div class="mb-3">
                                             <label class="form-label">Phone <span> *</span></label>
                                             <input type="tel" class="form-control" name="phone"
-                                                value="<?= !empty($emailSettingData[0]['phone']) ? $emailSettingData[0]['phone'] : "" ?>"
+                                                value="<?= !empty(
+                                                    $emailSettingData[0][
+                                                        "phone"
+                                                    ]
+                                                )
+                                                    ? $emailSettingData[0][
+                                                        "phone"
+                                                    ]
+                                                    : "" ?>"
                                                 required>
                                         </div>
                                     </div>
@@ -889,7 +979,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['addAddress'])) {
                                         <div class="mb-3">
                                             <label class="form-label"> Address Line <span> *</span></label>
                                             <input type="text" class="form-control" name="addressLine"
-                                                value="<?= !empty($emailSettingData[0]['address_line1']) ? $emailSettingData[0]['address_line1'] : "" ?>"
+                                                value="<?= !empty(
+                                                    $emailSettingData[0][
+                                                        "address_line1"
+                                                    ]
+                                                )
+                                                    ? $emailSettingData[0][
+                                                        "address_line1"
+                                                    ]
+                                                    : "" ?>"
                                                 required>
                                         </div>
                                     </div>
@@ -898,7 +996,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['addAddress'])) {
                                         <div class="mb-0">
                                             <label class="form-label"> Linkedin Url <span> *</span></label>
                                             <input type="url" class="form-control" name="linkedinUrl"
-                                                value="<?= !empty($emailSettingData[0]['linkedin_url']) ? $emailSettingData[0]['linkedin_url'] : "" ?>"
+                                                value="<?= !empty(
+                                                    $emailSettingData[0][
+                                                        "linkedin_url"
+                                                    ]
+                                                )
+                                                    ? $emailSettingData[0][
+                                                        "linkedin_url"
+                                                    ]
+                                                    : "" ?>"
                                                 required>
                                         </div>
                                     </div>
@@ -906,7 +1012,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['addAddress'])) {
                                         <div class="mb-0">
                                             <label class="form-label"> Instagram Url <span> *</span></label>
                                             <input type="url" class="form-control" name="instagramUrl"
-                                                value="<?= !empty($emailSettingData[0]['ig_url']) ? $emailSettingData[0]['ig_url'] : "" ?>"
+                                                value="<?= !empty(
+                                                    $emailSettingData[0][
+                                                        "ig_url"
+                                                    ]
+                                                )
+                                                    ? $emailSettingData[0][
+                                                        "ig_url"
+                                                    ]
+                                                    : "" ?>"
                                                 required>
                                         </div>
                                     </div>
@@ -914,7 +1028,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['addAddress'])) {
                                         <div class="mb-0">
                                             <label class="form-label"> Facebook Url <span> *</span></label>
                                             <input type="url" class="form-control" name="facebookUrl"
-                                                value="<?= !empty($emailSettingData[0]['fb_url']) ? $emailSettingData[0]['fb_url'] : "" ?>"
+                                                value="<?= !empty(
+                                                    $emailSettingData[0][
+                                                        "fb_url"
+                                                    ]
+                                                )
+                                                    ? $emailSettingData[0][
+                                                        "fb_url"
+                                                    ]
+                                                    : "" ?>"
                                                 required>
                                         </div>
                                     </div>
@@ -922,7 +1044,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['addAddress'])) {
                                         <div class="mb-0">
                                             <label class="form-label"> Google Url <span> *</span></label>
                                             <input type="url" class="form-control" name="googleUrl"
-                                                value="<?= !empty($emailSettingData[0]['google_url']) ? $emailSettingData[0]['google_url'] : "" ?>"
+                                                value="<?= !empty(
+                                                    $emailSettingData[0][
+                                                        "google_url"
+                                                    ]
+                                                )
+                                                    ? $emailSettingData[0][
+                                                        "google_url"
+                                                    ]
+                                                    : "" ?>"
                                                 required>
                                         </div>
                                     </div>
@@ -930,11 +1060,78 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['addAddress'])) {
                                         <div class="mb-0">
                                             <label class="form-label"> Whatsapp Url <span> *</span></label>
                                             <input type="url" class="form-control" name="whatsappUrl"
-                                                value="<?= !empty($emailSettingData[0]['whatsapp_url']) ? $emailSettingData[0]['whatsapp_url'] : "" ?>"
+                                                value="<?= !empty(
+                                                    $emailSettingData[0][
+                                                        "whatsapp_url"
+                                                    ]
+                                                )
+                                                    ? $emailSettingData[0][
+                                                        "whatsapp_url"
+                                                    ]
+                                                    : "" ?>"
                                                 required>
                                         </div>
                                     </div>
 
+                                </div>
+                                <div class="modal-footer-btn">
+                                    <button type="button" class="btn btn-cancel me-2"
+                                        data-bs-dismiss="modal">Cancel</button>
+                                    <button type="submit" name="addAddress" class="btn btn-submit">Submit</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="add-cc">
+        <div class="modal-dialog modal-dialog-centered custom-modal-two">
+            <div class="modal-content">
+                <div class="page-wrapper-new p-0">
+                    <div class="content">
+                        <div class="modal-header border-0 custom-modal-header">
+                            <div class="page-title">
+                                <h4>Add CC</h4>
+                            </div>
+                            <div
+                                class="status-toggle modal-status d-flex justify-content-between align-items-center ms-auto me-2">
+                                <input type="checkbox" id="user5" class="check" checked="">
+                                <label for="user5" class="checktoggle"> </label>
+                            </div>
+                            <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body custom-modal-body">
+                            <form action="" method="post" enctype="multipart/form-data">
+                                <input type="hidden" id="addressEmailSettingId" name="addressEmailSettingId">
+                                <input type="hidden" name="type"
+                                    value="<?= !empty(
+                                        $emailSettingData[0]["logo_url"]
+                                    )
+                                        ? "update"
+                                        : "insert" ?>">
+                                <div class="row">
+
+                                    <div class="col-lg-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Email Address <span> *</span></label>
+                                            <input type="email" class="form-control" name="emailAddress"
+                                                value="<?= !empty(
+                                                    $emailSettingData[0][
+                                                        "support_email"
+                                                    ]
+                                                )
+                                                    ? $emailSettingData[0][
+                                                        "support_email"
+                                                    ]
+                                                    : "" ?>"
+                                                required>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div class="modal-footer-btn">
                                     <button type="button" class="btn btn-cancel me-2"

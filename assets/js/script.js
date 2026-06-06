@@ -1658,3 +1658,68 @@ $(document).ready(function () {
             });
         }, 1000); // Adjust delay if needed
     });
+
+$(document).ready(function () {
+
+    let sidebarLinks = [];
+
+    $('#sidebar-menu a[href!="javascript:void(0);"]').each(function () {
+
+        let name = $(this).text().trim();
+
+        if(name !== ''){
+            sidebarLinks.push({
+                name: name,
+                url: $(this).attr('href')
+            });
+        }
+
+    });
+
+    $('.searchinputs input').on('keyup', function () {
+
+        let keyword = $(this).val().toLowerCase();
+        let html = '';
+
+        if(keyword.length > 0){
+
+            sidebarLinks.forEach(function(item){
+
+                if(item.name.toLowerCase().includes(keyword)){
+
+                    html += `
+                        <li>
+                            <a href="${item.url}">
+                                <div class="d-flex align-items-center">
+                                    <span class="me-2">
+                                        <i data-feather="link" class="feather-14"></i>
+                                    </span>
+                                    <span>${item.name}</span>
+                                </div>
+                            </a>
+                        </li>
+                    `;
+                }
+
+            });
+
+        } else {
+
+            html = `
+                <li>
+                    <div class="text-center py-2">
+                        Start typing to search...
+                    </div>
+                </li>
+            `;
+        }
+
+        $('.quick-links-list').html(html);
+
+        if (typeof feather !== "undefined") {
+            feather.replace();
+        }
+
+    });
+
+});

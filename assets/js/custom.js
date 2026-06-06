@@ -218,3 +218,43 @@ function exportToPDF() {
 }
 
 
+$(document).ready(function () {
+
+    let sidebarLinks = [];
+
+    $('#sidebar-menu a[href!="javascript:void(0);"]').each(function () {
+
+        sidebarLinks.push({
+            name: $(this).text().trim(),
+            url: $(this).attr('href')
+        });
+
+    });
+
+    $('.searchinputs input').on('keyup', function () {
+
+        let keyword = $(this).val().toLowerCase();
+        let html = '';
+
+        if (keyword.length > 0) {
+
+            sidebarLinks.forEach(function (item) {
+
+                if (item.name.toLowerCase().includes(keyword)) {
+
+                    html += `
+                        <a href="${item.url}" class="dropdown-item search-result">
+                            ${item.name}
+                        </a>
+                    `;
+                }
+
+            });
+
+        }
+
+        $('.search-dropdown').html(html);
+
+    });
+
+});
